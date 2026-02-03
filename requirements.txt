@@ -64,10 +64,11 @@ python-dateutil==2.8.2
 
 # AI & LLM Providers
 # Anthropic Claude (via anthropic library above)
-# AWS Bedrock
+# AWS Bedrock (synchronous client - standard usage)
 boto3==1.34.18
-botocore==1.34.18
-aioboto3==14.0.0
+# aioboto3==14.0.0  # ⚠️ Optional: Only for async AWS operations (version conflict with boto3)
+                    # Use standard boto3.client() for most cases
+                    # Async support can be added later with compatible versions
 
 # Cloude Dependencies
 Pillow==10.4.0
