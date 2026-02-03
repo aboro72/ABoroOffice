@@ -80,7 +80,7 @@ flake8==7.0.0
 isort==5.13.2
 pylint==3.0.3
 mypy==1.8.0
-django-stubs==6.0.0
+django-stubs==5.2.9
 
 # Utilities
 python-decouple==3.8
