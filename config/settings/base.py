@@ -55,6 +55,18 @@ INSTALLED_APPS = [
     'apps.core.apps.CoreConfig',
     'apps.licensing.apps.LicensingConfig',
 
+    # Phase 2: Classroom Management (Pit-Kalendar)
+    'apps.classroom.apps.ClassroomConfig',
+
+    # Phase 3: Approvals (dokmbw_web_app)
+    # 'apps.approvals.apps.ApprovalsConfig',
+
+    # Phase 4: HelpDesk
+    # 'apps.helpdesk_suite.apps.HelpDeskSuiteConfig',
+
+    # Phase 5: Cloude
+    # 'apps.cloude.apps.CloudeConfig',
+
     # Third-party apps (to be added as phases progress)
     # 'rest_framework',
     # 'rest_framework.authtoken',

@@ -179,13 +179,46 @@ class ABoroUser(AbstractUser):
     def get_available_features(self):
         """
         Return list of available features based on user's license.
-        This will be overridden by licensing checks.
+
+        Features are determined by the active license for this user's organization.
+        Default (no active license) includes only core features.
+
+        Returns:
+            list: Feature codes available to this user
         """
-        return []
+        from apps.licensing.models import LicenseKey
+        from datetime import date
+
+        # Default features for all users
+        features = ['core']
+
+        # Check for active licenses in the system
+        # Note: This is a simplified implementation
+        # In a multi-tenant system, this should check org-specific licenses
+        active_licenses = LicenseKey.objects.filter(
+            status='active',
+            expiry_date__gte=date.today()
+        ).first()
+
+        if active_licenses and active_licenses.product:
+            # Get features from the product
+            product_features = active_licenses.product.features
+            if isinstance(product_features, dict):
+                features.extend([f for f, enabled in product_features.items() if enabled])
+            elif isinstance(product_features, list):
+                features.extend(product_features)
+
+        return list(set(features))  # Remove duplicates
 
     def can_access_feature(self, feature: str) -> bool:
         """
         Check if user can access a specific feature.
+
+        Args:
+            feature: Feature code to check (e.g., 'classroom', 'helpdesk_tickets')
+
+        Returns:
+            bool: True if feature is available, False otherwise
         """
         available = self.get_available_features()
         return feature in available

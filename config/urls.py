@@ -19,17 +19,17 @@ urlpatterns = [
     # path('api/auth/token/', views.obtain_auth_token),
 
     # App-specific URLs (will be added as phases progress)
-    # HelpDesk Suite (Phase 4)
-    # path('helpdesk/', include('apps.helpdesk_suite.urls')),
-
-    # Classroom / Pit-Kalendar (Phase 2)
-    # path('classroom/', include('apps.classroom.urls')),
-
-    # Cloude (Phase 5)
-    # path('cloude/', include('apps.cloude.urls')),
+    # Classroom / Pit-Kalendar (Phase 2) ✅ INTEGRATED
+    path('classroom/', include('apps.classroom.urls')),
 
     # Approvals (Phase 3)
     # path('approvals/', include('apps.approvals.urls')),
+
+    # HelpDesk Suite (Phase 4)
+    # path('helpdesk/', include('apps.helpdesk_suite.urls')),
+
+    # Cloude (Phase 5)
+    # path('cloude/', include('apps.cloude.urls')),
 ]
 
 # Static files configuration
