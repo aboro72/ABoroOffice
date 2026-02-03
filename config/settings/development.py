@@ -61,4 +61,5 @@ SHELL_PLUS_PRE_IMPORTS = [
     ('apps.core.models', 'ABoroUser'),
 ]
 
-print("✓ ABoroOffice Development Settings Loaded")
+# print("✓ ABoroOffice Development Settings Loaded")  # ✓ Checkmark causes Unicode issues on Windows
+print("[OK] ABoroOffice Development Settings Loaded")
