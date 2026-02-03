@@ -41,9 +41,15 @@ django-allauth==0.62.0
 # HelpDesk Dependencies
 django-ckeditor==6.7.3
 anthropic==0.30.1
-ollama==0.6.1
+ollama==0.6.1  # Latest version, compatible with pydantic 2.5.3 on Linux
 django-filter==24.1
 python-dateutil==2.8.2
+
+# AI & LLM Providers
+# AWS Bedrock
+boto3==1.34.18
+botocore==1.34.18
+aioboto3==14.0.0
 
 # Cloude Dependencies
 Pillow==10.4.0
