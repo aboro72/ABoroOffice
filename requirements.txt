@@ -46,7 +46,7 @@ python-dateutil==2.8.2
 
 # Cloude Dependencies
 Pillow==10.4.0
-django-imagekit==5.0.2
+django-imagekit==4.1.0
 
 # Approvals Dependencies
 paramiko==4.0.0
@@ -55,7 +55,7 @@ openpyxl==3.1.5
 python-docx==1.2.0
 
 # Report Generation (for Phase 4+)
-# reportlab==4.1.0  # Requires Python <3.9, will update when needed
+# reportlab - requires Python <3.9, will be added for Phase 4+ with compatible Python version
 
 # Monitoring & Logging
 django-debug-toolbar==4.2.0
