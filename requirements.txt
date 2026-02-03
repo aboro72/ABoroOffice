@@ -16,9 +16,6 @@ djangorestframework==3.16.1
 django-cors-headers==4.4.0
 djangorestframework-simplejwt==5.4.0
 
-# Database Management
-django-migration-tool==0.1.0
-
 # Admin Enhancements
 django-jazzmin==3.0.1
 django-admin-interface==0.28.0
@@ -56,11 +53,9 @@ paramiko==4.0.0
 pandas==2.3.3
 openpyxl==3.1.5
 python-docx==1.2.0
-reportlab==4.4.7
 
-# Classroom Dependencies
-reportlab==4.4.7
-python-docx==1.2.0
+# Report Generation (for Phase 4+)
+# reportlab==4.1.0  # Requires Python <3.9, will update when needed
 
 # Monitoring & Logging
 django-debug-toolbar==4.2.0
@@ -117,5 +112,3 @@ uwsgi==2.0.23
 cryptography==41.0.7
 django-cors-headers==4.4.0
 django-ratelimit==4.1.0
-
-print("✓ Requirements file for Phase 1 Foundation setup")
