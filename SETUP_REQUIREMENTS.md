@@ -54,10 +54,10 @@ pytest tests/ -v
 
 ## Version Notes
 
-### Django 4.2 LTS
-- Long-term support until April 2026
+### Django 6.0.1 (Latest)
+- Latest stable release with all modern features
 - Compatible with all integrated apps (HelpDesk, Classroom, Cloude, Approvals)
-- Chosen over 5.x due to celery-beat compatibility
+- Updated all dependencies for Django 6.0 compatibility
 
 ### Pydantic Version Difference
 
@@ -72,8 +72,8 @@ pytest tests/ -v
 ### Key Dependencies
 
 **Core Stack (Both):**
-- Django==4.2
-- djangorestframework==3.16.1
+- Django==6.0.1 (Latest stable)
+- djangorestframework==3.14.0 (Django 6.0 compatible)
 - channels==4.3.2 (WebSockets support)
 - celery==5.6.2 (Task queue)
 - redis==7.1.0 (Caching)
@@ -217,5 +217,5 @@ To update dependencies while maintaining platform separation:
 ---
 
 **Last Updated:** 2025-02-03
-**Django Version:** 4.2 LTS
-**Status:** Platform-specific requirements configured and tested
+**Django Version:** 6.0.1 (Latest)
+**Status:** Platform-specific requirements configured and tested with Django 6.0.1

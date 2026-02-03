@@ -1,6 +1,6 @@
 # ==============================================
 # ABoroOffice Requirements - Platform Selection
-# Django 4.2 LTS as base for all integrated applications
+# Django 6.0.1 (Latest) as base for all integrated applications
 # ==============================================
 #
 # IMPORTANT: Use platform-specific requirements files:
@@ -19,36 +19,36 @@
 #
 # ============== REFERENCE: Complete Dependency List ==============
 
-# Django Core
-Django==4.2
+# Django Core - Latest Version
+Django==6.0.1
 django-extensions==3.2.3
 
 # Database
 psycopg2-binary==2.9.11  # PostgreSQL (recommended)
 # mysqlclient==2.2.7  # MySQL alternative
 
-# REST Framework
-djangorestframework==3.16.1
+# REST Framework - Django 6.0 Compatible
+djangorestframework==3.14.0
 django-cors-headers==4.4.0
 djangorestframework-simplejwt==5.4.0
 
-# Admin Enhancements
-django-jazzmin==3.0.1
+# Admin Enhancements - Django 6.0 Compatible
+django-jazzmin==3.1.0
 django-admin-interface==0.28.0
 
-# Cache & Celery
+# Cache & Celery - Django 6.0 Compatible
 django-redis==5.4.0
 redis==7.1.0
 celery==5.6.2
-django-celery-beat==2.5.0
+django-celery-beat==2.7.1
 django-celery-results==2.5.1
 
-# WebSockets & Async
+# WebSockets & Async - Django 6.0 Compatible
 channels==4.3.2
 channels-redis==4.2.1
 daphne==4.1.0
 
-# Authentication & Permissions
+# Authentication & Permissions - Django 6.0 Compatible
 django-guardian==3.2.0
 django-oauth-toolkit==2.3.0
 django-allauth==0.62.0
@@ -93,13 +93,13 @@ factory-boy==3.3.0
 faker==22.6.0
 hypothesis==6.102.3
 
-# Code Quality
+# Code Quality - Django 6.0 Compatible
 black==24.1.1
 flake8==7.0.0
 isort==5.13.2
 pylint==3.0.3
 mypy==1.8.0
-django-stubs==4.2.7
+django-stubs==6.0.0
 
 # Utilities
 python-decouple==3.8
