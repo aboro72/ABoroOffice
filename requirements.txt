@@ -106,7 +106,7 @@ drf-yasg==1.21.8
 # Deployment
 gunicorn==21.2.0
 whitenoise==6.6.0
-uwsgi==2.0.23
+# uwsgi==2.0.23  # UNIX only, not compatible with Windows. Use gunicorn instead.
 
 # Security
 cryptography==41.0.7
