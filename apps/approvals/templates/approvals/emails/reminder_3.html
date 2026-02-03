@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LETZTER AUFRUF - Genehmigung verfällt heute!</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header { background-color: #c0392b; color: #ffffff; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; text-align: center; }
+        .critical { background-color: #fadbd8; border: 3px solid #c0392b; color: #922b21; padding: 20px; border-radius: 3px; margin: 15px 0; font-weight: bold; text-align: center; font-size: 18px; }
+        .content { margin: 20px 0; }
+        .info-box { background-color: #f5b7b1; padding: 15px; border-left: 4px solid #c0392b; margin: 15px 0; border-radius: 3px; }
+        .deadline { color: #c0392b; font-weight: bold; font-size: 16px; }
+        .button { display: inline-block; background-color: #c0392b; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; font-size: 18px; }
+        .button:hover { background-color: #922b21; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1; font-size: 12px; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LETZTER AUFRUF</h1>
+            <p style="margin: 10px 0 0 0;">Genehmigung verfällt heute!</p>
+        </div>
+
+        <div class="content">
+            <div class="critical">
+                Die Genehmigung verfällt um {{ deadline }}
+            </div>
+
+            <p>DRINGEND:</p>
+
+            <p>Dies ist der <strong>LETZTE AUFRUF</strong> für die Genehmigung des Scripts auf Server <strong>{{ server_name }}</strong>.</p>
+
+            <div class="info-box">
+                <p><strong>Server:</strong> {{ server_name }}</p>
+                <p><strong>Deadline:</strong> <span class="deadline">{{ deadline }} (Heute!)</span></p>
+                <p><strong>Verbleibende Zeit:</strong> <span class="deadline">Weniger als {{ hours_remaining }} Stunden!</span></p>
+            </div>
+
+            <p>Falls Sie bis zum Ende des Tages nicht handeln, wird:</p>
+            <ul style="color: #c0392b;">
+                <li><strong>Das Script nicht ausgeführt</strong></li>
+                <li><strong>Die Anfrage als abgelaufen markiert</strong></li>
+                <li><strong>Ein Administrator benachrichtigt</strong></li>
+            </ul>
+
+            <center>
+                <a href="{{ approval_url }}" class="button">SOFORT GENEHMIGEN/ABLEHNEN</a>
+            </center>
+
+            <p style="color: #c0392b; font-weight: bold; text-align: center;">
+                Handeln Sie jetzt - die Zeit läuft davon!
+            </p>
+
+            <p>Mit freundlichen Grüßen,<br>
+            ABoroOffice Approval System</p>
+        </div>
+
+        <div class="footer">
+            <p>Dies ist eine automatisch generierte E-Mail. Bitte antworten Sie nicht.</p>
+        </div>
+    </div>
+</body>
+</html>

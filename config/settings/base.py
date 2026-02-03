@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'apps.classroom.apps.ClassroomConfig',
 
     # Phase 3: Approvals (dokmbw_web_app)
-    # 'apps.approvals.apps.ApprovalsConfig',
+    'apps.approvals.apps.ApprovalsConfig',
 
     # Phase 4: HelpDesk
     # 'apps.helpdesk_suite.apps.HelpDeskSuiteConfig',

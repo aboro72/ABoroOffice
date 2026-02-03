@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genehmigung erforderlich</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #2c3e50;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            margin: 20px 0;
+        }
+        .info-box {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+        .server-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        .deadline {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            background-color: #27ae60;
+            color: #ffffff;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #229954;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 3px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Genehmigung erforderlich</h1>
+        </div>
+
+        <div class="content">
+            <p>Guten Tag,</p>
+
+            <p>für den Server <span class="server-name">{{ server_name }}</span> ist eine Genehmigung zur Ausführung eines Scripts erforderlich.</p>
+
+            <div class="info-box">
+                <p><strong>Server:</strong> {{ server_name }}</p>
+                <p><strong>Geplante Ausführungszeit:</strong> {{ scheduled_time }}</p>
+                <p><strong>Genehmigungs-Deadline:</strong> <span class="deadline">{{ deadline }}</span></p>
+            </div>
+
+            <div class="warning">
+                <strong>Wichtig:</strong> Diese Genehmigung verfällt am angegebenen Termin. Danach kann das Script nicht mehr ausgeführt werden.
+            </div>
+
+            <p>Bitte genehmigen oder lehnen Sie die Anfrage über den folgenden Link ab:</p>
+
+            <center>
+                <a href="{{ approval_url }}" class="button">Zur Genehmigungsseite</a>
+            </center>
+
+            <p>Falls Sie den Link nicht verwenden können, besuchen Sie bitte die Genehmigungsseite mit folgendem Token:</p>
+            <div class="info-box">
+                <code style="word-break: break-all;">{{ token }}</code>
+            </div>
+
+            <h3>Wichtige Informationen:</h3>
+            <ul>
+                <li>Sie haben bis {{ deadline }} Zeit, um diese Anfrage zu genehmigen oder abzulehnen</li>
+                <li>Sie erhalten weitere Erinnerungen um 14:00, 20:00 und 07:00 (nächster Tag)</li>
+                <li>Nach Ablauf der Frist kann das Script nicht mehr ausgeführt werden</li>
+            </ul>
+
+            <p>Mit freundlichen Grüßen,<br>
+            ABoroOffice Approval System</p>
+        </div>
+
+        <div class="footer">
+            <p>Dies ist eine automatisch generierte E-Mail. Bitte antworten Sie nicht auf diese E-Mail.</p>
+            <p>ABoroOffice - SSH Approval Workflow System</p>
+        </div>
+    </div>
+</body>
+</html>

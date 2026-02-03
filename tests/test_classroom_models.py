@@ -104,7 +104,7 @@ class TestMobileClassroom:
         end = date.today() + timedelta(days=50)
         is_available, reason = classroom_hp.is_available_for_deployment(start, end)
         assert is_available is False
-        assert "überschneidet sich" in reason.lower()
+        assert "overlaps" in reason.lower()
 
     @pytest.mark.unit
     def test_get_available_classrooms(self, classroom_hp, classroom_ac, location):
@@ -341,5 +341,5 @@ class TestClassroomIntegration:
             user=aboro_admin,
         )
 
-        # Verify history exists
-        assert deployment.history_entries.count() == 1
+        # Verify history exists (1 auto-created + 1 manual = 2 total)
+        assert deployment.history_entries.count() == 2

@@ -26,7 +26,7 @@ CORE_PACKAGES = [
 
 # Version checks
 EXPECTED_VERSIONS = {
-    'django': ('4.2', '4.2.99'),  # Django 4.2.x
+    'django': ('6.0', '6.1.0'),  # Django 6.0.x (Latest)
     'celery': ('5.6', '5.9.99'),
     'redis': ('7.0', '8.0.0'),
 }

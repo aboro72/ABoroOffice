@@ -85,7 +85,7 @@ class ABoroUser(AbstractUser):
         blank=True,
         null=True
     )
-    timezone = models.CharField(
+    user_timezone = models.CharField(
         _('timezone'),
         max_length=50,
         default='Europe/Berlin',

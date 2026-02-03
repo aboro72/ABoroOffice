@@ -97,7 +97,8 @@ python-decouple==3.8
 python-dotenv==1.0.0
 requests==2.31.0
 beautifulsoup4==4.12.3
-lxml==5.1.0
+# lxml==5.1.0  # ⚠️ Requires libxml2 development headers (not available on Windows)
+                # Linux can use this; Windows users need to install separately or use BeautifulSoup4 instead
 arrow==1.3.0
 pytz==2024.1
 

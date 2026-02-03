@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genehmigung bestätigt</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header { background-color: #27ae60; color: #ffffff; padding: 20px; border-radius: 5px; margin-bottom: 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .success { background-color: #d5f4e6; border: 2px solid #27ae60; color: #1e8449; padding: 20px; border-radius: 3px; margin: 15px 0; text-align: center; }
+        .content { margin: 20px 0; }
+        .info-box { background-color: #ecf0f1; padding: 15px; border-left: 4px solid #27ae60; margin: 15px 0; border-radius: 3px; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1; font-size: 12px; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✓ Genehmigung bestätigt</h1>
+        </div>
+
+        <div class="content">
+            <div class="success">
+                <p style="margin: 0; font-size: 18px; font-weight: bold;">Die Genehmigung wurde akzeptiert!</p>
+            </div>
+
+            <p>Guten Tag,</p>
+
+            <p>die Genehmigung für Server <strong>{{ server_name }}</strong> wurde erfolgreich bestätigt.</p>
+
+            <div class="info-box">
+                <p><strong>Server:</strong> {{ server_name }}</p>
+                <p><strong>Genehmigt von:</strong> {{ approved_by }}</p>
+                <p><strong>Genehmigt am:</strong> {{ approved_at }}</p>
+                <p><strong>Genehmigungsmethode:</strong> {{ approval_method }}</p>
+            </div>
+
+            <h3>Nächste Schritte:</h3>
+            <ul>
+                <li>Das Script wird gemäß Plan ausgeführt</li>
+                <li>Die Ausführung wird protokolliert</li>
+                <li>Sie erhalten eine Benachrichtigung nach Abschluss</li>
+            </ul>
+
+            <p>Für Fragen oder Probleme kontaktieren Sie bitte den Administrator.</p>
+
+            <p>Mit freundlichen Grüßen,<br>
+            ABoroOffice Approval System</p>
+        </div>
+
+        <div class="footer">
+            <p>Dies ist eine automatisch generierte E-Mail. Bitte antworten Sie nicht.</p>
+        </div>
+    </div>
+</body>
+</html>

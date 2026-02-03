@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erinnerung: Genehmigung erforderlich</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header { background-color: #f39c12; color: #ffffff; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { margin: 20px 0; }
+        .info-box { background-color: #ecf0f1; padding: 15px; border-left: 4px solid #f39c12; margin: 15px 0; border-radius: 3px; }
+        .deadline { color: #e74c3c; font-weight: bold; }
+        .button { display: inline-block; background-color: #27ae60; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ecf0f1; font-size: 12px; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Erinnerung: Genehmigung erforderlich</h1>
+        </div>
+
+        <div class="content">
+            <p>Guten Tag,</p>
+
+            <p><strong>Dies ist eine Erinnerung:</strong> Eine Genehmigung für Server <strong>{{ server_name }}</strong> steht noch aus.</p>
+
+            <div class="info-box">
+                <p><strong>Server:</strong> {{ server_name }}</p>
+                <p><strong>Geplante Zeit:</strong> {{ scheduled_time }}</p>
+                <p><strong>Deadline:</strong> <span class="deadline">{{ deadline }}</span></p>
+            </div>
+
+            <p>Es verbleiben noch <span class="deadline">ca. {{ hours_remaining }} Stunden</span> für die Genehmigung.</p>
+
+            <center>
+                <a href="{{ approval_url }}" class="button">Jetzt genehmigen/ablehnen</a>
+            </center>
+
+            <p>Falls Sie diese Anfrage bereits beantwortet haben, können Sie diese E-Mail ignorieren.</p>
+
+            <p>Mit freundlichen Grüßen,<br>
+            ABoroOffice Approval System</p>
+        </div>
+
+        <div class="footer">
+            <p>Dies ist eine automatisch generierte E-Mail. Bitte antworten Sie nicht.</p>
+        </div>
+    </div>
+</body>
+</html>
