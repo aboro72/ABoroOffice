@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Neuer Benutzer - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+        <a href="{% url 'main:user_management' %}" 
+           style="background: #e9ecef; color: #495057; padding: 10px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
+            ←
+        </a>
+        <h1 style="font-size: 28px; font-weight: 600; margin: 0;">Neuer Benutzer</h1>
+    </div>
+
+    <form method="post" style="max-width: 800px;">
+        {% csrf_token %}
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <!-- Basic Information -->
+            <div style="background: #f8f9fa; padding: 25px; border-radius: 10px;">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #495057;">Grundinformationen</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Benutzername *</label>
+                    <input type="text" name="username" required 
+                           style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;"
+                           placeholder="Eindeutiger Benutzername">
+                    <small style="color: #868e96; font-size: 12px;">Muss eindeutig sein</small>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">E-Mail Adresse *</label>
+                    <input type="email" name="email" required 
+                           style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;"
+                           placeholder="benutzer@example.com">
+                    <small style="color: #868e96; font-size: 12px;">Muss eindeutig sein</small>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Vorname *</label>
+                        <input type="text" name="first_name" required 
+                               style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;"
+                               placeholder="Max">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Nachname *</label>
+                        <input type="text" name="last_name" required 
+                               style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;"
+                               placeholder="Mustermann">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Passwort *</label>
+                    <input type="password" name="password" required 
+                           style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;"
+                           placeholder="Mindestens 6 Zeichen">
+                    <small style="color: #868e96; font-size: 12px;">Mindestens 6 Zeichen lang</small>
+                </div>
+            </div>
+
+            <!-- Role and Additional Information -->
+            <div style="background: #f8f9fa; padding: 25px; border-radius: 10px;">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #495057;">Rolle & Zusatzinformationen</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Benutzerrolle *</label>
+                    <select name="role" required onchange="toggleSupportLevel(this.value)"
+                            style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;">
+                        {% for value, label in role_choices %}
+                            <option value="{{ value }}" {% if value == 'customer' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="support-level-field" style="margin-bottom: 20px; display: none;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Support Level</label>
+                    <select name="support_level" 
+                            style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;">
+                        <option value="">Kein Level</option>
+                        {% for value, label in support_level_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <small style="color: #868e96; font-size: 12px;">Nur für Support Agents relevant</small>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Telefon</label>
+                    <input type="tel" name="phone" 
+                           style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;"
+                           placeholder="+49 123 456789">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #495057;">Abteilung</label>
+                    <input type="text" name="department" 
+                           style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;"
+                           placeholder="IT, Buchhaltung, etc.">
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div style="display: flex; gap: 15px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #e9ecef;">
+            <a href="{% url 'main:user_management' %}" 
+               style="background: #e9ecef; color: #495057; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                Abbrechen
+            </a>
+            <button type="submit" 
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                Benutzer erstellen
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleSupportLevel(role) {
+    const supportLevelField = document.getElementById('support-level-field');
+    if (role === 'support_agent') {
+        supportLevelField.style.display = 'block';
+    } else {
+        supportLevelField.style.display = 'none';
+        // Reset support level when not support agent
+        document.querySelector('select[name="support_level"]').value = '';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.querySelector('select[name="role"]');
+    toggleSupportLevel(roleSelect.value);
+});
+</script>
+{% endblock %}

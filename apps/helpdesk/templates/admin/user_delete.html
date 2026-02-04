@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Benutzer löschen - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+        <a href="{% url 'main:user_management' %}" 
+           style="background: #e9ecef; color: #495057; padding: 10px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
+            ←
+        </a>
+        <div>
+            <h1 style="font-size: 28px; font-weight: 600; margin: 0; color: #dc3545;">Benutzer löschen</h1>
+            <p style="color: #868e96; margin: 5px 0 0 0;">Diese Aktion kann nicht rückgängig gemacht werden</p>
+        </div>
+    </div>
+
+    <!-- Warning Message -->
+    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="font-size: 32px;">⚠️</div>
+            <div>
+                <div style="font-size: 18px; font-weight: 600; margin-bottom: 5px;">Achtung: Benutzer endgültig löschen</div>
+                <div style="opacity: 0.9;">Sie sind dabei, den Benutzer dauerhaft aus dem System zu entfernen. Diese Aktion kann nicht rückgängig gemacht werden.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Information -->
+    <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #495057;">Benutzer Details</h3>
+        
+        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 24px;">
+                {{ user_obj.first_name|first }}{{ user_obj.last_name|first }}
+            </div>
+            <div>
+                <div style="font-size: 20px; font-weight: 600; color: #495057; margin-bottom: 5px;">{{ user_obj.full_name }}</div>
+                <div style="color: #868e96; margin-bottom: 3px;">@{{ user_obj.username }}</div>
+                <div style="color: #868e96;">{{ user_obj.email }}</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div>
+                <div style="font-weight: 600; color: #495057; margin-bottom: 5px;">Rolle</div>
+                <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
+                    {% if user_obj.role == 'admin' %}background: #ff6b6b; color: white;{% elif user_obj.role == 'support_agent' %}background: #ffd43b; color: #495057;{% else %}background: #e9ecef; color: #495057;{% endif %}">
+                    {% for value, label in role_choices %}{% if value == user_obj.role %}{{ label }}{% endif %}{% endfor %}
+                </span>
+                {% if user_obj.role == 'support_agent' and user_obj.support_level %}
+                    <div style="color: #868e96; font-size: 12px; margin-top: 3px;">Level {{ user_obj.support_level }}</div>
+                {% endif %}
+            </div>
+            
+            <div>
+                <div style="font-weight: 600; color: #495057; margin-bottom: 5px;">Status</div>
+                <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
+                    {% if user_obj.is_active %}background: #51cf66; color: white;{% else %}background: #868e96; color: white;{% endif %}">
+                    {% if user_obj.is_active %}Aktiv{% else %}Inaktiv{% endif %}
+                </span>
+            </div>
+            
+            <div>
+                <div style="font-weight: 600; color: #495057; margin-bottom: 5px;">Erstellt am</div>
+                <div style="color: #868e96; font-size: 14px;">{{ user_obj.created_at|date:"d.m.Y H:i" }}</div>
+            </div>
+            
+            {% if user_obj.last_login %}
+            <div>
+                <div style="font-weight: 600; color: #495057; margin-bottom: 5px;">Letzter Login</div>
+                <div style="color: #868e96; font-size: 14px;">{{ user_obj.last_login|date:"d.m.Y H:i" }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if user_obj.department %}
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+            <div style="font-weight: 600; color: #495057; margin-bottom: 5px;">Abteilung</div>
+            <div style="color: #868e96;">{{ user_obj.department }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Impact Warning -->
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <div style="font-weight: 600; color: #856404; margin-bottom: 10px;">Was passiert beim Löschen:</div>
+        <ul style="color: #856404; margin: 0; padding-left: 20px;">
+            <li>Der Benutzer wird dauerhaft aus dem System entfernt</li>
+            <li>Alle Benutzerreferenzen in Tickets bleiben erhalten (historische Daten)</li>
+            <li>Der Benutzer kann sich nicht mehr anmelden</li>
+            <li>Diese Aktion kann nicht rückgängig gemacht werden</li>
+        </ul>
+    </div>
+
+    <!-- Confirmation Form -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+            <div style="font-weight: 600; color: #495057; margin-bottom: 15px;">
+                Bestätigung erforderlich
+            </div>
+            <div style="color: #495057; margin-bottom: 20px;">
+                Geben Sie zur Bestätigung den Benutzernamen des zu löschenden Benutzers ein:
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid #dc3545; margin-bottom: 15px;">
+                <div style="font-weight: 600; color: #dc3545; text-align: center; font-size: 18px;">
+                    {{ user_obj.username }}
+                </div>
+            </div>
+            <input type="text" id="confirmation-input" placeholder="Benutzername zur Bestätigung eingeben" 
+                   style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px;"
+                   oninput="checkConfirmation()">
+        </div>
+
+        <!-- Buttons -->
+        <div style="display: flex; gap: 15px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid #e9ecef;">
+            <a href="{% url 'main:user_management' %}" 
+               style="background: #e9ecef; color: #495057; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                Abbrechen
+            </a>
+            <button type="submit" id="delete-button" disabled
+                    style="background: #dc3545; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: not-allowed; opacity: 0.5;">
+                Benutzer endgültig löschen
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function checkConfirmation() {
+    const input = document.getElementById('confirmation-input');
+    const deleteButton = document.getElementById('delete-button');
+    const requiredUsername = '{{ user_obj.username }}';
+    
+    if (input.value === requiredUsername) {
+        deleteButton.disabled = false;
+        deleteButton.style.cursor = 'pointer';
+        deleteButton.style.opacity = '1';
+    } else {
+        deleteButton.disabled = true;
+        deleteButton.style.cursor = 'not-allowed';
+        deleteButton.style.opacity = '0.5';
+    }
+}
+
+// Prevent accidental form submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    const input = document.getElementById('confirmation-input');
+    const requiredUsername = '{{ user_obj.username }}';
+    
+    if (input.value !== requiredUsername) {
+        e.preventDefault();
+        alert('Bitte geben Sie den korrekten Benutzernamen zur Bestätigung ein.');
+        return false;
+    }
+    
+    if (!confirm('Sind Sie absolut sicher, dass Sie diesen Benutzer löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden!')) {
+        e.preventDefault();
+        return false;
+    }
+});
+</script>
+{% endblock %}

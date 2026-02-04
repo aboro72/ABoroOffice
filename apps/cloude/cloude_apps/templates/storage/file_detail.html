@@ -1,0 +1,619 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ file.name }} - CloudService{% endblock %}
+
+{% block extra_css %}
+<!-- Preload libraries for faster loading -->
+{% if is_word %}
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/docx-preview@0.3.7/dist/docx-preview.min.js">
+{% endif %}
+{% if is_excel %}
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Debug Panel (nur für Admins) -->
+    {% if user.is_superuser %}
+    <div class="alert alert-secondary mb-3">
+        <details>
+            <summary><i class="bi bi-bug me-2"></i><strong>Debug Info</strong> (nur für Admins)</summary>
+            <div class="mt-2 small">
+                <table class="table table-sm table-bordered mb-0">
+                    <tr><td><strong>Datei-ID:</strong></td><td>{{ file.id }}</td></tr>
+                    <tr><td><strong>Name:</strong></td><td>{{ file.name }}</td></tr>
+                    <tr><td><strong>MIME-Type:</strong></td><td>{{ file.mime_type|default:"(nicht gesetzt)" }}</td></tr>
+                    <tr><td><strong>Datei vorhanden:</strong></td><td>{% if file.file %}Ja{% else %}Nein{% endif %}</td></tr>
+                    <tr><td><strong>Datei-URL:</strong></td><td>{% if file.file %}<a href="{{ file.file.url }}" target="_blank">{{ file.file.url }}</a>{% else %}(keine){% endif %}</td></tr>
+                    <tr><td><strong>Datei-Pfad:</strong></td><td>{% if file.file %}{{ file.file.path }}{% else %}(keine){% endif %}</td></tr>
+                    <tr><td><strong>is_image:</strong></td><td>{{ is_image }}</td></tr>
+                    <tr><td><strong>is_video:</strong></td><td>{{ is_video }}</td></tr>
+                    <tr><td><strong>is_audio:</strong></td><td>{{ is_audio }}</td></tr>
+                    <tr><td><strong>can_preview:</strong></td><td>{{ can_preview }}</td></tr>
+                </table>
+            </div>
+        </details>
+    </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <a href="/storage/" class="btn btn-outline-secondary mb-3">← Zurück</a>
+            <h2>
+                <i class="bi {{ file.get_icon_class }}"></i>
+                {{ file.name }}
+            </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📄 Dateivorschau</h5>
+                </div>
+                <div class="card-body">
+                    {% if can_preview %}
+                        {% if is_image %}
+                            <!-- Image preview -->
+                            <div class="text-center">
+                                {% if file.file %}
+                                <img src="{{ file.file.url }}" class="img-fluid rounded shadow-sm"
+                                     style="max-height: 600px; object-fit: contain;"
+                                     alt="{{ file.name }}"
+                                     id="previewImage"
+                                     onload="document.getElementById('imageError').style.display='none';"
+                                     onerror="document.getElementById('imageError').style.display='block'; this.style.display='none';">
+                                <div id="imageError" class="alert alert-warning mt-3" style="display: none;">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Bild konnte nicht geladen werden.
+                                    <br><small class="text-muted">URL: {{ file.file.url }}</small>
+                                    <br>
+                                    <a href="{{ file.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                                        <i class="bi bi-box-arrow-up-right"></i> Direkt öffnen
+                                    </a>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Keine Datei vorhanden.
+                                </div>
+                                {% endif %}
+                            </div>
+
+                        {% elif is_video %}
+                            <!-- Video preview -->
+                            <div class="text-center">
+                                {% if file.file %}
+                                <video controls class="w-100 rounded shadow-sm" style="max-height: 600px;"
+                                       onerror="document.getElementById('videoError').style.display='block'; this.style.display='none';">
+                                    <source src="{{ file.file.url }}" type="{{ file.mime_type|default:'video/mp4' }}">
+                                    <source src="{{ file.file.url }}" type="video/mp4">
+                                    <source src="{{ file.file.url }}" type="video/webm">
+                                </video>
+                                <div id="videoError" class="alert alert-warning mt-3" style="display: none;">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Video konnte nicht geladen werden.
+                                    <br>
+                                    <a href="/storage/file/{{ file.id }}/download/" class="btn btn-sm btn-primary mt-2">
+                                        <i class="bi bi-download"></i> Herunterladen
+                                    </a>
+                                </div>
+                                <p class="text-muted mt-2 small">
+                                    <i class="bi bi-film me-1"></i> {{ file.name }}
+                                </p>
+                                {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Keine Videodatei vorhanden.
+                                </div>
+                                {% endif %}
+                            </div>
+
+                        {% elif is_audio %}
+                            <!-- Audio preview -->
+                            <div class="text-center py-4">
+                                {% if file.file %}
+                                <div class="mb-4">
+                                    <i class="bi bi-music-note-beamed display-1 text-primary"></i>
+                                </div>
+                                <h5 class="mb-3">{{ file.name }}</h5>
+                                <audio controls class="w-100" style="max-width: 500px;"
+                                       onerror="document.getElementById('audioError').style.display='block'; this.style.display='none';">
+                                    <source src="{{ file.file.url }}" type="{{ file.mime_type|default:'audio/mpeg' }}">
+                                    <source src="{{ file.file.url }}" type="audio/mpeg">
+                                    <source src="{{ file.file.url }}" type="audio/wav">
+                                    <source src="{{ file.file.url }}" type="audio/ogg">
+                                </audio>
+                                <div id="audioError" class="alert alert-warning mt-3" style="display: none;">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Audio konnte nicht geladen werden.
+                                    <br>
+                                    <a href="/storage/file/{{ file.id }}/download/" class="btn btn-sm btn-primary mt-2">
+                                        <i class="bi bi-download"></i> Herunterladen
+                                    </a>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Keine Audiodatei vorhanden.
+                                </div>
+                                {% endif %}
+                            </div>
+
+                        {% elif is_pdf %}
+                            <!-- PDF preview -->
+                            <div class="alert alert-info">
+                                PDF-Datei: <strong>{{ file.name }}</strong>
+                            </div>
+                            <iframe src="{{ file.file.url }}" width="100%" height="600" frameborder="0"></iframe>
+
+                        {% elif is_word %}
+                            <!-- Word document preview -->
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-file-word"></i> Word-Dokument: <strong>{{ file.name }}</strong>
+                            </div>
+                            <div id="wordPreview" style="max-height: 600px; overflow-y: auto; background-color: white; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                                <div class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-3"><strong>Dokument wird geladen...</strong></p>
+                                    <p class="text-muted small">
+                                        {% if file.size >= 1048576 %}
+                                            Große Datei (~{{ file.size|floatformat:-1|add:"0" }} MB) - bitte warten...
+                                        {% else %}
+                                            (~{{ file.size|floatformat:-1|add:"0" }} KB) - bitte warten...
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-muted small">Dies kann 5-10 Sekunden dauern</p>
+                                </div>
+                            </div>
+
+                        {% elif is_excel %}
+                            <!-- Excel spreadsheet preview -->
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-file-excel"></i> Excel-Tabelle: <strong>{{ file.name }}</strong>
+                            </div>
+                            <div id="excelPreview" style="max-height: 600px; overflow: auto;">
+                                <div class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-3"><strong>Tabelle wird geladen...</strong></p>
+                                    <p class="text-muted small">
+                                        {% if file.size >= 1048576 %}
+                                            Große Datei (~{{ file.size|floatformat:-1|add:"0" }} MB) - bitte warten...
+                                        {% else %}
+                                            (~{{ file.size|floatformat:-1|add:"0" }} KB) - bitte warten...
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-muted small">Dies kann 3-5 Sekunden dauern</p>
+                                </div>
+                            </div>
+
+                        {% elif is_ppt %}
+                            <!-- PowerPoint preview -->
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-file-pptx"></i> PowerPoint-Präsentation: <strong>{{ file.name }}</strong>
+                            </div>
+                            <div class="text-center py-5">
+                                <p class="text-muted">PowerPoint-Vorschau wird in Kürze unterstützt</p>
+                                <a href="/storage/file/{{ file.id }}/download/" class="btn btn-primary">
+                                    📥 Download
+                                </a>
+                            </div>
+
+                        {% elif is_text %}
+                            <!-- Text preview -->
+                            <pre style="max-height: 500px; overflow-y: auto; background-color: #f5f5f5; padding: 15px; border-radius: 5px;"><code id="textPreview">Laden...</code></pre>
+
+                        {% elif plugins_left or plugins_center or plugins_right %}
+                            <!-- Plugin layout: Left | Center | Right -->
+                            <div class="plugin-layout" style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; min-height: 400px;">
+
+                                <!-- LEFT PLUGINS (vertical stack) -->
+                                <div class="plugins-left" style="display: flex; flex-direction: column; gap: 15px;">
+                                    {% for plugin in plugins_left %}
+                                        <div class="plugin-item" style="padding: 15px; background-color: white; border: 1px solid #ddd; border-radius: 5px; overflow: auto;">
+                                            <small class="text-muted">📦 {{ plugin.name }}</small>
+                                            {{ plugin.html|safe }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- CENTER PLUGINS (horizontal then vertical) -->
+                                <div class="plugins-center" style="display: flex; flex-direction: column; gap: 15px;">
+                                    {% for plugin in plugins_center %}
+                                        <div class="plugin-item" style="padding: 15px; background-color: white; border: 1px solid #ddd; border-radius: 5px; overflow: auto;">
+                                            <small class="text-muted">📦 {{ plugin.name }}</small>
+                                            {{ plugin.html|safe }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- RIGHT PLUGINS (vertical stack) -->
+                                <div class="plugins-right" style="display: flex; flex-direction: column; gap: 15px;">
+                                    {% for plugin in plugins_right %}
+                                        <div class="plugin-item" style="padding: 15px; background-color: white; border: 1px solid #ddd; border-radius: 5px; overflow: auto;">
+                                            <small class="text-muted">📦 {{ plugin.name }}</small>
+                                            {{ plugin.html|safe }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                            </div>
+
+                        {% else %}
+                            <!-- Other previewable files -->
+                            <div class="alert alert-info">
+                                <i class="bi bi-file-text"></i> {{ file.name }} ({{ file.mime_type }})
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <!-- Non-previewable file -->
+                        <div class="text-center py-5">
+                            <h3>{{ file.get_icon_class }}</h3>
+                            <p class="text-muted">Diese Dateitype kann nicht in der Vorschau angezeigt werden</p>
+                            <p>
+                                <strong>Dateityp:</strong> {{ file.mime_type }}<br>
+                                <strong>Größe:</strong>
+                                {% if file.size >= 1048576 %}
+                                    {{ file.size|floatformat:2|add:"0" }} MB
+                                {% elif file.size >= 1024 %}
+                                    {{ file.size|floatformat:2|add:"0" }} KB
+                                {% else %}
+                                    {{ file.size }} Bytes
+                                {% endif %}
+                            </p>
+                            <a href="/storage/file/{{ file.id }}/download/" class="btn btn-primary">
+                                📥 Download
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📋 Details</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Größe:</strong><br>
+                        {% if file.size >= 1048576 %}
+                            {{ file.size|floatformat:2|add:"0" }} MB
+                        {% elif file.size >= 1024 %}
+                            {{ file.size|floatformat:2|add:"0" }} KB
+                        {% else %}
+                            {{ file.size }} Bytes
+                        {% endif %}
+                    </p>
+                    <p>
+                        <strong>Typ:</strong><br>
+                        <code>{{ file.mime_type }}</code>
+                    </p>
+                    <p>
+                        <strong>Erstellt:</strong><br>
+                        {{ file.created_at|date:"d.m.Y H:i" }}
+                    </p>
+                    <p>
+                        <strong>Geändert:</strong><br>
+                        {{ file.updated_at|date:"d.m.Y H:i" }}
+                    </p>
+                    <p>
+                        <strong>Versionen:</strong><br>
+                        {{ file.version_count }}
+                    </p>
+                    <p>
+                        <strong>Downloads:</strong><br>
+                        {{ file.download_count }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚙️ Aktionen</h5>
+                </div>
+                <div class="card-body">
+                    <a href="/storage/file/{{ file.id }}/download/" class="btn btn-primary w-100 mb-2">
+                        📥 Download
+                    </a>
+                    {% if is_word or is_excel %}
+                    <button class="btn btn-warning w-100 mb-2" onclick="downloadForEdit({{ file.id }}, '{{ file.name }}')">
+                        ✏️ In Programm bearbeiten
+                    </button>
+                    {% endif %}
+                    <a href="/storage/file/{{ file.id }}/versions/" class="btn btn-outline-primary w-100 mb-2">
+                        📜 Versionen
+                    </a>
+                    <button class="btn btn-outline-secondary w-100 mb-2" data-bs-toggle="modal" data-bs-target="#shareModal">
+                        <i class="bi bi-share"></i> Teilen
+                    </button>
+                    <button class="btn btn-outline-danger w-100" onclick="if(confirm('Diese Datei wirklich löschen?')) window.location.href='/storage/file/{{ file.id }}/delete/'">
+                        🗑️ Löschen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-share me-2"></i>Datei teilen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-4">
+                    <i class="bi bi-file-earmark me-1"></i> {{ file.name }}
+                </p>
+
+                <!-- Share Options -->
+                <div class="d-grid gap-3">
+                    <!-- Public Link -->
+                    <a href="{% url 'sharing:create_link' content_type='file' object_id=file.id %}"
+                       class="btn btn-outline-primary btn-lg text-start">
+                        <i class="bi bi-link-45deg me-3"></i>
+                        <span>
+                            <strong>Öffentlicher Link</strong><br>
+                            <small class="text-muted">Jeder mit dem Link kann zugreifen</small>
+                        </span>
+                    </a>
+
+                    <!-- Share with User -->
+                    <a href="{% url 'sharing:share' content_type='file' object_id=file.id %}"
+                       class="btn btn-outline-secondary btn-lg text-start">
+                        <i class="bi bi-person-plus me-3"></i>
+                        <span>
+                            <strong>Mit Benutzer teilen</strong><br>
+                            <small class="text-muted">Nur für registrierte Benutzer</small>
+                        </span>
+                    </a>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Quick Link (already created links) -->
+                <div id="existingLinks">
+                    <h6 class="text-muted mb-3">Bestehende Links</h6>
+                    <div id="linksLoader" class="text-center py-3">
+                        <div class="spinner-border spinner-border-sm text-primary"></div>
+                        <small class="text-muted ms-2">Lade...</small>
+                    </div>
+                    <div id="linksList"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{% url 'sharing:links_list' %}" class="btn btn-link">
+                    Alle Links verwalten
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Schließen
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast for copy confirmation -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    <div id="copyToast" class="toast" role="alert">
+        <div class="toast-body bg-success text-white rounded">
+            <i class="bi bi-check-circle me-2"></i> Link kopiert!
+        </div>
+    </div>
+</div>
+
+<script>
+// Load existing links when modal opens
+document.getElementById('shareModal').addEventListener('shown.bs.modal', function() {
+    loadExistingLinks();
+});
+
+function loadExistingLinks() {
+    // For now, just show the message - can be enhanced with AJAX later
+    document.getElementById('linksLoader').style.display = 'none';
+    document.getElementById('linksList').innerHTML =
+        '<p class="text-muted small text-center">Noch keine Links für diese Datei erstellt.</p>';
+}
+
+function copyLink(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+        toast.show();
+    });
+}
+
+// Download file for editing
+function downloadForEdit(fileId, fileName) {
+    const link = document.createElement('a');
+    link.href = `/storage/file/${fileId}/download/`;
+    link.click();
+    alert('Datei wurde heruntergeladen.\n\nÖffnen Sie die Datei in Word oder Excel um zu bearbeiten.\nNachdem Sie die Änderungen gespeichert haben, können Sie die neue Version hier hochladen.');
+}
+</script>
+
+{% if is_text %}
+<script>
+// Load text file preview
+document.addEventListener('DOMContentLoaded', function() {
+    const fileUrl = '{{ file.file.url }}';
+    const previewElement = document.getElementById('textPreview');
+
+    fetch(fileUrl)
+        .then(response => response.text())
+        .then(text => {
+            // Limit preview to first 10000 characters
+            if (text.length > 10000) {
+                previewElement.textContent = text.substring(0, 10000) + '\n\n... [Datei gekürzt, Download für vollständige Datei]';
+            } else {
+                previewElement.textContent = text;
+            }
+        })
+        .catch(error => {
+            previewElement.textContent = 'Fehler beim Laden der Dateivorschau';
+            console.error('Error:', error);
+        });
+});
+</script>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Load preview libraries first -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.7/dist/docx-preview.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+{% if is_word %}
+<script>
+// Wait for docx library to load
+function loadWordPreview() {
+    const fileUrl = '{{ file.file.url }}';
+    const previewElement = document.getElementById('wordPreview');
+    const startTime = Date.now();
+    const timeoutMs = 30000; // 30 second timeout
+
+    function tryLoadWord() {
+        // Check if docx is loaded
+        if (typeof docx === 'undefined' || !docx.renderAsync) {
+            // Check if we've exceeded timeout
+            if (Date.now() - startTime > timeoutMs) {
+                previewElement.innerHTML = '<div class="alert alert-warning">' +
+                    'Das Laden des Dokuments dauert länger als erwartet. ' +
+                    'Die Vorschau wird möglicherweise noch verarbeitet...<br><br>' +
+                    '<a href="/storage/file/{{ file.id }}/download/" class="btn btn-primary">Download stattdessen</a>' +
+                    '</div>';
+                return;
+            }
+            // Library not loaded yet, try again
+            setTimeout(tryLoadWord, 500);
+            return;
+        }
+
+        // Library is loaded, proceed with rendering
+        fetch(fileUrl)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => {
+                const blob = new Blob([arrayBuffer]);
+                docx.renderAsync(blob, previewElement)
+                    .catch(error => {
+                        console.error('Error rendering Word document:', error);
+                        previewElement.innerHTML = '<div class="alert alert-warning">' +
+                            'Fehler beim Anzeigen des Dokuments. ' +
+                            '<a href="/storage/file/{{ file.id }}/download/" class="btn btn-sm btn-primary">Download</a>' +
+                            '</div>';
+                    });
+            })
+            .catch(error => {
+                console.error('Error loading Word file:', error);
+                previewElement.innerHTML = '<div class="alert alert-danger">Fehler beim Herunterladen des Dokuments</div>';
+            });
+    }
+
+    // Start loading when DOM is ready
+    tryLoadWord();
+}
+
+document.addEventListener('DOMContentLoaded', loadWordPreview);
+</script>
+{% endif %}
+
+{% if is_excel %}
+<script>
+// Wait for XLSX library to load
+function loadExcelPreview() {
+    const fileUrl = '{{ file.file.url }}';
+    const previewElement = document.getElementById('excelPreview');
+    const startTime = Date.now();
+    const timeoutMs = 30000; // 30 second timeout
+
+    function tryLoadExcel() {
+        // Check if XLSX is loaded
+        if (typeof XLSX === 'undefined') {
+            // Check if we've exceeded timeout
+            if (Date.now() - startTime > timeoutMs) {
+                previewElement.innerHTML = '<div class="alert alert-warning">' +
+                    'Das Laden der Tabelle dauert länger als erwartet. ' +
+                    'Die Vorschau wird möglicherweise noch verarbeitet...<br><br>' +
+                    '<a href="/storage/file/{{ file.id }}/download/" class="btn btn-primary">Download stattdessen</a>' +
+                    '</div>';
+                return;
+            }
+            // Library not loaded yet, try again
+            setTimeout(tryLoadExcel, 500);
+            return;
+        }
+
+        // Library is loaded, proceed with rendering
+        fetch(fileUrl)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => {
+                const data = new Uint8Array(arrayBuffer);
+                const workbook = XLSX.read(data, {type: 'array'});
+
+                let html = '<div>';
+
+                // Process each sheet
+                workbook.SheetNames.forEach((sheetName, index) => {
+                    if (index > 0) html += '<hr class="my-4">';
+
+                    html += '<h5 class="mt-4 mb-3">' + sheetName + '</h5>';
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+
+                    // Create styled HTML table
+                    html += '<div class="table-responsive">';
+                    html += '<table class="table table-sm table-bordered table-hover">';
+
+                    if (jsonData.length > 0) {
+                        html += '<thead class="table-light">';
+                        html += '<tr>';
+                        jsonData[0].forEach(cell => {
+                            html += '<th style="background-color: #f8f9fa; font-weight: 600; padding: 10px;">' + (cell || '') + '</th>';
+                        });
+                        html += '</tr>';
+                        html += '</thead>';
+
+                        html += '<tbody>';
+                        for (let i = 1; i < jsonData.length; i++) {
+                            html += '<tr>';
+                            jsonData[i].forEach(cell => {
+                                html += '<td style="padding: 8px; vertical-align: top;">' + (cell || '') + '</td>';
+                            });
+                            html += '</tr>';
+                        }
+                        html += '</tbody>';
+                    }
+
+                    html += '</table>';
+                    html += '</div>';
+                });
+
+                html += '</div>';
+                previewElement.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading Excel file:', error);
+                previewElement.innerHTML = '<div class="alert alert-danger">Fehler beim Laden der Tabelle</div>';
+            });
+    }
+
+    // Start loading when DOM is ready
+    tryLoadExcel();
+}
+
+document.addEventListener('DOMContentLoaded', loadExcelPreview);
+</script>
+{% endif %}
+{% endblock %}

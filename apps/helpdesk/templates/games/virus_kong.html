@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Virus Kong v1.3 - Die Bedrohung!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: #0f0f1e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(255,0,0,0.3);
+            border: 3px solid #ff0000;
+        }
+
+        #gameCanvas {
+            border: 4px solid #ff0000;
+            background: #000;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: #ff0000;
+            font-size: 18px;
+            text-shadow: 0 0 10px #ff0000;
+        }
+
+        .menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            padding: 40px;
+            border-radius: 15px;
+            border: 3px solid #ff0000;
+            text-align: center;
+            color: #ff0000;
+            display: none;
+            max-width: 600px;
+        }
+
+        .menu.active {
+            display: block;
+        }
+
+        .menu h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #ff0000;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px #ff0000; }
+            50% { text-shadow: 0 0 40px #ff0000, 0 0 60px #ff0000; }
+        }
+
+        .menu p {
+            font-size: 16px;
+            margin: 15px 0;
+            line-height: 1.6;
+            color: #ff6666;
+        }
+
+        .btn {
+            background: #ff0000;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #cc0000;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #ff0000;
+        }
+
+        .story {
+            font-size: 14px;
+            color: #ffaaaa;
+            font-style: italic;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,0,0,0.1);
+            border-left: 3px solid #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="600" height="800"></canvas>
+        <div class="hud">
+            <div>❤️ Leben: <span id="lives">3</span></div>
+            <div>🎯 Score: <span id="score">0</span></div>
+            <div>📊 Level: <span id="level">1</span></div>
+        </div>
+    </div>
+
+    <div id="startMenu" class="menu active">
+        <h1>🦠 VIRUS KONG 💿</h1>
+        <div class="story">
+            ⚠️ ACHTUNG! ⚠️<br>
+            Ein Computer-Virus hat sich auf dem Server eingenistet!<br>
+            Er wirft verseuchte CDs und USB-Sticks auf dich!<br>
+            Erklimme den Server und besiege den Virus!
+        </div>
+        <p style="font-size: 14px; margin: 20px 0;">
+            ⌨️ Pfeiltasten Links/Rechts: Laufen<br>
+            ⬆️⬇️ Pfeiltasten Hoch/Runter: Leitern klettern<br>
+            🪜 Orangene Leitern verbinden alle Ebenen!<br>
+            🎯 Weiche den verseuchten CDs aus!<br>
+            🏁 Erreiche die GRÜNE Plattform ganz oben!
+        </p>
+        <button class="btn" onclick="startGame()">🎮 MISSION STARTEN</button>
+        <button class="btn" onclick="showHighscores()" style="background: #ffd700; color: #000;">🏆 BESTENLISTE</button>
+        <button class="btn" onclick="window.history.back()" style="background: #666;">← ZURÜCK</button>
+        <p style="font-size: 10px; margin-top: 15px; opacity: 0.5;">v1.3 - Leitern reichen jetzt hoch UND runter!</p>
+    </div>
+
+    <div id="gameOverMenu" class="menu">
+        <h1>💀 INFIZIERT!</h1>
+        <p style="font-size: 24px; color: #ff6666;">Score: <span id="finalScore">0</span></p>
+        <p>Level erreicht: <span id="reachedLevel">1</span></p>
+        <p id="rankMessage" style="color: #ffd700; font-weight: bold; margin: 10px 0;"></p>
+        <button class="btn" onclick="restartGame()">🔄 NOCHMAL</button>
+        <button class="btn" onclick="showHighscores()" style="background: #ffd700; color: #000;">🏆 SCORES</button>
+        <button class="btn" onclick="window.history.back()" style="background: #666;">← ZURÜCK</button>
+    </div>
+
+    <div id="victoryMenu" class="menu">
+        <h1>🏆 VIRUS BESIEGT!</h1>
+        <p style="font-size: 20px; color: #00ff00;">Level <span id="victoryLevel">1</span> abgeschlossen!</p>
+        <p style="color: #ffd700;">+<span id="bonusPoints">0</span> Bonus-Punkte!</p>
+        <button class="btn" onclick="nextLevel()">➡️ NÄCHSTES LEVEL</button>
+    </div>
+
+    <div id="highscoreMenu" class="menu">
+        <h1>🏆 TOP VIRUS-JÄGER 🏆</h1>
+        <div id="highscoreList" style="max-height: 400px; overflow-y: auto; margin: 20px 0;">
+            <p style="color: #ff0000;">Lade Bestenliste...</p>
+        </div>
+        <button class="btn" onclick="hideHighscores()">ZURÜCK</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameState = 'menu';
+        let player, platforms, ladders, hazards, particles;
+        let virus;
+        let keys = {};
+        let currentLevel = 1;
+        let lives = 3;
+        let score = 0;
+        let gameInterval;
+
+        // Player (Antivirus Agent!)
+        class Player {
+            constructor() {
+                this.width = 30;
+                this.height = 40;
+                this.x = 50;
+                this.y = canvas.height - 120; // Sicher über der untersten Plattform
+                this.vx = 0;
+                this.vy = 0;
+                this.speed = 3;
+                this.gravity = 0.5;
+                this.onGround = false;
+                this.onLadder = false;
+                this.direction = 1;
+                this.invincible = true; // Start mit Invincibility
+                this.invincibleTime = 60; // 1 Sekunde Schutz beim Start
+            }
+
+            draw() {
+                if (this.invincible && Math.floor(Date.now() / 100) % 2 === 0) {
+                    return; // Blink effect
+                }
+
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+                if (this.direction === -1) ctx.scale(-1, 1);
+
+                // Agent body (Strichmännchen)
+                // Färbe orange wenn auf Leiter
+                ctx.strokeStyle = this.onLadder ? '#ffaa00' : '#00ff00';
+                ctx.lineWidth = 3;
+
+                // Head
+                ctx.beginPath();
+                ctx.arc(0, -15, 8, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Body
+                ctx.beginPath();
+                ctx.moveTo(0, -7);
+                ctx.lineTo(0, 10);
+                ctx.stroke();
+
+                // Arms
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-10, 5);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(10, 5);
+                ctx.stroke();
+
+                // Legs
+                const legOffset = this.onGround && Math.abs(this.vx) > 0 ? Math.sin(Date.now() / 100) * 5 : 0;
+                ctx.beginPath();
+                ctx.moveTo(0, 10);
+                ctx.lineTo(-5 + legOffset, 20);
+                ctx.moveTo(0, 10);
+                ctx.lineTo(5 - legOffset, 20);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            update() {
+                // Check ladder - großzügigere Detection
+                this.onLadder = false;
+                ladders.forEach(ladder => {
+                    // Spieler muss sich in der Nähe der Leiter befinden
+                    if (this.x + this.width > ladder.x - 10 &&
+                        this.x < ladder.x + ladder.width + 10 &&
+                        this.y + this.height > ladder.y - 10 &&
+                        this.y < ladder.y + ladder.height + 10) {
+                        this.onLadder = true;
+                    }
+                });
+
+                // Movement
+                this.vx = 0;
+                if (keys['ArrowLeft']) {
+                    this.vx = -this.speed;
+                    this.direction = -1;
+                }
+                if (keys['ArrowRight']) {
+                    this.vx = this.speed;
+                    this.direction = 1;
+                }
+
+                // Ladder climbing
+                if (this.onLadder) {
+                    this.vy = 0;
+                    if (keys['ArrowUp']) {
+                        this.vy = -this.speed;
+                    }
+                    if (keys['ArrowDown']) {
+                        this.vy = this.speed;
+                    }
+                } else {
+                    this.vy += this.gravity;
+                }
+
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Screen bounds
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
+
+                // Platform collision - WICHTIG: Vor onGround reset!
+                this.onGround = false;
+                platforms.forEach(platform => {
+                    if (this.x + this.width > platform.x &&
+                        this.x < platform.x + platform.width &&
+                        this.y + this.height >= platform.y &&
+                        this.y + this.height <= platform.y + platform.height &&
+                        this.vy >= 0) {
+                        this.y = platform.y - this.height;
+                        this.vy = 0;
+                        this.onGround = true;
+                    }
+                });
+
+                // Hazard collision
+                if (!this.invincible) {
+                    hazards.forEach(hazard => {
+                        if (this.x + this.width > hazard.x &&
+                            this.x < hazard.x + hazard.width &&
+                            this.y + this.height > hazard.y &&
+                            this.y < hazard.y + hazard.height) {
+                            hit();
+                        }
+                    });
+                }
+
+                // Invincibility countdown
+                if (this.invincible) {
+                    this.invincibleTime--;
+                    if (this.invincibleTime <= 0) {
+                        this.invincible = false;
+                    }
+                }
+
+                // Win condition - reached top platform (green platform)
+                // Check if standing on the green platform
+                platforms.forEach(platform => {
+                    if (platform.color === '#00ff00' && // Green platform
+                        this.x + this.width > platform.x &&
+                        this.x < platform.x + platform.width &&
+                        this.y + this.height >= platform.y &&
+                        this.y + this.height <= platform.y + platform.height &&
+                        this.onGround) {
+                        victory();
+                    }
+                });
+
+                // Death by falling (off screen)
+                if (this.y > canvas.height + 100) {
+                    hit();
+                }
+            }
+        }
+
+        // Platform
+        class Platform {
+            constructor(x, y, width, color = '#ff0000') {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = 15;
+                this.color = color;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.strokeStyle = '#ff6666';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+            }
+        }
+
+        // Ladder
+        class Ladder {
+            constructor(x, y, height) {
+                this.x = x;
+                this.y = y;
+                this.width = 40; // Breitere Leiter für besseres Klettern
+                this.height = height;
+            }
+
+            draw() {
+                // Hintergrund-Glow für bessere Sichtbarkeit
+                ctx.fillStyle = 'rgba(255, 170, 0, 0.2)';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+
+                ctx.strokeStyle = '#ffaa00';
+                ctx.lineWidth = 4;
+
+                // Vertical rails
+                ctx.beginPath();
+                ctx.moveTo(this.x + 8, this.y);
+                ctx.lineTo(this.x + 8, this.y + this.height);
+                ctx.moveTo(this.x + 32, this.y);
+                ctx.lineTo(this.x + 32, this.y + this.height);
+                ctx.stroke();
+
+                // Rungs (Sprossen)
+                ctx.lineWidth = 3;
+                for (let i = 0; i < this.height; i += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + 8, this.y + i);
+                    ctx.lineTo(this.x + 32, this.y + i);
+                    ctx.stroke();
+                }
+
+                // Oben/Unten Marker
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(this.x, this.y - 3, this.width, 3);
+                ctx.fillRect(this.x, this.y + this.height, this.width, 3);
+            }
+        }
+
+        // Hazard (Verseuchte CD / USB)
+        class Hazard {
+            constructor(x, y, type = 'cd') {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.width = type === 'cd' ? 30 : 20;
+                this.height = type === 'cd' ? 30 : 25;
+                this.vx = (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 2);
+                this.vy = 1;
+                this.rotation = 0;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+                ctx.rotate(this.rotation);
+
+                if (this.type === 'cd') {
+                    // CD
+                    ctx.fillStyle = '#ff00ff';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Virus symbol
+                    ctx.fillStyle = '#ff0000';
+                    ctx.font = '12px Arial';
+                    ctx.fillText('☠', -6, 4);
+                } else {
+                    // USB Stick
+                    ctx.fillStyle = '#00ffff';
+                    ctx.fillRect(-10, -12, 20, 25);
+                    ctx.fillStyle = '#666';
+                    ctx.fillRect(-6, -15, 12, 3);
+                }
+
+                ctx.restore();
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += 0.1;
+
+                // Bounce off walls
+                if (this.x < 0 || this.x + this.width > canvas.width) {
+                    this.vx *= -1;
+                }
+
+                // Platform collision - roll on platforms
+                platforms.forEach(platform => {
+                    if (this.x + this.width > platform.x &&
+                        this.x < platform.x + platform.width &&
+                        this.y + this.height >= platform.y &&
+                        this.y + this.height <= platform.y + platform.height) {
+                        this.y = platform.y - this.height;
+                        this.vy = 0;
+                    }
+                });
+
+                // Apply some bounce/roll effect
+                if (this.vy === 0) {
+                    this.vy = 0.5; // Slight downward velocity to continue rolling down ramps
+                }
+
+                // Remove if off screen
+                return this.y > canvas.height + 50;
+            }
+        }
+
+        // Virus Boss
+        class Virus {
+            constructor() {
+                this.x = canvas.width / 2 - 40;
+                this.y = 20;
+                this.width = 80;
+                this.height = 60;
+                this.throwTimer = -180; // Start with delay - 3 seconds
+                this.throwInterval = 180; // Frames between throws (3 seconds)
+                this.angry = false;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+
+                // Virus body
+                ctx.fillStyle = this.angry ? '#ff0000' : '#cc00cc';
+                ctx.beginPath();
+                ctx.arc(0, 0, 30, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Spikes
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 / 8) * i;
+                    ctx.fillStyle = '#ff0000';
+                    ctx.beginPath();
+                    ctx.moveTo(Math.cos(angle) * 25, Math.sin(angle) * 25);
+                    ctx.lineTo(Math.cos(angle) * 40, Math.sin(angle) * 40);
+                    ctx.lineTo(Math.cos(angle + 0.3) * 25, Math.sin(angle + 0.3) * 25);
+                    ctx.fill();
+                }
+
+                // Evil eyes
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(-15, -5, 10, 10);
+                ctx.fillRect(5, -5, 10, 10);
+
+                // Mouth
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 5, 15, 0.2, Math.PI - 0.2);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            update() {
+                this.throwTimer++;
+
+                if (this.throwTimer >= this.throwInterval) {
+                    this.throwHazard();
+                    this.throwTimer = 0;
+                    // Get angrier (throw faster)
+                    this.throwInterval = Math.max(60, this.throwInterval - 2);
+                }
+
+                // Animate
+                this.y = 20 + Math.sin(Date.now() / 500) * 5;
+            }
+
+            throwHazard() {
+                const type = Math.random() > 0.5 ? 'cd' : 'usb';
+                hazards.push(new Hazard(this.x + 25, this.y + 50, type));
+            }
+        }
+
+        // Particle effects
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 5;
+                this.vy = (Math.random() - 0.5) * 5;
+                this.life = 30;
+                this.maxLife = 30;
+                this.color = color;
+                this.size = Math.random() * 4 + 2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+            }
+
+            draw() {
+                const alpha = this.life / this.maxLife;
+                ctx.fillStyle = this.color.replace(')', `,${alpha})`).replace('rgb', 'rgba');
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+
+            isDead() {
+                return this.life <= 0;
+            }
+        }
+
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 10; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function generateLevel(level) {
+            platforms = [];
+            ladders = [];
+            hazards = [];
+
+            console.log('=== Generiere Level', level, '===');
+
+            // Bottom platform (Startplattform)
+            platforms.push(new Platform(0, canvas.height - 80, canvas.width, '#ff0000'));
+
+            // Donkey Kong Style - Zig-Zag Plattformen
+            const numFloors = 5;
+            const floorHeight = 140; // Abstand zwischen Ebenen
+
+            const ladderOverhang = 30; // Leitern ragen 30px über Plattformen hinaus
+
+            // Ebene 1 (von unten): Rechts nach Links
+            const floor1Y = canvas.height - 80 - floorHeight;
+            platforms.push(new Platform(100, floor1Y, canvas.width - 100, '#ff0000'));
+            // Leiter vom Boden zur Ebene 1 (Links) - ragt über Plattform hinaus
+            ladders.push(new Ladder(50, floor1Y - ladderOverhang, floorHeight + ladderOverhang));
+
+            // Ebene 2: Links nach Rechts
+            const floor2Y = floor1Y - floorHeight;
+            platforms.push(new Platform(0, floor2Y, canvas.width - 100, '#ff0000'));
+            // Leiter von Ebene 1 zu Ebene 2 (Rechts)
+            ladders.push(new Ladder(canvas.width - 120, floor2Y - ladderOverhang, floorHeight + ladderOverhang));
+
+            // Ebene 3: Rechts nach Links
+            const floor3Y = floor2Y - floorHeight;
+            platforms.push(new Platform(100, floor3Y, canvas.width - 100, '#ff0000'));
+            // Leiter von Ebene 2 zu Ebene 3 (Links)
+            ladders.push(new Ladder(50, floor3Y - ladderOverhang, floorHeight + ladderOverhang));
+
+            // Ebene 4: Links nach Rechts
+            const floor4Y = floor3Y - floorHeight;
+            platforms.push(new Platform(0, floor4Y, canvas.width - 100, '#ff0000'));
+            // Leiter von Ebene 3 zu Ebene 4 (Rechts)
+            ladders.push(new Ladder(canvas.width - 120, floor4Y - ladderOverhang, floorHeight + ladderOverhang));
+
+            // Top platform (Ziel - Victory!)
+            const topY = floor4Y - 100;
+            platforms.push(new Platform(canvas.width / 2 - 100, topY, 200, '#00ff00'));
+            // Leiter von Ebene 4 zum Ziel (Mitte)
+            ladders.push(new Ladder(canvas.width / 2 - 15, topY - ladderOverhang, floor4Y - topY + ladderOverhang));
+
+            // ZUSÄTZLICHE LEITERN für mehr Optionen
+            // Extra Leiter auf Ebene 1 (Mitte) - auch mit Overhang
+            ladders.push(new Ladder(canvas.width / 2 - 15, floor1Y - ladderOverhang, floorHeight + ladderOverhang));
+            // Extra Leiter auf Ebene 3 (Mitte)
+            ladders.push(new Ladder(canvas.width / 2 - 15, floor3Y - ladderOverhang, floorHeight + ladderOverhang));
+
+            console.log('Platforms:', platforms.length, 'Ladders:', ladders.length);
+            console.log('Floor heights:', floor1Y, floor2Y, floor3Y, floor4Y, topY);
+
+            // Create virus
+            virus = new Virus();
+        }
+
+        function startGame() {
+            document.getElementById('startMenu').classList.remove('active');
+            gameState = 'playing';
+            currentLevel = 1;
+            lives = 3;
+            score = 0;
+
+            initLevel();
+            gameInterval = setInterval(gameLoop, 1000/60);
+        }
+
+        function initLevel() {
+            console.log('Init Level', currentLevel);
+            player = new Player();
+            particles = [];
+            generateLevel(currentLevel);
+            updateHUD();
+            console.log('Platforms:', platforms.length, 'Ladders:', ladders.length);
+            console.log('Player position:', player.x, player.y);
+        }
+
+        function nextLevel() {
+            document.getElementById('victoryMenu').classList.remove('active');
+            currentLevel++;
+            initLevel();
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverMenu').classList.remove('active');
+            startGame();
+        }
+
+        function hit() {
+            if (player.invincible) return;
+
+            console.log('Player hit! Lives before:', lives);
+            lives--;
+            createParticles(player.x + player.width/2, player.y + player.height/2, 'rgb(255,0,0)');
+
+            if (lives <= 0) {
+                console.log('Game Over!');
+                gameOver();
+            } else {
+                player.invincible = true;
+                player.invincibleTime = 120; // 2 seconds
+                player.x = 50;
+                player.y = canvas.height - 120; // Höher positionieren
+                player.vy = 0;
+                updateHUD();
+            }
+        }
+
+        function gameOver() {
+            clearInterval(gameInterval);
+            gameState = 'gameover';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('reachedLevel').textContent = currentLevel;
+            saveScore();
+            document.getElementById('gameOverMenu').classList.add('active');
+        }
+
+        function victory() {
+            clearInterval(gameInterval);
+            gameState = 'victory';
+
+            const levelBonus = currentLevel * 1000;
+            score += levelBonus;
+
+            document.getElementById('victoryLevel').textContent = currentLevel;
+            document.getElementById('bonusPoints').textContent = levelBonus;
+            document.getElementById('victoryMenu').classList.add('active');
+        }
+
+        function updateHUD() {
+            document.getElementById('lives').textContent = lives;
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = currentLevel;
+        }
+
+        function gameLoop() {
+            // Clear
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid background
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Update & Draw
+            virus.update();
+            virus.draw();
+
+            platforms.forEach(p => p.draw());
+            ladders.forEach(l => l.draw());
+
+            // Update hazards
+            hazards = hazards.filter(h => {
+                const shouldRemove = h.update();
+                h.draw();
+                return !shouldRemove; // Keep if update returns false
+            });
+
+            player.update();
+            player.draw();
+
+            // Particles
+            particles = particles.filter(p => !p.isDead());
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Score display
+            ctx.fillStyle = '#ff0000';
+            ctx.font = '20px Courier New';
+            ctx.fillText(`Score: ${score}`, 10, 30);
+
+            // Add points over time
+            if (gameState === 'playing') {
+                score += 1;
+                updateHUD();
+            }
+        }
+
+        // Keyboard
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // ====================================================================
+        // HIGHSCORE FUNCTIONS
+        // ====================================================================
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function saveScore() {
+            const csrftoken = getCookie('csrftoken');
+
+            fetch('/game/save-score-viruskong/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    score: score,
+                    level: currentLevel
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const rankMsg = document.getElementById('rankMessage');
+                    if (data.rank === 1) {
+                        rankMsg.textContent = '🏆 NEUER HIGHSCORE! Platz 1! 🏆';
+                    } else if (data.rank <= 10) {
+                        rankMsg.textContent = `🎖️ Top 10! Platz ${data.rank}!`;
+                    } else {
+                        rankMsg.textContent = `Platz ${data.rank}`;
+                    }
+                }
+            })
+            .catch(error => console.error('Error saving score:', error));
+        }
+
+        function loadHighscores() {
+            fetch('/game/highscores-viruskong/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayHighscores(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading highscores:', error);
+                document.getElementById('highscoreList').innerHTML =
+                    '<p style="color: #ff6666;">Fehler beim Laden</p>';
+            });
+        }
+
+        function displayHighscores(data) {
+            const container = document.getElementById('highscoreList');
+            let html = '';
+
+            if (data.scores.length === 0) {
+                html = '<p style="color: #ff0000; font-size: 16px;">Noch keine Scores!<br>Sei der Erste!</p>';
+            } else {
+                html = '<table style="width: 100%; color: #ff0000; font-family: \'Courier New\', monospace; font-size: 14px; border-collapse: collapse;">';
+                html += '<thead><tr style="border-bottom: 2px solid #ff0000;">';
+                html += '<th style="padding: 10px; text-align: left;">Rang</th>';
+                html += '<th style="padding: 10px; text-align: left;">Virus-Jäger</th>';
+                html += '<th style="padding: 10px; text-align: right;">Score</th>';
+                html += '<th style="padding: 10px; text-align: center;">Level</th>';
+                html += '</tr></thead><tbody>';
+
+                data.scores.forEach(score => {
+                    const isCurrentUser = score.is_current_user;
+                    const rowStyle = isCurrentUser ? 'background: rgba(255, 0, 0, 0.2); font-weight: bold;' : '';
+                    const medal = score.rank === 1 ? '🥇' : score.rank === 2 ? '🥈' : score.rank === 3 ? '🥉' : '';
+
+                    html += `<tr style="${rowStyle} border-bottom: 1px solid #330000;">`;
+                    html += `<td style="padding: 8px;">${medal} ${score.rank}</td>`;
+                    html += `<td style="padding: 8px;">${score.player_name}${isCurrentUser ? ' (Du)' : ''}</td>`;
+                    html += `<td style="padding: 8px; text-align: right; color: #ffd700;">${score.score}</td>`;
+                    html += `<td style="padding: 8px; text-align: center;">L${score.level}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+
+                if (data.player_best) {
+                    html += '<div style="margin-top: 20px; padding: 15px; background: rgba(255, 0, 0, 0.1); border: 2px solid #ff0000; border-radius: 8px;">';
+                    html += '<p style="color: #ffd700; font-weight: bold; margin-bottom: 5px;">👤 DEINE BESTLEISTUNG:</p>';
+                    html += `<p style="color: #ff0000;">Platz ${data.player_best.rank} | Score: ${data.player_best.score} | Level: ${data.player_best.level}</p>`;
+                    html += '</div>';
+                }
+
+                html += `<p style="margin-top: 15px; font-size: 12px; opacity: 0.7;">Gesamt: ${data.total_players} Spieler</p>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function showHighscores() {
+            document.getElementById('startMenu').classList.remove('active');
+            document.getElementById('gameOverMenu').classList.remove('active');
+            document.getElementById('highscoreMenu').classList.add('active');
+            loadHighscores();
+        }
+
+        function hideHighscores() {
+            document.getElementById('highscoreMenu').classList.remove('active');
+            if (gameState === 'menu') {
+                document.getElementById('startMenu').classList.add('active');
+            } else if (gameState === 'gameover') {
+                document.getElementById('gameOverMenu').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

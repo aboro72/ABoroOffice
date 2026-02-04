@@ -1,0 +1,915 @@
+{% load static %}<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ app_title }}{% endblock %}</title>
+
+    <!-- Theme CSS Variables -->
+    {% if system_settings %}
+    <style>
+        :root {
+            {% if system_settings.primary_color %}--primary-color: {{ system_settings.primary_color }};{% endif %}
+            {% if system_settings.secondary_color %}--secondary-color: {{ system_settings.secondary_color }};{% endif %}
+            {% if system_settings.accent_color %}--accent-color: {{ system_settings.accent_color }};{% endif %}
+            {% if system_settings.danger_color %}--danger-color: {{ system_settings.danger_color }};{% endif %}
+            {% if system_settings.border_radius %}--border-radius: {{ system_settings.border_radius }}px;{% endif %}
+        }
+
+        /* Apply theme variant if not custom */
+        {% if system_settings.theme_variant == 'professional' %}
+        body {
+            --primary-color: #1C3A70;
+            --secondary-color: #2E5090;
+            --accent-color: #0066CC;
+        }
+        {% elif system_settings.theme_variant == 'bright' %}
+        body {
+            --primary-color: #FF6600;
+            --secondary-color: #FFB300;
+            --accent-color: #FF3D00;
+        }
+        {% elif system_settings.theme_variant == 'corporate' %}
+        body {
+            --primary-color: #003D82;
+            --secondary-color: #0066CC;
+            --accent-color: #1A90FF;
+        }
+        {% elif system_settings.theme_variant == 'dark' %}
+        body {
+            --primary-color: #1E1E1E;
+            --secondary-color: #333333;
+            --accent-color: #4A9EFF;
+            background-color: #0D0D0D;
+        }
+        {% elif system_settings.theme_variant == 'modern' %}
+        body {
+            --primary-color: #6366F1;
+            --secondary-color: #10B981;
+            --accent-color: #F59E0B;
+        }
+        {% endif %}
+    </style>
+    {% endif %}
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, rgba(0,0,0,0.1));
+            color: white;
+            padding: 12px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar-brand {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .navbar-brand-logo {
+            height: 40px;
+            width: auto;
+            max-width: 150px;
+        }
+
+        .navbar-brand-text {
+            display: flex;
+            align-items: center;
+            height: 40px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: nowrap;
+            flex: 1;
+            justify-content: flex-end;
+            height: 40px;
+        }
+
+        .navbar-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            white-space: nowrap;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .navbar-menu a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .navbar-menu button:hover {
+            background: rgba(255,255,255,0.2) !important;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 100%;
+            margin-left: 10px;
+            border-left: 1px solid rgba(255,255,255,0.2);
+            padding-left: 10px;
+        }
+
+        .user-info span {
+            display: flex;
+            align-items: center;
+        }
+
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .role-badge.admin {
+            background: #ff6b6b;
+        }
+
+        .role-badge.support_agent {
+            background: #4ecdc4;
+        }
+
+        .role-badge.customer {
+            background: #95e1d3;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+
+        /* Messages */
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #51cf66;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffd43b;
+            color: #333;
+        }
+
+        .btn-secondary {
+            background: #868e96;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-open {
+            background: #51cf66;
+            color: white;
+        }
+
+        .status-in_progress {
+            background: #ffd43b;
+            color: #333;
+        }
+
+        .status-pending {
+            background: #74c0fc;
+            color: white;
+        }
+
+        .status-resolved {
+            background: #51cf66;
+            color: white;
+        }
+
+        .status-closed {
+            background: #868e96;
+            color: white;
+        }
+
+        /* Priority badges */
+        .priority-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .priority-low {
+            background: #d3f9d8;
+            color: #2b8a3e;
+        }
+
+        .priority-medium {
+            background: #fff3bf;
+            color: #f08c00;
+        }
+
+        .priority-high {
+            background: #ffc9c9;
+            color: #c92a2a;
+        }
+
+        .priority-critical {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* Support Level Badges */
+        .level-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .level-level_1 {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .level-level_2 {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .level-level_3 {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+
+        .level-level_4 {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        /* Table */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background: #f8f9fa;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table th {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #868e96;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        /* Utility classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-3 {
+            margin-top: 20px;
+        }
+
+        .mb-3 {
+            margin-bottom: 20px;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .gap-2 {
+            gap: 10px;
+        }
+    </style>
+
+    <!-- Theme CSS for buttons, cards, forms, etc. -->
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                {% if admin_logo_url %}
+                <img src="{{ admin_logo_url }}" alt="{{ app_name }}" class="navbar-brand-logo">
+                {% elif logo_url %}
+                <img src="{{ logo_url }}" alt="{{ app_name }}" class="navbar-brand-logo">
+                {% endif %}
+                <span class="navbar-brand-text">{{ app_name }}</span>
+            </div>
+            <div class="navbar-menu">
+                {% if user.is_authenticated %}
+                <a href="{% url 'main:dashboard' %}">Dashboard</a>
+                <a href="{% url 'tickets:list' %}">Tickets</a>
+                <a href="{% url 'knowledge:list' %}">FAQ</a>
+                {% if user.role in 'customer,support_agent' %}
+                <a href="{% url 'tickets:create' %}">{% if user.role == 'customer' %}Neues Ticket{% else %}Ticket erstellen{% endif %}</a>
+                {% endif %}
+                {% if user.role == 'admin' %}
+                <a href="{% url 'tickets:create' %}">Ticket erstellen</a>
+                <a href="{% url 'chat:agent_dashboard' %}">💬 Chat Dashboard</a>
+                <a href="{% url 'accounts:user_list' %}">Benutzerverwaltung</a>
+                <a href="/admin/">Admin</a>
+                {% elif user.role == 'support_agent' and user.support_level == 4 %}
+                <a href="{% url 'chat:agent_dashboard' %}">💬 Chat Dashboard</a>
+                <a href="{% url 'accounts:user_list' %}">Benutzer/Kundenverwaltung</a>
+                {% elif user.role == 'support_agent' %}
+                <a href="{% url 'chat:agent_dashboard' %}">💬 Chat Dashboard</a>
+                <a href="{% url 'accounts:user_list' %}">Kundenverwaltung</a>
+                {% endif %}
+                {% else %}
+                <a href="{% url 'accounts:login' %}">Login</a>
+                <a href="{% url 'accounts:register' %}">Registrieren</a>
+                {% endif %}
+                {% if user.is_authenticated %}
+                <div class="user-info">
+                    <span>{{ user.full_name }}</span>
+                    <span class="role-badge {{ user.role }}">
+                        {% if user.role == 'admin' %}Administrator{% endif %}
+                        {% if user.role == 'support_agent' %}Support Agent L{{ user.support_level }}{% endif %}
+                        {% if user.role == 'customer' %}Kunde{% endif %}
+                    </span>
+                    <form method="post" action="{% url 'accounts:logout' %}" style="display: flex; align-items: center; height: 100%; margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" style="background: none; border: none; color: white; cursor: pointer; padding: 8px 12px; border-radius: 5px; transition: background 0.3s; font-size: 14px; display: flex; align-items: center; height: 100%;">Logout</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Easter Egg: Konami Code -->
+    {% if user.is_authenticated %}
+    <script>
+    (function() {
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiPosition = 0;
+
+        document.addEventListener('keydown', function(e) {
+            const key = e.key.toLowerCase();
+
+            if (key === konamiCode[konamiPosition] || e.key === konamiCode[konamiPosition]) {
+                konamiPosition++;
+
+                if (konamiPosition === konamiCode.length) {
+                    // Konami Code aktiviert!
+                    konamiPosition = 0;
+                    window.location.href = '{% url "main:retro_game" %}';
+                }
+            } else {
+                konamiPosition = 0;
+            }
+        });
+    })();
+    </script>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer style="margin-top: 50px; padding: 20px 0; border-top: 1px solid #dee2e6; background: #f8f9fa; text-align: center; color: #868e96; font-size: 14px;">
+        <div class="container">
+            <p style="margin: 0;">
+                © {{ "now"|date:"Y" }} <a href="https://aboro-it.net" target="_blank" style="color: #667eea; text-decoration: none;">Aboro-IT</a>
+                - Professionelle IT-Lösungen für Ihr Unternehmen
+                {% if user.is_authenticated %}
+                <span style="opacity: 0.1; font-size: 8px; margin-left: 10px;">
+                    <a href="{% url 'main:retro_game' %}" style="color: inherit; text-decoration: none;" title="???">💾</a>
+                    <a href="{% url 'main:virus_kong' %}" style="color: inherit; text-decoration: none;" title="!!!">🦠</a>
+                </span>
+                {% endif %}
+            </p>
+        </div>
+    </footer>
+
+    <!-- Live Chat Widget for Customers -->
+    {% if user.is_authenticated and user.role == 'customer' %}
+    {% csrf_token %}
+    <div id="customer-chat-widget">
+        <!-- Chat Widget wird hier direkt eingebettet -->
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load chat widget data
+        fetch('/chat/widget-data/?customer=true&user_name={{ user.full_name|urlencode }}&user_email={{ user.email|urlencode }}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderChatWidget(data.widget_data);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading chat widget:', error);
+        });
+        
+        // Add support link in navigation menu
+        const navMenu = document.querySelector('.navbar-menu');
+        if (navMenu) {
+            const chatLink = document.createElement('a');
+            chatLink.href = '#';
+            chatLink.innerHTML = '💬 Live Support';
+            chatLink.style.cssText = `
+                color: white;
+                text-decoration: none;
+                padding: 8px 15px;
+                border-radius: 5px;
+                transition: background 0.3s;
+                display: inline-block;
+            `;
+            
+            chatLink.onmouseover = function() {
+                this.style.background = 'rgba(255,255,255,0.2)';
+            };
+            chatLink.onmouseout = function() {
+                this.style.background = 'transparent';
+            };
+            
+            chatLink.onclick = function(e) {
+                e.preventDefault();
+                toggleChat();
+            };
+            
+            navMenu.appendChild(chatLink);
+        }
+    });
+    
+    // Global chat variables
+    let chatOpen = false;
+    let chatSession = null;
+    let sessionId = null;
+    let messagePolling = null;
+    let isCustomer = true;
+    let customerName = '{{ user.full_name|escapejs }}';
+    let customerEmail = '{{ user.email|escapejs }}';
+    let widgetColor = '#667eea';
+    let availableAgents = 0;
+    let aiAvailable = false;
+    
+    function renderChatWidget(data) {
+        sessionId = data.session_id;
+        availableAgents = data.available_agents;
+        aiAvailable = data.ai_available;
+        widgetColor = data.widget_color || '#667eea';
+        
+        const chatContainer = document.getElementById('customer-chat-widget');
+        chatContainer.innerHTML = `
+            <!-- Chat Widget -->
+            <div id="chat-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                <!-- Chat Button -->
+                <div id="chat-button" 
+                     style="width: 60px; height: 60px; background: ${widgetColor}; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: transform 0.2s;"
+                     onclick="toggleChat()">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12c0 1.54.36 3.04 1.05 4.35L2 22l5.65-1.05C9.96 21.64 11.46 22 13 22h-1c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.4 0-2.74-.35-3.9-.99L4 20l.99-4.1C4.35 14.74 4 13.4 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                </div>
+
+                <!-- Chat Window -->
+                <div id="chat-window" 
+                     style="display: none; width: 350px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); margin-bottom: 10px; overflow: hidden; border: 1px solid #e0e0e0;">
+                    
+                    <!-- Chat Header -->
+                    <div style="background: ${widgetColor}; color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Live Support</h3>
+                            <p style="margin: 0; font-size: 12px; opacity: 0.9;" id="chat-status">
+                                ${availableAgents > 0 ? `${availableAgents} Agent${availableAgents > 1 ? 's' : ''} online` : 
+                                  aiAvailable ? 'KI-Support verfügbar - Agent übernimmt bei Bedarf' : 'Offline - Senden Sie uns eine Nachricht'}
+                            </p>
+                        </div>
+                        <button onclick="toggleChat()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0;">×</button>
+                    </div>
+
+                    <!-- Pre-Chat Form -->
+                    <div id="pre-chat-form" style="padding: 20px;">
+                        <h4 style="margin: 0 0 16px 0; font-size: 14px; color: #333;">Hallo ${customerName}! 👋</h4>
+                        <p style="margin: 0 0 16px 0; font-size: 12px; color: #666;">
+                            ${availableAgents > 0 ? 'Ein Support-Agent ist verfügbar. Starten Sie den Chat!' : 
+                              aiAvailable ? 'Unser KI-Assistent hilft Ihnen gerne weiter. Ein menschlicher Agent übernimmt bei komplexeren Fragen.' : 
+                              'Derzeit ist kein Agent verfügbar. Hinterlassen Sie eine Nachricht.'}
+                        </p>
+                        <div style="margin-bottom: 16px;">
+                            <textarea id="initial-message" placeholder="Wie können wir Ihnen helfen?" 
+                                      style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; resize: vertical; height: 80px; box-sizing: border-box;" required></textarea>
+                        </div>
+                        <button onclick="startChat()" 
+                                style="width: 100%; padding: 12px; background: ${widgetColor}; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 600;">
+                            ${availableAgents > 0 ? '💬 Chat starten' : aiAvailable ? '🤖 KI-Chat starten' : '📧 Nachricht senden'}
+                        </button>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="chat-messages" style="display: none; height: 300px; overflow-y: auto; padding: 16px; border-bottom: 1px solid #eee;">
+                        <!-- Messages will be loaded here -->
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div id="chat-input" style="display: none; padding: 16px; background: #f8f9fa;">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="message-input" placeholder="Nachricht eingeben..." 
+                                   style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;"
+                                   onkeypress="if(event.key==='Enter') sendMessage()">
+                            <button onclick="sendMessage()" 
+                                    style="padding: 10px 16px; background: ${widgetColor}; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function toggleChat() {
+        chatOpen = !chatOpen;
+        const chatWindow = document.getElementById('chat-window');
+        const chatButton = document.getElementById('chat-button');
+        
+        if (chatOpen) {
+            chatWindow.style.display = 'block';
+            chatButton.style.transform = 'scale(0.9)';
+        } else {
+            chatWindow.style.display = 'none';
+            chatButton.style.transform = 'scale(1)';
+            if (messagePolling) {
+                clearInterval(messagePolling);
+            }
+        }
+    }
+    
+    function startChat() {
+        const message = document.getElementById('initial-message').value.trim();
+        
+        if (!message) {
+            alert('Bitte geben Sie eine Nachricht ein.');
+            return;
+        }
+        
+        const data = {
+            session_id: sessionId,
+            name: customerName,
+            email: customerEmail,
+            message: message,
+            page_url: window.location.href
+        };
+        
+        fetch('/chat/api/start/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                chatSession = data;
+                showChatInterface();
+                startMessagePolling();
+            } else {
+                alert('Fehler beim Starten des Chats: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Fehler beim Starten des Chats.');
+        });
+    }
+    
+    function showChatInterface() {
+        document.getElementById('pre-chat-form').style.display = 'none';
+        document.getElementById('chat-messages').style.display = 'block';
+        document.getElementById('chat-input').style.display = 'block';
+        
+        // Update status
+        const statusEl = document.getElementById('chat-status');
+        if (chatSession.status === 'active') {
+            statusEl.textContent = `Agent ist online`;
+        } else {
+            statusEl.textContent = 'Warten auf einen Mitarbeiter...';
+        }
+        
+        loadMessages();
+    }
+    
+    function sendMessage() {
+        const messageInput = document.getElementById('message-input');
+        const message = messageInput.value.trim();
+        
+        if (!message || !chatSession) return;
+        
+        const data = {
+            session_id: sessionId,
+            message: message
+        };
+        
+        fetch('/chat/api/send/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageInput.value = '';
+                loadMessages();
+            } else {
+                alert('Fehler beim Senden der Nachricht: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    
+    function loadMessages() {
+        if (!chatSession) return;
+        
+        fetch(`/chat/api/messages/${sessionId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayMessages(data.messages);
+                
+                // Update status if changed
+                if (data.session_status !== chatSession.status) {
+                    chatSession.status = data.session_status;
+                    const statusEl = document.getElementById('chat-status');
+                    if (data.session_status === 'active') {
+                        statusEl.textContent = 'Agent ist online';
+                    } else if (data.session_status === 'ended') {
+                        statusEl.textContent = 'Chat beendet';
+                        if (messagePolling) {
+                            clearInterval(messagePolling);
+                        }
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading messages:', error);
+        });
+    }
+    
+    function displayMessages(messages) {
+        const messagesContainer = document.getElementById('chat-messages');
+        messagesContainer.innerHTML = '';
+        
+        messages.forEach(msg => {
+            const messageEl = document.createElement('div');
+            messageEl.style.marginBottom = '12px';
+            
+            const isVisitor = msg.is_from_visitor;
+            const isSystem = msg.message_type === 'system';
+            
+            if (isSystem) {
+                messageEl.innerHTML = `
+                    <div style="text-align: center; color: #666; font-size: 12px; font-style: italic;">
+                        ${msg.message}
+                    </div>
+                `;
+            } else {
+                const alignStyle = isVisitor ? 'margin-left: 20px; text-align: right;' : 'margin-right: 20px;';
+                const bgColor = isVisitor ? widgetColor : '#f1f3f4';
+                const textColor = isVisitor ? 'white' : '#333';
+                
+                messageEl.innerHTML = `
+                    <div style="${alignStyle}">
+                        <div style="display: inline-block; max-width: 80%; padding: 8px 12px; border-radius: 12px; background: ${bgColor}; color: ${textColor}; font-size: 14px; word-wrap: break-word;">
+                            ${msg.message}
+                        </div>
+                        <div style="font-size: 11px; color: #666; margin-top: 4px;">
+                            ${new Date(msg.timestamp).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            messagesContainer.appendChild(messageEl);
+        });
+        
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    function startMessagePolling() {
+        // Poll for new messages every 2 seconds
+        messagePolling = setInterval(loadMessages, 2000);
+    }
+    </script>
+    {% endif %}
+</body>
+</html>

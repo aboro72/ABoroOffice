@@ -1,0 +1,53 @@
+{
+  "name": "Claude Code Widget",
+  "slug": "claude-code",
+  "version": "1.0.0",
+  "author": "CloudService Team",
+  "description": "Stellt Claude Code fuer alle Nutzer zur Verfuegung. Nutzer mit aboro72_* Praefix koennen die geteilten Zugangsdaten verwenden.",
+
+  "django_app": {
+    "app_config": "claude_code.apps.ClaudeCodeConfig"
+  },
+
+  "requirements": {
+    "django": ">=5.0,<6.0",
+    "python": ">=3.10",
+    "python_packages": []
+  },
+
+  "hooks": {
+    "ui_dashboard_widget": {
+      "handler": "claude_code.widget.ClaudeCodeWidgetProvider",
+      "priority": 5
+    }
+  },
+
+  "settings": {
+    "has_settings": true,
+    "schema": {
+      "shared_credentials_info": {
+        "type": "textarea",
+        "label": "Geteilte Zugangsdaten Info",
+        "help": "Informationen fuer aboro72_* Nutzer (z.B. Anleitung zur Nutzung der Root-Credentials)",
+        "required": false,
+        "default": "Du kannst die geteilten Root-Zugangsdaten verwenden. Kontaktiere den Administrator fuer Details."
+      },
+      "claude_code_url": {
+        "type": "text",
+        "label": "Claude Code URL",
+        "help": "Link zur Claude Code Seite",
+        "required": true,
+        "default": "https://claude.ai/claude-code"
+      },
+      "show_for_all_users": {
+        "type": "select",
+        "label": "Sichtbarkeit",
+        "options": [
+          {"value": "all", "label": "Alle Nutzer"},
+          {"value": "aboro72_only", "label": "Nur aboro72_* Nutzer"}
+        ],
+        "default": "all"
+      }
+    }
+  }
+}

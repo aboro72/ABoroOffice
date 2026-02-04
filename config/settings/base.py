@@ -61,11 +61,11 @@ INSTALLED_APPS = [
     # Phase 3: Approvals (dokmbw_web_app)
     'apps.approvals.apps.ApprovalsConfig',
 
-    # Phase 4: HelpDesk
-    # 'apps.helpdesk_suite.apps.HelpDeskSuiteConfig',
+    # Phase 4: HelpDesk (tickets, knowledge, chat, admin_panel)
+    'apps.helpdesk.apps.HelpDeskConfig',
 
-    # Phase 5: Cloude
-    # 'apps.cloude.apps.CloudeConfig',
+    # Phase 5: Cloude (storage, files, sharing)
+    'apps.cloude.apps.CloudeConfig',
 
     # Third-party apps (to be added as phases progress)
     # 'rest_framework',

@@ -1,0 +1,750 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat Session - {{ session.visitor_name|default:"Unbekannt" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat-detail {
+    height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    background: white;
+    border-bottom: 1px solid #eee;
+    padding: 20px;
+    flex-shrink: 0;
+}
+
+.chat-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+}
+
+.chat-sidebar {
+    width: 300px;
+    background: white;
+    border-left: 1px solid #eee;
+    overflow-y: auto;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    max-height: calc(100vh - 300px);
+}
+
+.chat-input-area {
+    padding: 20px;
+    background: white;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.message {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.message-visitor {
+    justify-content: flex-end;
+}
+
+.message-agent, .message-system, .message-ai {
+    justify-content: flex-start;
+}
+
+.message-content {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    position: relative;
+}
+
+.message-visitor .message-content {
+    background: #667eea;
+    color: white;
+    margin-left: 30%;
+}
+
+.message-agent .message-content {
+    background: white;
+    border: 1px solid #e3e6f0;
+    margin-right: 30%;
+}
+
+.message-ai .message-content {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    margin-right: 30%;
+}
+
+.message-system .message-content {
+    background: #fff3e0;
+    border: 1px solid #ffcc02;
+    margin: 0 auto;
+    text-align: center;
+    font-style: italic;
+    max-width: 80%;
+}
+
+.message-meta {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 5px;
+    text-align: right;
+}
+
+.message-visitor .message-meta {
+    text-align: right;
+}
+
+.message-agent .message-meta, .message-ai .message-meta {
+    text-align: left;
+}
+
+.message-system .message-meta {
+    text-align: center;
+}
+
+.chat-input {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input textarea {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 10px 15px;
+    resize: none;
+    min-height: 20px;
+    max-height: 100px;
+}
+
+.chat-input button {
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.session-info {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.session-actions {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.action-btn {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.action-btn:hover {
+    background: #f8f9fa;
+}
+
+.action-btn.danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.action-btn.danger:hover {
+    background: #f8d7da;
+}
+
+.action-btn.primary {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.action-btn.primary:hover {
+    background: #5a67d8;
+}
+
+.faq-templates {
+    padding: 15px;
+}
+
+.faq-item {
+    padding: 8px 12px;
+    border: 1px solid #eee;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+}
+
+.faq-item:hover {
+    background: #f8f9fa;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-waiting {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-closed {
+    background: #d6d8db;
+    color: #495057;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.typing-indicator {
+    display: none;
+    font-style: italic;
+    color: #666;
+    padding: 10px 0;
+}
+
+.alert {
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 4px;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentSessionId = '{{ session.session_id }}';
+let lastMessageTime = null;
+let isTyping = false;
+let refreshInterval;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeChatInterface();
+    startAutoRefresh();
+});
+
+function initializeChatInterface() {
+    // Chat-Input Setup
+    const textarea = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    
+    textarea.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+    
+    sendButton.addEventListener('click', sendMessage);
+    
+    // Auto-resize textarea
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+    
+    // FAQ-Template Buttons
+    document.querySelectorAll('.faq-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const articleId = this.dataset.articleId;
+            useFaqTemplate(articleId);
+        });
+    });
+    
+    // Action Buttons
+    document.getElementById('transfer-ai-btn')?.addEventListener('click', transferToAI);
+    document.getElementById('close-session-btn')?.addEventListener('click', closeSession);
+    document.getElementById('create-ticket-btn')?.addEventListener('click', createTicket);
+    
+    // Scroll to bottom
+    scrollToBottom();
+    
+    // Set last message time
+    const messages = document.querySelectorAll('.message');
+    if (messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        lastMessageTime = lastMessage.dataset.timestamp || new Date().toISOString();
+    }
+}
+
+function sendMessage() {
+    const textarea = document.getElementById('message-input');
+    const message = textarea.value.trim();
+    
+    if (!message) return;
+    
+    // Disable input
+    textarea.disabled = true;
+    document.getElementById('send-button').disabled = true;
+    
+    // Add message to UI immediately
+    addMessageToUI(message, true, '{{ user.get_full_name }}', new Date().toISOString());
+    textarea.value = '';
+    
+    // Send to server
+    fetch(`/chat/agent/send/${currentSessionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.error || 'Fehler beim Senden');
+        }
+        // Re-enable input
+        textarea.disabled = false;
+        document.getElementById('send-button').disabled = false;
+        textarea.focus();
+    })
+    .catch(error => {
+        console.error('Send error:', error);
+        alert('Fehler beim Senden der Nachricht: ' + error.message);
+        textarea.disabled = false;
+        document.getElementById('send-button').disabled = false;
+    });
+}
+
+function addMessageToUI(content, isAgent, senderName, timestamp) {
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    
+    const messageClass = isAgent ? 'message-agent' : 'message-visitor';
+    messageDiv.className = `message ${messageClass}`;
+    messageDiv.dataset.timestamp = timestamp;
+    
+    const timeStr = new Date(timestamp).toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    messageDiv.innerHTML = `
+        <div class="message-content">
+            ${content}
+            <div class="message-meta">${senderName} • ${timeStr}</div>
+        </div>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    scrollToBottom();
+}
+
+function startAutoRefresh() {
+    refreshInterval = setInterval(refreshMessages, 3000);
+}
+
+function refreshMessages() {
+    const params = new URLSearchParams();
+    if (lastMessageTime) {
+        params.append('since', lastMessageTime);
+    }
+
+    fetch(`/chat/agent/messages/${currentSessionId}/?${params}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success && data.messages.length > 0) {
+            data.messages.forEach(msg => {
+                if (!msg.is_from_visitor || !isAgent) {
+                    addReceivedMessageToUI(msg);
+                }
+            });
+
+            // Update last message time
+            const latestMessage = data.messages[data.messages.length - 1];
+            lastMessageTime = latestMessage.timestamp;
+        }
+
+        // Update session status
+        updateSessionStatus(data.session_status, data.assigned_agent);
+    })
+    .catch(error => {
+        console.error('Refresh error:', error);
+    });
+}
+
+function addReceivedMessageToUI(message) {
+    // Check if message already exists
+    const existing = document.querySelector(`[data-timestamp="${message.timestamp}"]`);
+    if (existing) return;
+    
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    
+    let messageClass;
+    if (message.message_type === 'system') {
+        messageClass = 'message-system';
+    } else if (message.is_from_visitor) {
+        messageClass = 'message-visitor';
+    } else if (message.sender_name === 'KI-Assistent') {
+        messageClass = 'message-ai';
+    } else {
+        messageClass = 'message-agent';
+    }
+    
+    messageDiv.className = `message ${messageClass}`;
+    messageDiv.dataset.timestamp = message.timestamp;
+    
+    const timeStr = new Date(message.timestamp).toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    messageDiv.innerHTML = `
+        <div class="message-content">
+            ${message.message}
+            <div class="message-meta">${message.sender_name} • ${timeStr}</div>
+        </div>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    scrollToBottom();
+}
+
+function scrollToBottom() {
+    const messagesContainer = document.getElementById('chat-messages');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function useFaqTemplate(articleId) {
+    fetch(`/chat/agent/faq-template/${currentSessionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ article_id: articleId })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            document.getElementById('message-input').value = data.template;
+            document.getElementById('message-input').focus();
+        } else {
+            alert(data.error || 'Fehler beim Laden des FAQ-Templates');
+        }
+    })
+    .catch(error => {
+        console.error('FAQ template error:', error);
+        alert('Fehler beim Laden des FAQ-Templates: ' + error.message);
+    });
+}
+
+function transferToAI() {
+    if (!confirm('Chat-Session an KI übertragen?')) return;
+
+    fetch(`/chat/agent/transfer-ai/${currentSessionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Session an KI übertragen');
+            window.location.href = '/chat/agent/';
+        } else {
+            alert(data.error || 'Fehler beim Übertragen an KI');
+        }
+    })
+    .catch(error => {
+        console.error('Transfer error:', error);
+        alert('Fehler beim Übertragen an KI: ' + error.message);
+    });
+}
+
+function closeSession() {
+    const reason = prompt('Grund für Schließung (optional):') || 'Von Agent geschlossen';
+    const createTicket = confirm('Soll ein Ticket erstellt werden?');
+
+    fetch(`/chat/agent/close/${currentSessionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            reason: reason,
+            create_ticket: createTicket
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            let message = 'Session geschlossen';
+            if (data.ticket_number) {
+                message += `. Ticket ${data.ticket_number} erstellt.`;
+            }
+            alert(message);
+            window.location.href = '/chat/agent/';
+        } else {
+            alert(data.error || 'Fehler beim Schließen der Session');
+        }
+    })
+    .catch(error => {
+        console.error('Close error:', error);
+        alert('Fehler beim Schließen der Session: ' + error.message);
+    });
+}
+
+function createTicket() {
+    const reason = prompt('Grund für Ticket-Erstellung:') || 'Manuelle Ticket-Erstellung';
+
+    fetch(`/chat/agent/close/${currentSessionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            reason: reason,
+            create_ticket: true
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert(`Ticket ${data.ticket_number} erstellt`);
+            window.location.href = '/chat/agent/';
+        } else {
+            alert(data.error || 'Fehler beim Erstellen des Tickets');
+        }
+    })
+    .catch(error => {
+        console.error('Create ticket error:', error);
+        alert('Fehler beim Erstellen des Tickets: ' + error.message);
+    });
+}
+
+function updateSessionStatus(status, assignedAgent) {
+    const statusElement = document.getElementById('session-status');
+    if (statusElement) {
+        statusElement.textContent = status;
+        statusElement.className = `status-badge status-${status}`;
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="chat-detail">
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h4>
+                    <i class="fas fa-comments"></i>
+                    Chat mit {{ session.visitor_name|default:"Unbekannter Besucher" }}
+                </h4>
+                <small class="text-muted">
+                    Session: {{ session.session_id }} • 
+                    Status: <span id="session-status" class="status-badge status-{{ session.status }}">{{ session.status }}</span>
+                </small>
+            </div>
+            <div class="col-md-6 text-right">
+                {% if session.visitor_email %}
+                <span class="text-muted">{{ session.visitor_email }}</span><br>
+                {% endif %}
+                <small class="text-muted">
+                    Erstellt: {{ session.created_at|timesince }} her •
+                    Letzte Aktivität: {{ session.updated_at|timesince }} her
+                </small>
+            </div>
+        </div>
+        
+        {% if not can_assign %}
+        <div class="alert alert-warning mt-3">
+            <i class="fas fa-exclamation-triangle"></i>
+            Diese Session ist bereits {{ session.assigned_agent.get_full_name }} zugewiesen.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Chat Body -->
+    <div class="chat-body">
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <!-- Messages -->
+            <div class="chat-messages" id="chat-messages">
+                {% for message in messages %}
+                <div class="message 
+                    {% if message.message_type == 'system' %}message-system
+                    {% elif message.is_from_visitor %}message-visitor
+                    {% elif message.sender_name == 'KI-Assistent' %}message-ai
+                    {% else %}message-agent{% endif %}"
+                    data-timestamp="{{ message.timestamp|date:'c' }}">
+                    <div class="message-content">
+                        {{ message.message|linebreaks }}
+                        <div class="message-meta">
+                            {{ message.sender_name }} • {{ message.timestamp|date:'H:i' }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Chat Input -->
+            {% if can_assign and session.status != 'closed' %}
+            <div class="chat-input-area">
+                <div class="chat-input">
+                    <textarea id="message-input" 
+                              placeholder="Nachricht eingeben..." 
+                              rows="1"></textarea>
+                    <button id="send-button" type="button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="chat-sidebar">
+            <!-- Session Info -->
+            <div class="session-info">
+                <h6><i class="fas fa-info-circle"></i> Session Info</h6>
+                <p><strong>Besucher:</strong><br>{{ session.visitor_name|default:"Unbekannt" }}</p>
+                {% if session.visitor_email %}
+                <p><strong>E-Mail:</strong><br>{{ session.visitor_email }}</p>
+                {% endif %}
+                <p><strong>Dauer:</strong><br>{{ session.created_at|timesince }}</p>
+                <p><strong>Nachrichten:</strong><br>{{ messages.count }}</p>
+            </div>
+
+            <!-- Actions -->
+            {% if can_assign and session.status != 'closed' %}
+            <div class="session-actions">
+                <h6><i class="fas fa-tools"></i> Aktionen</h6>
+                
+                <button id="transfer-ai-btn" class="action-btn">
+                    <i class="fas fa-robot"></i> An KI übertragen
+                </button>
+                
+                <button id="create-ticket-btn" class="action-btn primary">
+                    <i class="fas fa-ticket-alt"></i> Ticket erstellen
+                </button>
+                
+                <button id="close-session-btn" class="action-btn danger">
+                    <i class="fas fa-times"></i> Session schließen
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- FAQ Templates -->
+            {% if faq_articles and can_assign %}
+            <div class="faq-templates">
+                <h6><i class="fas fa-book"></i> FAQ-Vorlagen</h6>
+                <small class="text-muted">Klicken zum Verwenden</small>
+                
+                {% for article in faq_articles %}
+                <div class="faq-item" data-article-id="{{ article.id }}">
+                    {{ article.title|truncatechars:40 }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Feature Not Available{% endblock %}
+
+{% block extra_css %}
+<style>
+.license-restriction {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.restriction-icon {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.restriction-icon i {
+    font-size: 80px;
+    color: #ffc107;
+}
+
+.restriction-title {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.restriction-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+.feature-info {
+    background: #f8f9fa;
+    border-left: 4px solid #ffc107;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.current-license {
+    background: #e9ecef;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 20px 0;
+}
+
+.upgrade-options {
+    margin-top: 30px;
+}
+
+.upgrade-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.upgrade-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.upgrade-card.recommended {
+    border-color: #28a745;
+    background: #f8fff9;
+}
+
+.upgrade-card .badge {
+    margin-bottom: 10px;
+}
+
+.upgrade-benefits {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+.upgrade-benefits li {
+    padding: 5px 0;
+    color: #666;
+}
+
+.upgrade-benefits li:before {
+    content: "✓ ";
+    color: #28a745;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.action-buttons {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn-upgrade {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: 600;
+    margin: 0 10px;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.btn-upgrade:hover {
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-contact {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    margin: 0 10px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-contact:hover {
+    background: #5a6268;
+    color: white;
+    text-decoration: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="license-restriction">
+        <div class="restriction-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+        
+        <h1 class="restriction-title">Feature Not Available</h1>
+        <p class="restriction-subtitle">
+            The feature "{{ feature_name|title }}" is not included in your current license plan.
+        </p>
+        
+        <div class="feature-info">
+            <h5><i class="fas fa-info-circle"></i> About this Feature</h5>
+            <p>
+                {% if feature_name == 'ai_automation' %}
+                    <strong>AI Automation</strong> enables intelligent ticket routing, auto-responses, and smart suggestions to improve support efficiency.
+                {% elif feature_name == 'live_chat' %}
+                    <strong>Live Chat</strong> allows real-time communication with customers directly through your website.
+                {% elif feature_name == 'api_access' %}
+                    <strong>API Access</strong> enables integration with third-party systems and custom applications.
+                {% elif feature_name == 'api_full' %}
+                    <strong>Full API Access</strong> provides complete API functionality including webhooks and advanced integrations.
+                {% elif feature_name == 'advanced_reporting' %}
+                    <strong>Advanced Reporting</strong> offers detailed analytics and custom reports for performance insights.
+                {% elif feature_name == 'custom_branding' %}
+                    <strong>Custom Branding</strong> allows you to customize the appearance with your company colors and logo.
+                {% elif feature_name == 'sso_ldap' %}
+                    <strong>SSO/LDAP Integration</strong> enables single sign-on and Active Directory integration for enterprise environments.
+                {% elif feature_name == 'sla' %}
+                    <strong>SLA Management</strong> provides service level agreement tracking and escalation rules.
+                {% else %}
+                    This feature provides enhanced functionality for professional support operations.
+                {% endif %}
+            </p>
+        </div>
+
+        {% if current_license %}
+        <div class="current-license">
+            <h5><i class="fas fa-certificate"></i> Current License</h5>
+            <p><strong>Plan:</strong> {{ current_license.product_name }}</p>
+            <p><strong>Max Agents:</strong> {{ current_license.max_agents }}</p>
+            <p><strong>Expires:</strong> {{ current_license.expiry_date }} ({{ current_license.days_remaining }} days remaining)</p>
+        </div>
+        {% else %}
+        <div class="current-license">
+            <h5><i class="fas fa-exclamation-triangle"></i> No Active License</h5>
+            <p>You are currently using the system without a valid license. Please purchase a license to access all features.</p>
+        </div>
+        {% endif %}
+
+        <div class="upgrade-options">
+            <h5><i class="fas fa-arrow-up"></i> Upgrade Options</h5>
+            
+            {% for suggestion in upgrade_suggestions.suggestions %}
+            <div class="upgrade-card {% if forloop.first %}recommended{% endif %}">
+                {% if forloop.first %}
+                <span class="badge badge-success">Recommended</span>
+                {% endif %}
+                
+                <h6>{{ suggestion.name }}</h6>
+                <p class="text-muted">{{ suggestion.price }}</p>
+                
+                <ul class="upgrade-benefits">
+                    {% for benefit in suggestion.benefits %}
+                    <li>{{ benefit }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="action-buttons">
+            <a href="/admin/license/" class="btn-upgrade">
+                <i class="fas fa-key"></i> Manage License
+            </a>
+            <a href="https://aboro-it.net/pricing/" class="btn-upgrade">
+                <i class="fas fa-shopping-cart"></i> View Pricing
+            </a>
+            <a href="mailto:support@aboro-it.net" class="btn-contact">
+                <i class="fas fa-envelope"></i> Contact Sales
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

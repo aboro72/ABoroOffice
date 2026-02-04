@@ -1,0 +1,107 @@
+<style>
+    .claude-code-widget {
+        text-align: center;
+        padding: 15px;
+    }
+    .claude-code-widget .claude-icon {
+        font-size: 3.5rem;
+        color: #6366f1;
+        margin-bottom: 15px;
+    }
+    .claude-code-widget .claude-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 10px;
+    }
+    .claude-code-widget .claude-subtitle {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin-bottom: 20px;
+    }
+    .claude-code-widget .features-list {
+        text-align: left;
+        margin: 15px auto;
+        max-width: 250px;
+    }
+    .claude-code-widget .features-list li {
+        padding: 5px 0;
+        font-size: 0.85rem;
+        color: #4b5563;
+    }
+    .claude-code-widget .features-list i {
+        color: #10b981;
+        margin-right: 8px;
+    }
+    .claude-code-widget .shared-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 15px 0;
+        font-size: 0.9rem;
+    }
+    .claude-code-widget .shared-info .badge-shared {
+        background: rgba(255,255,255,0.2);
+        padding: 3px 10px;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+    .claude-code-widget .btn-claude {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        font-size: 1rem;
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .claude-code-widget .btn-claude:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        color: white;
+    }
+</style>
+
+<div class="claude-code-widget">
+    <div class="claude-icon">
+        <i class="bi bi-robot"></i>
+    </div>
+
+    <div class="claude-title">Claude Code</div>
+    <div class="claude-subtitle">KI-gestuetzter Programmier-Assistent von Anthropic</div>
+
+    {% if widget_context.is_shared_user %}
+    <div class="shared-info">
+        <div class="badge-shared">
+            <i class="bi bi-key me-1"></i>Geteilter Zugang
+        </div>
+        <p class="mb-0">
+            Hallo {{ widget_context.username }}! Du hast Zugriff auf die geteilten Root-Zugangsdaten.
+        </p>
+        {% if widget_context.shared_credentials_info %}
+        <hr style="border-color: rgba(255,255,255,0.3); margin: 10px 0;">
+        <small>{{ widget_context.shared_credentials_info }}</small>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <ul class="features-list list-unstyled">
+        {% for feature in widget_context.features %}
+        <li><i class="bi bi-check-circle-fill"></i>{{ feature }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ widget_context.claude_code_url }}" target="_blank" rel="noopener" class="btn btn-claude">
+        <i class="bi bi-box-arrow-up-right me-2"></i>Claude Code oeffnen
+    </a>
+
+    <div class="mt-3">
+        <small class="text-muted">
+            <i class="bi bi-info-circle me-1"></i>
+            Oeffnet in einem neuen Tab
+        </small>
+    </div>
+</div>

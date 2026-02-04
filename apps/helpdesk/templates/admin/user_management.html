@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Benutzerverwaltung - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="font-size: 28px; font-weight: 600; margin: 0;">Benutzerverwaltung</h1>
+        <a href="{% url 'main:user_create' %}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px;">➕</span>
+            Neuer Benutzer
+        </a>
+    </div>
+
+    <!-- Statistics -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700;">{{ stats.total_users }}</div>
+            <div style="font-size: 12px; opacity: 0.9;">Gesamt</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700;">{{ stats.active_users }}</div>
+            <div style="font-size: 12px; opacity: 0.9;">Aktiv</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700;">{{ stats.admins }}</div>
+            <div style="font-size: 12px; opacity: 0.9;">Admins</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700;">{{ stats.agents }}</div>
+            <div style="font-size: 12px; opacity: 0.9;">Agents</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #4ecdc4 0%, #2d9cdb 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700;">{{ stats.customers }}</div>
+            <div style="font-size: 12px; opacity: 0.9;">Kunden</div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <form method="get" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">Suche</label>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Name, E-Mail oder Benutzername..." style="width: 100%; padding: 10px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 14px;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">Rolle</label>
+                <select name="role" style="width: 100%; padding: 10px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 14px;">
+                    <option value="">Alle Rollen</option>
+                    {% for value, label in role_choices %}
+                        <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">Status</label>
+                <select name="status" style="width: 100%; padding: 10px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 14px;">
+                    <option value="">Alle</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Aktiv</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inaktiv</option>
+                </select>
+            </div>
+            <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                Suchen
+            </button>
+        </div>
+    </form>
+
+    <!-- Users Table -->
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <tr>
+                    <th style="padding: 15px; text-align: left; font-weight: 600;">Benutzer</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600;">E-Mail</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600;">Rolle</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600;">Status</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600;">Erstellt</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600;">Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_obj in page_obj %}
+                <tr style="border-bottom: 1px solid #e9ecef;" id="user-row-{{ user_obj.id }}">
+                    <td style="padding: 15px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px;">
+                                {{ user_obj.first_name|first }}{{ user_obj.last_name|first }}
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: #495057;">{{ user_obj.full_name }}</div>
+                                <div style="font-size: 12px; color: #868e96;">@{{ user_obj.username }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 15px; color: #495057;">{{ user_obj.email }}</td>
+                    <td style="padding: 15px;">
+                        <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
+                            {% if user_obj.role == 'admin' %}background: #ff6b6b; color: white;{% elif user_obj.role == 'support_agent' %}background: #ffd43b; color: #495057;{% else %}background: #e9ecef; color: #495057;{% endif %}">
+                            {% for value, label in role_choices %}{% if value == user_obj.role %}{{ label }}{% endif %}{% endfor %}
+                        </span>
+                        {% if user_obj.role == 'support_agent' and user_obj.support_level %}
+                            <small style="display: block; color: #868e96; margin-top: 2px;">Level {{ user_obj.support_level }}</small>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 15px; text-align: center;">
+                        <button onclick="toggleUserStatus({{ user_obj.id }}, {{ user_obj.is_active|yesno:'true,false' }})" 
+                                style="padding: 4px 8px; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+                                {% if user_obj.is_active %}background: #51cf66; color: white;{% else %}background: #868e96; color: white;{% endif %}"
+                                id="status-btn-{{ user_obj.id }}">
+                            {% if user_obj.is_active %}Aktiv{% else %}Inaktiv{% endif %}
+                        </button>
+                    </td>
+                    <td style="padding: 15px; text-align: center; color: #868e96; font-size: 12px;">
+                        {{ user_obj.created_at|date:"d.m.Y H:i" }}
+                    </td>
+                    <td style="padding: 15px; text-align: center;">
+                        <div style="display: flex; gap: 8px; justify-content: center;">
+                            <a href="{% url 'main:user_edit' user_obj.id %}" 
+                               style="background: #4ecdc4; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600;">
+                                Bearbeiten
+                            </a>
+                            {% if user_obj.id != user.id %}
+                            <a href="{% url 'main:user_delete' user_obj.id %}" 
+                               style="background: #ff6b6b; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600;"
+                               onclick="return confirm('Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?')">
+                                Löschen
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="padding: 40px; text-align: center; color: #868e96;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">👥</div>
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">Keine Benutzer gefunden</div>
+                        <div>Keine Benutzer entsprechen den gewählten Filterkriterien.</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+               style="padding: 8px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                ← Zurück
+            </a>
+        {% endif %}
+        
+        <span style="color: #495057; font-weight: 600;">
+            Seite {{ page_obj.number }} von {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+               style="padding: 8px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                Weiter →
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleUserStatus(userId, currentStatus) {
+    fetch(`{% url 'main:user_toggle_active' 0 %}`.replace('0', userId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const btn = document.getElementById(`status-btn-${userId}`);
+            if (data.is_active) {
+                btn.textContent = 'Aktiv';
+                btn.style.background = '#51cf66';
+            } else {
+                btn.textContent = 'Inaktiv';
+                btn.style.background = '#868e96';
+            }
+            btn.onclick = () => toggleUserStatus(userId, data.is_active);
+            
+            // Show success message
+            if (window.showMessage) {
+                window.showMessage(data.message, 'success');
+            }
+        } else {
+            alert('Fehler: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Fehler beim Ändern des Benutzerstatus');
+    });
+}
+</script>
+{% endblock %}

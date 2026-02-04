@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABoro-IT Chat Widget - Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+        }
+        .info-box {
+            background: #f0f8ff;
+            border: 1px solid #4a90e2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        .controls button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <h1>ABoro-IT Chat Widget - Externe Integration</h1>
+    
+    <div class="info-box">
+        <h3>Widget Status</h3>
+        <p>Dieses Widget wird von <strong>{{ request.get_host }}</strong> geladen.</p>
+        <p id="widget-status">Wird initialisiert...</p>
+    </div>
+    
+    <div class="controls">
+        <h3>Widget Steuerung</h3>
+        <button onclick="AboroChat.open()">Chat öffnen</button>
+        <button onclick="AboroChat.close()">Chat schließen</button>
+        <button onclick="AboroChat.toggle()">Chat umschalten</button>
+        <button onclick="testNotifications()">Benachrichtigungen testen</button>
+    </div>
+    
+    <div class="info-box">
+        <h3>Für externe Websites</h3>
+        <p>Um das Chat Widget auf Ihrer Website einzubinden, fügen Sie folgenden Code hinzu:</p>
+        <pre><code>&lt;!-- ABoro-IT Chat Widget (iframe-freie Version für Firefox Kompatibilität) --&gt;
+&lt;script&gt;
+    // Optional: Widget Konfiguration
+    window.AboroChatConfig = {
+        chatHost: '{{ request.scheme }}://{{ request.get_host }}',
+        widgetColor: '{{ chat_settings.widget_color }}',
+        position: '{{ chat_settings.widget_position }}',
+        autoOpen: false,
+        language: 'de'
+    };
+&lt;/script&gt;
+&lt;script src="{{ request.scheme }}://{{ request.get_host }}/chat/widget.js" defer&gt;&lt;/script&gt;
+&lt;!-- Ende Chat Widget --&gt;</code></pre>
+        
+        <h4>🔥 Firefox Kompatibilität - NEUE VERSION</h4>
+        <p><strong>Vollständig iframe-freie Implementierung!</strong> Das Widget erstellt das Chat-Interface direkt im DOM ohne jegliche iframes. 
+        Funktioniert garantiert in Firefox, Chrome, Safari und Edge ohne Cross-Origin-Probleme.</p>
+        
+        <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; padding: 10px; margin: 10px 0;">
+            <strong>✅ Neue Features:</strong>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>100% iframe-frei - keine Browser-Blockierungen</li>
+                <li>Direkte API-Kommunikation mit CORS-Support</li>
+                <li>Real-time Nachrichten ohne Polling-Probleme</li>
+                <li>Optimiert für externe Website-Integration</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="info-box">
+        <h3>Erlaubte Domains</h3>
+        <p>Aktuell sind folgende Domains für das Widget zugelassen:</p>
+        <ul>
+            {% for domain in allowed_domains %}
+            <li><code>{{ domain }}</code></li>
+            {% endfor %}
+        </ul>
+        <p><small>Diese können in den Chat-Einstellungen angepasst werden.</small></p>
+    </div>
+
+    <!-- Chat Widget Integration -->
+    <script>
+        // Konfiguration für dieses Test-Widget
+        window.AboroChatConfig = {
+            chatHost: '{{ request.scheme }}://{{ request.get_host }}',
+            widgetColor: '{{ chat_settings.widget_color }}',
+            position: '{{ chat_settings.widget_position }}',
+            autoOpen: false,
+            language: 'de'
+        };
+        
+        // Widget Status aktualisieren
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                if (window.AboroChatWidget && window.AboroChatWidget.isInitialized) {
+                    document.getElementById('widget-status').innerHTML = 
+                        '<span style="color: green;">✓ Widget erfolgreich geladen</span>';
+                } else {
+                    document.getElementById('widget-status').innerHTML = 
+                        '<span style="color: red;">✗ Widget konnte nicht geladen werden</span>';
+                }
+            }, 2000);
+        });
+        
+        function testNotifications() {
+            if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    new Notification('Test-Benachrichtigung', {
+                        body: 'Das Chat Widget kann Benachrichtigungen senden.',
+                        icon: '{{ request.scheme }}://{{ request.get_host }}/static/images/logo.png'
+                    });
+                } else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            testNotifications();
+                        }
+                    });
+                } else {
+                    alert('Benachrichtigungen sind blockiert. Erlauben Sie Benachrichtigungen in den Browser-Einstellungen.');
+                }
+            } else {
+                alert('Dieser Browser unterstützt keine Benachrichtigungen.');
+            }
+        }
+    </script>
+    
+    <!-- Chat Widget Script laden -->
+    <script src="{{ request.scheme }}://{{ request.get_host }}/chat/widget.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ folder.name }} - CloudService{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2">
+            <div class="sidebar">
+                <h5 class="mb-4">Navigation</h5>
+                <a href="/storage/" class="sidebar-link">Meine Dateien</a>
+                <a href="/sharing/shared-with-me/" class="sidebar-link">Mit mir geteilt</a>
+                <a href="/sharing/links/" class="sidebar-link">Öffentliche Links</a>
+                <a href="/storage/trash/" class="sidebar-link">Papierkorb</a>
+                <a href="/storage/stats/" class="sidebar-link">Statistiken</a>
+                <hr>
+                <h6 class="mb-3">Aktionen</h6>
+                <button class="btn btn-primary btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                    Datei hochladen
+                </button>
+                <button class="btn btn-outline-primary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#folderModal">
+                    Ordner erstellen
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/storage/">Cloud</a></li>
+                    <li class="breadcrumb-item active">{{ folder.name }}</li>
+                </ol>
+            </nav>
+
+            <!-- Files Table -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-folder-fill text-warning me-2"></i>{{ folder.name }}</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#shareCurrentFolderModal">
+                            <i class="bi bi-share"></i> Ordner teilen
+                        </button>
+                        <a href="/storage/" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Zurück
+                        </a>
+                    </div>
+                </div>
+
+<!-- Modal for sharing current folder -->
+<div class="modal fade" id="shareCurrentFolderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-share me-2"></i>Ordner "{{ folder.name }}" teilen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-grid gap-3">
+                    <a href="{% url 'sharing:create_link' content_type='folder' object_id=folder.id %}" class="btn btn-primary">
+                        <i class="bi bi-link-45deg me-2"></i> Öffentlichen Link erstellen
+                    </a>
+                    <a href="{% url 'sharing:share' content_type='folder' object_id=folder.id %}" class="btn btn-outline-primary">
+                        <i class="bi bi-person-plus me-2"></i> Mit Benutzer teilen
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Größe</th>
+                                <th>Änderungsdatum</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subfolder in subfolders %}
+                                <tr class="table-light">
+                                    <td>
+                                        <i class="bi bi-folder-fill text-warning"></i>
+                                        <a href="/storage/folder/{{ subfolder.id }}/">{{ subfolder.name }}</a>
+                                    </td>
+                                    <td>-</td>
+                                    <td>{{ subfolder.created_at|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="/storage/folder/{{ subfolder.id }}/" class="btn btn-outline-primary" title="Öffnen">
+                                                <i class="bi bi-folder2-open"></i>
+                                            </a>
+                                            <button class="btn btn-outline-secondary" title="Teilen" data-bs-toggle="modal" data-bs-target="#shareFolderModal{{ subfolder.id }}">
+                                                <i class="bi bi-share"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" title="Löschen" onclick="deleteFolder({{ subfolder.id }}, '{{ subfolder.name }}')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Share Modal for subfolder -->
+                                        <div class="modal fade" id="shareFolderModal{{ subfolder.id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-sm">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h6 class="modal-title"><i class="bi bi-share me-1"></i> Ordner teilen</h6>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p class="small text-muted mb-3"><i class="bi bi-folder-fill text-warning me-1"></i>{{ subfolder.name }}</p>
+                                                        <div class="d-grid gap-2">
+                                                            <a href="{% url 'sharing:create_link' content_type='folder' object_id=subfolder.id %}" class="btn btn-outline-primary btn-sm">
+                                                                <i class="bi bi-link-45deg me-1"></i> Öffentlicher Link
+                                                            </a>
+                                                            <a href="{% url 'sharing:share' content_type='folder' object_id=subfolder.id %}" class="btn btn-outline-secondary btn-sm">
+                                                                <i class="bi bi-person-plus me-1"></i> Mit Benutzer teilen
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            {% for file in files %}
+                                <tr>
+                                    <td>
+                                        <i class="bi bi-file-earmark"></i>
+                                        <a href="/storage/file/{{ file.id }}/">{{ file.name }}</a>
+                                    </td>
+                                    <td>
+                                        {% if file.size >= 1048576 %}
+                                            {{ file.size|floatformat:2 }} MB
+                                        {% elif file.size >= 1024 %}
+                                            {{ file.size|floatformat:2 }} KB
+                                        {% else %}
+                                            {{ file.size }} B
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ file.updated_at|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="/storage/file/{{ file.id }}/download/" class="btn btn-outline-primary" title="Download">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                            <button class="btn btn-outline-danger" title="Löschen" onclick="deleteFile({{ file.id }})">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                {% if not subfolders %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        Dieser Ordner ist leer
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Datei hochladen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="uploadProgress" style="display:none;" class="mb-3">
+                    <div class="progress">
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                    </div>
+                    <small id="uploadStatus" class="text-muted">Hochladen...</small>
+                </div>
+                <div id="uploadArea" class="border rounded p-4 text-center" style="cursor: pointer; background-color: #f8f9fa;">
+                    <p class="mb-0"><strong>Dateien hier ablegen</strong></p>
+                    <small class="text-muted">oder klicken zum Auswählen</small>
+                    <input type="file" id="fileInput" class="form-control" multiple style="display:none;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                <button type="button" class="btn btn-primary" id="uploadBtn" style="display:none;">Hochladen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Folder Modal -->
+<div class="modal fade" id="folderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Neuen Ordner erstellen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="folderForm" method="post" action="/storage/folder/create/">
+                {% csrf_token %}
+                <input type="hidden" name="parent_id" value="{{ folder.id }}">
+                <div class="modal-body">
+                    <div id="folderError" class="alert alert-danger" style="display:none;"></div>
+                    <div class="mb-3">
+                        <label for="folderName" class="form-label">Ordnername</label>
+                        <input type="text" class="form-control" id="folderName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="folderDescription" class="form-label">Beschreibung (optional)</label>
+                        <textarea class="form-control" id="folderDescription" name="description" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary" id="folderSubmitBtn">Erstellen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Datei löschen
+function deleteFile(fileId) {
+    if (confirm('Sind Sie sicher, dass Sie diese Datei löschen möchten?')) {
+        const csrfToken = getCookie('csrftoken');
+        fetch(`/storage/file/${fileId}/delete/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken }
+        }).then(() => window.location.reload());
+    }
+}
+
+// Ordner löschen
+function deleteFolder(folderId, folderName) {
+    if (confirm(`Sind Sie sicher, dass Sie den Ordner "${folderName}" löschen möchten?`)) {
+        const csrfToken = getCookie('csrftoken');
+        fetch(`/storage/folder/${folderId}/delete/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken }
+        }).then(() => window.location.reload());
+    }
+}
+
+// Folder Form
+const folderForm = document.getElementById('folderForm');
+if (folderForm) {
+    folderForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const csrfToken = getCookie('csrftoken');
+        const folderName = document.getElementById('folderName').value;
+        const folderDescription = document.getElementById('folderDescription').value;
+        const folderSubmitBtn = document.getElementById('folderSubmitBtn');
+        const folderError = document.getElementById('folderError');
+
+        folderSubmitBtn.disabled = true;
+        folderSubmitBtn.textContent = 'Erstelle...';
+
+        fetch('/storage/folder/create/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                'name': folderName,
+                'description': folderDescription,
+                'parent_id': '{{ folder.id }}'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                folderError.style.display = 'block';
+                folderError.textContent = data.error || 'Fehler beim Erstellen';
+                folderSubmitBtn.disabled = false;
+                folderSubmitBtn.textContent = 'Erstellen';
+            }
+        })
+        .catch(error => {
+            folderError.style.display = 'block';
+            folderError.textContent = 'Fehler beim Erstellen';
+            folderSubmitBtn.disabled = false;
+            folderSubmitBtn.textContent = 'Erstellen';
+        });
+    });
+}
+</script>
+{% endblock %}

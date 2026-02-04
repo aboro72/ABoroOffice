@@ -1,0 +1,1103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Support Chat Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat-dashboard {
+    padding: 20px 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: calc(100vh - 120px);
+}
+
+/* Compact Header */
+.dashboard-header-compact {
+    background: white;
+    border-radius: 15px;
+    padding: 15px 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-content h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn-small {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.control-btn-small:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Compact Statistics Grid */
+.stats-grid-compact {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card-compact {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card-compact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient);
+}
+
+.stat-card-compact.waiting {
+    --gradient: linear-gradient(45deg, #ff6b6b, #ee5a52);
+}
+
+.stat-card-compact.escalated {
+    --gradient: linear-gradient(45deg, #ffa94d, #fd9644);
+}
+
+.stat-card-compact.active {
+    --gradient: linear-gradient(45deg, #51cf66, #40c057);
+}
+
+.stat-card-compact.ai {
+    --gradient: linear-gradient(45deg, #4ecdc4, #38d9a9);
+}
+
+.stat-card-compact:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.stat-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stat-icon-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient);
+    color: white;
+    font-size: 16px;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-number-compact {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-label-compact {
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* Compact Sessions Grid */
+.sessions-grid-compact {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.session-list-compact {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.session-list-compact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient);
+}
+
+.session-list-compact.waiting {
+    --gradient: linear-gradient(45deg, #ff6b6b, #ee5a52);
+}
+
+.session-list-compact.escalated {
+    --gradient: linear-gradient(45deg, #ffa94d, #fd9644);
+}
+
+.session-list-compact.active {
+    --gradient: linear-gradient(45deg, #51cf66, #40c057);
+}
+
+.session-list-compact.ai {
+    --gradient: linear-gradient(45deg, #4ecdc4, #38d9a9);
+}
+
+.session-header-compact {
+    padding: 12px 15px;
+    background: #f8f9fa;
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1px solid #eee;
+}
+
+.session-content-compact {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.session-item-compact {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.session-item-compact::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--gradient);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+}
+
+.session-item-compact:hover::before {
+    transform: scaleY(1);
+}
+
+.session-item-compact:hover {
+    background: #f8f9fa;
+    padding-left: 18px;
+}
+
+.session-item-compact:last-child {
+    border-bottom: none;
+}
+
+.session-info-compact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.session-name-compact {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+
+.session-time-compact {
+    font-size: 10px;
+    color: #666;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 8px;
+}
+
+.session-preview-compact {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.take-btn-compact {
+    background: var(--gradient);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.take-btn-compact:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.take-btn-compact.urgent {
+    background: linear-gradient(45deg, #dc3545, #c82333);
+    animation: pulse 2s infinite;
+}
+
+.empty-compact {
+    padding: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+    font-style: italic;
+}
+
+.empty-compact i {
+    display: block;
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: #ddd;
+}
+
+.stats-row {
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 25px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: none;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--gradient);
+}
+
+.stat-card.waiting {
+    --gradient: linear-gradient(45deg, #ff6b6b, #ee5a52);
+}
+
+.stat-card.escalated {
+    --gradient: linear-gradient(45deg, #ffa94d, #fd9644);
+}
+
+.stat-card.active {
+    --gradient: linear-gradient(45deg, #51cf66, #40c057);
+}
+
+.stat-card.ai {
+    --gradient: linear-gradient(45deg, #4ecdc4, #38d9a9);
+}
+
+.stat-card:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+}
+
+.stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+    color: white;
+    background: var(--gradient);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 42px;
+    font-weight: 900;
+    margin: 0 0 10px 0;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+}
+
+.stat-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 0;
+}
+
+.session-list {
+    background: white;
+    border-radius: 25px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    overflow: hidden;
+    border: none;
+}
+
+.session-list-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 25px 30px;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    color: #333;
+}
+
+.session-item {
+    padding: 25px 30px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.session-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--gradient);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.session-item.waiting {
+    --gradient: linear-gradient(45deg, #ff6b6b, #ee5a52);
+}
+
+.session-item.escalated {
+    --gradient: linear-gradient(45deg, #ffa94d, #fd9644);
+}
+
+.session-item.active {
+    --gradient: linear-gradient(45deg, #51cf66, #40c057);
+}
+
+.session-item.ai {
+    --gradient: linear-gradient(45deg, #4ecdc4, #38d9a9);
+}
+
+.session-item:hover::before {
+    transform: scaleY(1);
+}
+
+.session-item:hover {
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    transform: translateX(10px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.session-item:last-child {
+    border-bottom: none;
+}
+
+.session-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.session-name {
+    font-weight: 700;
+    color: #333;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.session-name::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gradient);
+    margin-right: 12px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.session-time {
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+    background: #f8f9fa;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.session-preview {
+    color: #666;
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.session-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.session-status {
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-waiting {
+    background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+    color: #856404;
+}
+
+.status-escalated {
+    background: linear-gradient(45deg, #ffe0b3, #ffcc80);
+    color: #e65100;
+}
+
+.status-active {
+    background: linear-gradient(45deg, #d4edda, #c3e6cb);
+    color: #155724;
+}
+
+.status-ai {
+    background: linear-gradient(45deg, #e3f2fd, #bbdefb);
+    color: #0d47a1;
+}
+
+.take-session-btn {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.take-session-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.take-session-btn:active {
+    transform: translateY(-1px);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #999;
+}
+
+.empty-state .icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    font-size: 48px;
+    color: #ccc;
+}
+
+.empty-state h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    color: #666;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 16px;
+    color: #999;
+}
+
+.controls-section {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.controls-section h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: #333;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.control-btn {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Responsive Design for Compact Layout */
+@media (max-width: 1200px) {
+    .stats-grid-compact {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .sessions-grid-compact {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .chat-dashboard {
+        padding: 15px 10px;
+    }
+    
+    .dashboard-header-compact {
+        padding: 12px 15px;
+        margin-bottom: 15px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .header-content h2 {
+        font-size: 18px;
+    }
+    
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .control-btn-small {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+    
+    .stats-grid-compact,
+    .sessions-grid-compact {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .stat-card-compact {
+        padding: 12px;
+    }
+    
+    .stat-content {
+        gap: 8px;
+    }
+    
+    .stat-icon-small {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    .stat-number-compact {
+        font-size: 20px;
+    }
+    
+    .stat-label-compact {
+        font-size: 10px;
+    }
+    
+    .session-header-compact {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+    
+    .session-content-compact {
+        max-height: 200px;
+    }
+    
+    .session-item-compact {
+        padding: 10px 12px;
+    }
+    
+    .session-name-compact {
+        font-size: 12px;
+    }
+    
+    .session-time-compact {
+        font-size: 9px;
+        padding: 1px 4px;
+    }
+    
+    .session-preview-compact {
+        font-size: 10px;
+        margin-bottom: 6px;
+    }
+    
+    .take-btn-compact {
+        padding: 4px 8px;
+        font-size: 9px;
+    }
+    
+    .empty-compact {
+        padding: 15px;
+        font-size: 11px;
+    }
+    
+    .empty-compact i {
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header-compact {
+        padding: 10px 12px;
+    }
+    
+    .header-content h2 {
+        font-size: 16px;
+    }
+    
+    .control-btn-small {
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+    
+    .stat-card-compact {
+        padding: 10px;
+    }
+    
+    .stat-number-compact {
+        font-size: 18px;
+    }
+    
+    .session-item-compact {
+        padding: 8px 10px;
+    }
+}
+
+/* Legacy responsive design for old layout */
+@media (max-width: 768px) {
+    .dashboard-header {
+        padding: 25px 20px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 24px;
+    }
+    
+    .stat-card {
+        padding: 20px;
+        height: 160px;
+    }
+    
+    .stat-number {
+        font-size: 32px;
+    }
+    
+    .session-list-header,
+    .session-item {
+        padding: 20px;
+    }
+    
+    .controls-section {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .control-buttons {
+        justify-content: center;
+    }
+    
+    .session-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh every 10 seconds
+    setInterval(refreshDashboard, 10000);
+    
+    // Take session buttons (both compact and regular)
+    document.querySelectorAll('.take-session-btn, .take-btn-compact').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const sessionId = this.dataset.sessionId;
+            takeSession(sessionId);
+        });
+    });
+    
+    // Session item clicks (both compact and regular)
+    document.querySelectorAll('.session-item[data-session-id], .session-item-compact[data-session-id]').forEach(item => {
+        item.addEventListener('click', function() {
+            const sessionId = this.dataset.sessionId;
+            window.location.href = `/chat/agent/session/${sessionId}/`;
+        });
+    });
+});
+
+function refreshDashboard() {
+    location.reload();
+}
+
+function takeSession(sessionId) {
+    // Get the button element correctly (handle event target being icon inside button)
+    let button = event.target;
+    if (!button.classList.contains('take-btn-compact') && !button.classList.contains('take-session-btn')) {
+        button = button.closest('.take-btn-compact, .take-session-btn');
+    }
+
+    if (!button) {
+        alert('Button nicht gefunden');
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Übernehme...';
+
+    fetch(`/chat/agent/take/${sessionId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        // Check HTTP response status
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            window.location.href = `/chat/agent/session/${sessionId}/`;
+        } else {
+            alert(data.error || 'Fehler beim Übernehmen der Session');
+            button.disabled = false;
+            button.textContent = 'Übernehmen';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Netzwerk-Fehler: ' + error.message);
+        button.disabled = false;
+        button.textContent = 'Übernehmen';
+    });
+}
+
+function toggleNotifications() {
+    const button = document.getElementById('notification-btn');
+    const isEnabled = button.innerHTML.includes('Aus');
+    
+    if (isEnabled) {
+        button.innerHTML = '<i class="fas fa-bell"></i> Benachrichtigungen An';
+        // Enable browser notifications
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    } else {
+        button.innerHTML = '<i class="fas fa-bell-slash"></i> Benachrichtigungen Aus';
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid chat-dashboard">
+    <!-- Compact Header with Controls -->
+    <div class="dashboard-header-compact">
+        <div class="header-content">
+            <h2>💬 Support Chat Dashboard</h2>
+            <div class="header-controls">
+                <button id="notification-btn" onclick="toggleNotifications()" class="control-btn-small">
+                    <i class="fas fa-bell-slash"></i> Benachrichtigungen Aus
+                </button>
+                <button onclick="refreshDashboard()" class="control-btn-small">
+                    <i class="fas fa-sync-alt"></i> Aktualisieren
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compact Statistics Cards -->
+    <div class="stats-grid-compact">
+        <div class="stat-card-compact waiting">
+            <div class="stat-content">
+                <div class="stat-icon-small">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number-compact">{{ waiting_chats.count }}</div>
+                    <div class="stat-label-compact">Wartend</div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card-compact escalated">
+            <div class="stat-content">
+                <div class="stat-icon-small">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number-compact">{{ escalated_chats.count }}</div>
+                    <div class="stat-label-compact">Eskaliert</div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card-compact active">
+            <div class="stat-content">
+                <div class="stat-icon-small">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number-compact">{{ active_chats.count }}</div>
+                    <div class="stat-label-compact">Meine Aktiven</div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card-compact ai">
+            <div class="stat-content">
+                <div class="stat-icon-small">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number-compact">{{ ai_handled_chats.count }}</div>
+                    <div class="stat-label-compact">KI-Betreut</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compact Chat Sessions Grid -->
+    <div class="sessions-grid-compact">
+        <!-- Waiting Sessions -->
+        <div class="session-list-compact waiting">
+            <div class="session-header-compact">
+                <span>🕒 Wartend ({{ waiting_chats.count }})</span>
+            </div>
+            <div class="session-content-compact">
+                {% if waiting_chats %}
+                    {% for session in waiting_chats %}
+                    <div class="session-item-compact waiting" data-session-id="{{ session.session_id }}">
+                        <div class="session-info-compact">
+                            <span class="session-name-compact">{{ session.visitor_name|default:"Unbekannt" }}</span>
+                            <span class="session-time-compact">{{ session.created_at|timesince }}</span>
+                        </div>
+                        <div class="session-preview-compact">{{ session.initial_message|default:"Keine Nachricht"|truncatechars:50 }}</div>
+                        <button class="take-btn-compact" data-session-id="{{ session.session_id }}">
+                            <i class="fas fa-hand-paper"></i> Übernehmen
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-compact"><i class="fas fa-check-circle"></i> Keine wartenden Chats</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Active Sessions -->
+        <div class="session-list-compact active">
+            <div class="session-header-compact">
+                <span>👤 Aktiv ({{ active_chats.count }})</span>
+            </div>
+            <div class="session-content-compact">
+                {% if active_chats %}
+                    {% for session in active_chats %}
+                    <div class="session-item-compact active" data-session-id="{{ session.session_id }}">
+                        <div class="session-info-compact">
+                            <span class="session-name-compact">{{ session.visitor_name|default:"Unbekannt" }}</span>
+                            <span class="session-time-compact">{{ session.updated_at|timesince }}</span>
+                        </div>
+                        <div class="session-preview-compact">{{ session.messages.count }} Nachrichten</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-compact"><i class="fas fa-coffee"></i> Keine aktiven Chats</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Escalated Sessions -->
+        <div class="session-list-compact escalated">
+            <div class="session-header-compact">
+                <span>⚠️ Eskaliert ({{ escalated_chats.count }})</span>
+            </div>
+            <div class="session-content-compact">
+                {% if escalated_chats %}
+                    {% for session in escalated_chats %}
+                    <div class="session-item-compact escalated" data-session-id="{{ session.session_id }}">
+                        <div class="session-info-compact">
+                            <span class="session-name-compact">{{ session.visitor_name|default:"Unbekannt" }}</span>
+                            <span class="session-time-compact">{{ session.updated_at|timesince }}</span>
+                        </div>
+                        <div class="session-preview-compact">Benötigt menschliche Hilfe</div>
+                        <button class="take-btn-compact urgent" data-session-id="{{ session.session_id }}">
+                            <i class="fas fa-hand-paper"></i> Übernehmen
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-compact"><i class="fas fa-thumbs-up"></i> Keine eskalierten Chats</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI Sessions -->
+        <div class="session-list-compact ai">
+            <div class="session-header-compact">
+                <span>🤖 KI-Betreut ({{ ai_handled_chats.count }})</span>
+            </div>
+            <div class="session-content-compact">
+                {% if ai_handled_chats %}
+                    {% for session in ai_handled_chats %}
+                    <div class="session-item-compact ai" data-session-id="{{ session.session_id }}">
+                        <div class="session-info-compact">
+                            <span class="session-name-compact">{{ session.visitor_name|default:"Unbekannt" }}</span>
+                            <span class="session-time-compact">{{ session.updated_at|timesince }}</span>
+                        </div>
+                        <div class="session-preview-compact">KI-Assistent aktiv</div>
+                        <button class="take-btn-compact" data-session-id="{{ session.session_id }}">
+                            <i class="fas fa-hand-paper"></i> Übernehmen
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-compact"><i class="fas fa-robot"></i> Keine KI-Sessions</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

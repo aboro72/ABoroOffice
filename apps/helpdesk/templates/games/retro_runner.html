@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Retro Runner - Top Secret! v2.3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: #222;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        #gameCanvas {
+            border: 4px solid #00ff00;
+            background: #111;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: #00ff00;
+            font-size: 18px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            padding: 40px;
+            border-radius: 15px;
+            border: 3px solid #00ff00;
+            text-align: center;
+            color: #00ff00;
+            display: none;
+        }
+
+        .menu.active {
+            display: block;
+        }
+
+        .menu h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ff00;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px #00ff00; }
+            50% { text-shadow: 0 0 40px #00ff00, 0 0 60px #00ff00; }
+        }
+
+        .menu p {
+            font-size: 16px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #00cc00;
+            transform: scale(1.1);
+        }
+
+        .secret-msg {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 20px;
+        }
+
+        .level-complete {
+            font-size: 32px;
+            animation: bounce 0.5s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="hud">
+            <div>💾 Leben: <span id="lives">3</span></div>
+            <div>🪙 Münzen: <span id="coins">0</span>/<span id="totalCoins">0</span></div>
+            <div>⏱️ Zeit: <span id="timer">60</span>s</div>
+            <div>📊 Level: <span id="level">1</span></div>
+        </div>
+    </div>
+
+    <div id="startMenu" class="menu active">
+        <h1>🎮 RETRO RUNNER 💾</h1>
+        <p>Du hast das geheime Spiel gefunden!</p>
+        <p style="font-size: 14px; margin: 20px 0;">
+            🎯 Sammle alle Münzen bevor die Zeit abläuft!<br>
+            ⌨️ Pfeiltasten: Bewegen | Leertaste: Springen<br>
+            💾 Diskette auf Beinen = Dein Held!
+        </p>
+        <button class="btn" onclick="startGame()">SPIEL STARTEN</button>
+        <button class="btn" onclick="showHighscores()" style="background: #ffd700;">🏆 BESTENLISTE</button>
+        <button class="btn" onclick="location.href='/virus-kong/'" style="background: #cc00cc;">🦠 VIRUS KONG</button>
+        <p class="secret-msg">🤫 Psst... nicht weitersagen! (v2.3 - Highscores fixed!)</p>
+    </div>
+
+    <div id="gameOverMenu" class="menu">
+        <h1>💔 GAME OVER!</h1>
+        <p class="level-complete">Score: <span id="finalScore">0</span></p>
+        <p>Erreichte Level: <span id="reachedLevel">1</span></p>
+        <p id="rankMessage" style="color: #ffd700; font-weight: bold; margin: 10px 0;"></p>
+        <button class="btn" onclick="restartGame()">NOCHMAL VERSUCHEN</button>
+        <button class="btn" onclick="showHighscores()" style="background: #ffd700;">🏆 BESTENLISTE</button>
+        <button class="btn" onclick="window.history.back()">ZURÜCK ZUM HELPDESK</button>
+    </div>
+
+    <div id="victoryMenu" class="menu">
+        <h1>🎉 LEVEL GESCHAFFT!</h1>
+        <p class="level-complete">Alle Münzen gesammelt!</p>
+        <p>Zeit übrig: <span id="timeBonus">0</span>s (+<span id="bonusPoints">0</span> Punkte)</p>
+        <button class="btn" onclick="nextLevel()">NÄCHSTES LEVEL</button>
+    </div>
+
+    <div id="highscoreMenu" class="menu">
+        <h1>🏆 BESTENLISTE 🏆</h1>
+        <div id="highscoreList" style="max-height: 400px; overflow-y: auto; margin: 20px 0;">
+            <p style="color: #00ff00;">Lade Bestenliste...</p>
+        </div>
+        <button class="btn" onclick="hideHighscores()">ZURÜCK</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameState = 'menu'; // menu, playing, gameover, victory
+        let player, platforms, coins, particles;
+        let keys = {};
+        let currentLevel = 1;
+        let lives = 3;
+        let score = 0;
+        let timeLeft = 60;
+        let gameInterval, timerInterval;
+
+        // Player (Diskette auf Beinen!)
+        class Player {
+            constructor() {
+                this.width = 40;
+                this.height = 50;
+                this.x = 100;
+                this.y = canvas.height - 150;
+                this.vx = 0;
+                this.vy = 0;
+                this.speed = 5;
+                this.jumpPower = 15;
+                this.gravity = 0.6;
+                this.onGround = false;
+                this.direction = 1; // 1 = rechts, -1 = links
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+                if (this.direction === -1) ctx.scale(-1, 1);
+
+                // Diskette Körper
+                ctx.fillStyle = '#0066ff';
+                ctx.fillRect(-20, -15, 40, 30);
+
+                // Label
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(-15, -10, 30, 20);
+
+                // Metal Slide
+                ctx.fillStyle = '#666';
+                ctx.fillRect(-18, -8, 5, 16);
+
+                // Beine
+                ctx.strokeStyle = '#0066ff';
+                ctx.lineWidth = 3;
+
+                // Linkes Bein
+                ctx.beginPath();
+                ctx.moveTo(-10, 15);
+                ctx.lineTo(-10, 25);
+                ctx.lineTo(-15, 25);
+                ctx.stroke();
+
+                // Rechtes Bein (animated)
+                const legOffset = Math.sin(Date.now() / 100) * 2;
+                ctx.beginPath();
+                ctx.moveTo(10, 15);
+                ctx.lineTo(10 + legOffset, 25);
+                ctx.lineTo(15 + legOffset, 25);
+                ctx.stroke();
+
+                // Augen
+                ctx.fillStyle = '#000';
+                ctx.fillRect(-8, -5, 4, 4);
+                ctx.fillRect(4, -5, 4, 4);
+
+                ctx.restore();
+            }
+
+            update() {
+                // Bewegung
+                this.vx = 0;
+                if (keys['ArrowLeft']) {
+                    this.vx = -this.speed;
+                    this.direction = -1;
+                }
+                if (keys['ArrowRight']) {
+                    this.vx = this.speed;
+                    this.direction = 1;
+                }
+
+                // Springen
+                if (keys[' '] && this.onGround) {
+                    this.vy = -this.jumpPower;
+                    this.onGround = false;
+                }
+
+                // Gravitation
+                this.vy += this.gravity;
+
+                // Position update
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bildschirm-Grenzen
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
+
+                // Kollisionen prüfen (erst zurücksetzen, dann alle Kollisionen checken)
+                this.onGround = false;
+
+                // Kollision mit Boden
+                if (this.y + this.height >= canvas.height - 20) {
+                    this.y = canvas.height - 20 - this.height;
+                    this.vy = 0;
+                    this.onGround = true;
+                }
+
+                // Plattform-Kollision
+                platforms.forEach(platform => {
+                    if (this.x + this.width > platform.x &&
+                        this.x < platform.x + platform.width &&
+                        this.y + this.height > platform.y &&
+                        this.y + this.height < platform.y + platform.height &&
+                        this.vy >= 0) {
+                        this.y = platform.y - this.height;
+                        this.vy = 0;
+                        this.onGround = true;
+                    }
+                });
+
+                // Münzen einsammeln
+                coins.forEach((coin, index) => {
+                    if (!coin.collected &&
+                        this.x + this.width > coin.x &&
+                        this.x < coin.x + coin.size &&
+                        this.y + this.height > coin.y &&
+                        this.y < coin.y + coin.size) {
+                        coin.collected = true;
+                        score += 100;
+                        createParticles(coin.x + coin.size/2, coin.y + coin.size/2);
+                        updateHUD();
+                        checkVictory();
+                    }
+                });
+
+                // Tod durch Fall
+                if (this.y > canvas.height) {
+                    die();
+                }
+            }
+        }
+
+        // Plattform
+        class Platform {
+            constructor(x, y, width, height) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+            }
+
+            draw() {
+                ctx.fillStyle = '#00ff00';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.strokeStyle = '#00cc00';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+            }
+        }
+
+        // Münze
+        class Coin {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = 20;
+                this.collected = false;
+                this.rotation = 0;
+            }
+
+            draw() {
+                if (this.collected) return;
+
+                this.rotation += 0.1;
+                ctx.save();
+                ctx.translate(this.x + this.size/2, this.y + this.size/2);
+                ctx.rotate(this.rotation);
+
+                // Münze
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.size/2, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffaa00';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.size/3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        // Partikel für Effekte
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 5;
+                this.vy = (Math.random() - 0.5) * 5;
+                this.life = 30;
+                this.maxLife = 30;
+                this.size = Math.random() * 4 + 2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.2;
+                this.life--;
+            }
+
+            draw() {
+                const alpha = this.life / this.maxLife;
+                ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+
+            isDead() {
+                return this.life <= 0;
+            }
+        }
+
+        function createParticles(x, y) {
+            for (let i = 0; i < 15; i++) {
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        // Level generieren - HERAUSFORDERND ABER FAIR
+        function generateLevel(level) {
+            platforms = [];
+            coins = [];
+
+            console.log('Generiere Level', level);
+
+            // Boden
+            platforms.push(new Platform(0, canvas.height - 20, canvas.width, 20));
+
+            // Plattformen-Anzahl basierend auf Level
+            const platformCount = 6 + level * 2;
+
+            // Spieler kann etwa 150 Pixel hoch und 120 Pixel weit springen
+            const minPlatformWidth = 80;
+            const maxPlatformWidth = 120;
+
+            // Definiere verschiedene Höhen-Ebenen
+            const heightLevels = [
+                canvas.height - 100,  // Niedrig
+                canvas.height - 200,  // Mittel
+                canvas.height - 300,  // Hoch
+                canvas.height - 400,  // Sehr hoch
+            ];
+
+            // Starte vom Boden aus
+            let lastX = 50;
+            let currentHeightLevel = 0;
+
+            for (let i = 0; i < platformCount; i++) {
+                // Horizontale Distanz: 100-140 Pixel (erreichbar)
+                const jumpDistance = 100 + Math.random() * 40;
+                let x = lastX + jumpDistance;
+
+                // Wechsle manchmal die Höhen-Ebene (60% Chance)
+                if (Math.random() > 0.4) {
+                    // Gehe eine Ebene hoch oder runter
+                    const change = Math.random() > 0.5 ? 1 : -1;
+                    currentHeightLevel = Math.max(0, Math.min(heightLevels.length - 1, currentHeightLevel + change));
+                }
+
+                let y = heightLevels[currentHeightLevel];
+                // Kleine zufällige Variation innerhalb der Ebene
+                y += (Math.random() - 0.5) * 40;
+
+                // Wrap around wenn zu weit rechts
+                if (x > canvas.width - 100) {
+                    x = 80 + Math.random() * 100;
+                    // Gehe beim Wrap eine Ebene höher
+                    currentHeightLevel = Math.min(heightLevels.length - 1, currentHeightLevel + 1);
+                }
+
+                const width = minPlatformWidth + Math.random() * (maxPlatformWidth - minPlatformWidth);
+                platforms.push(new Platform(x, y, width, 15));
+
+                lastX = x;
+            }
+
+            // Level 1: Ein paar extra einfache Plattformen vom Boden
+            if (level === 1) {
+                platforms.push(new Platform(200, canvas.height - 150, 100, 15));
+                platforms.push(new Platform(400, canvas.height - 250, 100, 15));
+            }
+
+            // Eine Münze pro Plattform (außer Boden)
+            platforms.slice(1).forEach((platform, i) => {
+                const coin = new Coin(
+                    platform.x + platform.width / 2 - 10,
+                    platform.y - 30
+                );
+                coins.push(coin);
+            });
+
+            console.log('Level generiert - Plattformen:', platforms.length, 'Münzen:', coins.length);
+            document.getElementById('totalCoins').textContent = coins.length;
+        }
+
+        function startGame() {
+            document.getElementById('startMenu').classList.remove('active');
+            gameState = 'playing';
+            currentLevel = 1;
+            lives = 3;
+            score = 0;
+
+            // Zeit basierend auf Level: Level 1 = 60s, Level 2 = 55s, Level 3 = 50s, etc.
+            timeLeft = Math.max(35, 65 - (currentLevel * 5));
+
+            initLevel();
+
+            gameInterval = setInterval(gameLoop, 1000/60);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateHUD();
+                if (timeLeft <= 0) {
+                    die();
+                }
+            }, 1000);
+        }
+
+        function initLevel() {
+            player = new Player();
+            particles = [];
+            generateLevel(currentLevel);
+            updateHUD();
+        }
+
+        function nextLevel() {
+            document.getElementById('victoryMenu').classList.remove('active');
+            currentLevel++;
+
+            // Zeit reduziert sich mit jedem Level: L1=60s, L2=55s, L3=50s, L4=45s, L5=40s, L6+=35s
+            timeLeft = Math.max(35, 65 - (currentLevel * 5));
+
+            gameState = 'playing';
+            initLevel();
+
+            // Restart game loop and timer
+            if (gameInterval) clearInterval(gameInterval);
+            if (timerInterval) clearInterval(timerInterval);
+
+            gameInterval = setInterval(gameLoop, 1000/60);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateHUD();
+                if (timeLeft <= 0) {
+                    die();
+                }
+            }, 1000);
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverMenu').classList.remove('active');
+            startGame();
+        }
+
+        function die() {
+            lives--;
+            if (lives <= 0) {
+                gameOver();
+            } else {
+                player = new Player();
+                timeLeft = Math.min(timeLeft + 10, 60);
+                updateHUD();
+            }
+        }
+
+        function gameOver() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            gameState = 'gameover';
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('reachedLevel').textContent = currentLevel;
+
+            // Save score to database
+            saveScore();
+
+            document.getElementById('gameOverMenu').classList.add('active');
+        }
+
+        function checkVictory() {
+            const collectedCoins = coins.filter(c => c.collected).length;
+            if (collectedCoins === coins.length) {
+                victory();
+            }
+        }
+
+        function victory() {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            gameState = 'victory';
+
+            const timeBonus = timeLeft * 10;
+            score += timeBonus;
+
+            document.getElementById('timeBonus').textContent = timeLeft;
+            document.getElementById('bonusPoints').textContent = timeBonus;
+            document.getElementById('victoryMenu').classList.add('active');
+        }
+
+        function updateHUD() {
+            document.getElementById('lives').textContent = lives;
+            document.getElementById('coins').textContent = coins.filter(c => c.collected).length;
+            document.getElementById('timer').textContent = timeLeft;
+            document.getElementById('level').textContent = currentLevel;
+        }
+
+        function gameLoop() {
+            // Clear
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid background
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Update & Draw
+            player.update();
+
+            platforms.forEach(p => p.draw());
+            coins.forEach(c => c.draw());
+
+            particles = particles.filter(p => !p.isDead());
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            player.draw();
+
+            // Score anzeigen
+            ctx.fillStyle = '#00ff00';
+            ctx.font = '20px Courier New';
+            ctx.fillText(`Score: ${score}`, 10, 30);
+        }
+
+        // Keyboard events
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (e.key === ' ') e.preventDefault();
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // ====================================================================
+        // HIGHSCORE FUNCTIONS
+        // ====================================================================
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function saveScore() {
+            const csrftoken = getCookie('csrftoken');
+            const totalTime = 60 - timeLeft;
+
+            console.log('Speichere Score:', score, 'Level:', currentLevel);
+
+            fetch('/game/save-score/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    score: score,
+                    level: currentLevel,
+                    coins: coins.filter(c => c.collected).length,
+                    time: totalTime
+                })
+            })
+            .then(response => {
+                console.log('Save score response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Save score data:', data);
+                if (data.success) {
+                    const rankMsg = document.getElementById('rankMessage');
+                    if (data.rank === 1) {
+                        rankMsg.textContent = '🏆 NEUER HIGHSCORE! Du bist auf Platz 1! 🏆';
+                        rankMsg.style.animation = 'glow 1s ease-in-out infinite';
+                    } else if (data.rank <= 10) {
+                        rankMsg.textContent = `🎖️ Top 10! Du bist auf Platz ${data.rank}!`;
+                    } else {
+                        rankMsg.textContent = `Platz ${data.rank} - Gut gemacht!`;
+                    }
+                } else {
+                    console.error('Save score failed:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error saving score:', error);
+            });
+        }
+
+        function loadHighscores() {
+            console.log('Lade Highscores...');
+            fetch('/game/highscores/')
+            .then(response => {
+                console.log('Highscores response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Highscores data:', data);
+                if (data.success) {
+                    displayHighscores(data);
+                } else {
+                    console.error('Load highscores failed:', data.error);
+                    document.getElementById('highscoreList').innerHTML =
+                        `<p style="color: #ff6b6b;">Fehler: ${data.error}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading highscores:', error);
+                document.getElementById('highscoreList').innerHTML =
+                    '<p style="color: #ff6b6b;">Fehler beim Laden der Bestenliste</p>';
+            });
+        }
+
+        function displayHighscores(data) {
+            const container = document.getElementById('highscoreList');
+            let html = '';
+
+            if (data.scores.length === 0) {
+                html = '<p style="color: #00ff00; font-size: 16px;">Noch keine Scores vorhanden.<br>Sei der Erste!</p>';
+            } else {
+                html = '<table style="width: 100%; color: #00ff00; font-family: \'Courier New\', monospace; font-size: 14px; border-collapse: collapse;">';
+                html += '<thead><tr style="border-bottom: 2px solid #00ff00;">';
+                html += '<th style="padding: 10px; text-align: left;">Rang</th>';
+                html += '<th style="padding: 10px; text-align: left;">Agent</th>';
+                html += '<th style="padding: 10px; text-align: right;">Score</th>';
+                html += '<th style="padding: 10px; text-align: center;">Level</th>';
+                html += '</tr></thead><tbody>';
+
+                data.scores.forEach(score => {
+                    const isCurrentUser = score.is_current_user;
+                    const rowStyle = isCurrentUser ?
+                        'background: rgba(255, 215, 0, 0.2); font-weight: bold;' : '';
+                    const medal = score.rank === 1 ? '🥇' :
+                                  score.rank === 2 ? '🥈' :
+                                  score.rank === 3 ? '🥉' : '';
+
+                    html += `<tr style="${rowStyle} border-bottom: 1px solid #003300;">`;
+                    html += `<td style="padding: 8px;">${medal} ${score.rank}</td>`;
+                    html += `<td style="padding: 8px;">${score.player_name}${isCurrentUser ? ' (Du)' : ''}</td>`;
+                    html += `<td style="padding: 8px; text-align: right; color: #ffd700;">${score.score}</td>`;
+                    html += `<td style="padding: 8px; text-align: center;">L${score.level}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+
+                // Player's best score
+                if (data.player_best) {
+                    html += '<div style="margin-top: 20px; padding: 15px; background: rgba(255, 215, 0, 0.1); border: 2px solid #ffd700; border-radius: 8px;">';
+                    html += '<p style="color: #ffd700; font-weight: bold; margin-bottom: 5px;">👤 DEINE BESTLEISTUNG:</p>';
+                    html += `<p style="color: #00ff00;">Platz ${data.player_best.rank} | Score: ${data.player_best.score} | Level: ${data.player_best.level}</p>`;
+                    html += '</div>';
+                }
+
+                html += `<p style="margin-top: 15px; font-size: 12px; opacity: 0.7;">Gesamt: ${data.total_players} Spieler</p>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function showHighscores() {
+            document.getElementById('startMenu').classList.remove('active');
+            document.getElementById('gameOverMenu').classList.remove('active');
+            document.getElementById('highscoreMenu').classList.add('active');
+            loadHighscores();
+        }
+
+        function hideHighscores() {
+            document.getElementById('highscoreMenu').classList.remove('active');
+            if (gameState === 'menu') {
+                document.getElementById('startMenu').classList.add('active');
+            } else if (gameState === 'gameover') {
+                document.getElementById('gameOverMenu').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
