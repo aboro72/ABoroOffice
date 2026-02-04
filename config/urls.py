@@ -9,8 +9,12 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
+from apps.core.views import HomeView
 
 urlpatterns = [
+    # Home
+    path('', HomeView.as_view(), name='home'),
+
     # Admin interface
     path('admin/', admin.site.urls),
 
@@ -22,8 +26,8 @@ urlpatterns = [
     # Classroom / Pit-Kalendar (Phase 2) ✅ INTEGRATED
     path('classroom/', include('apps.classroom.urls')),
 
-    # Approvals (Phase 3)
-    # path('approvals/', include('apps.approvals.urls')),
+    # Approvals (Phase 3) ✅ INTEGRATED
+    path('approvals/', include('apps.approvals.urls')),
 
     # HelpDesk Suite (Phase 4)
     # path('helpdesk/', include('apps.helpdesk_suite.urls')),

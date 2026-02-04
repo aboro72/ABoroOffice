@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Approvals{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>SSH Approvals</h1>
+            <p class="text-muted">Manage approval requests for SSH script execution</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <span class="badge bg-primary">{{ approvals.paginator.count }} Total</span>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        {% for status in status_choices %}
+                            <option value="{{ status }}" {% if status == current_status %}selected{% endif %}>
+                                {{ status|upper }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" name="server" class="form-control"
+                           placeholder="Filter by server..."
+                           value="{{ current_server }}"
+                           onchange="this.form.submit()">
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'approvals:list' %}" class="btn btn-outline-secondary w-100">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Approvals Table -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Server</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Deadline</th>
+                    <th>Approved By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for approval in approvals %}
+                <tr>
+                    <td>
+                        <strong>{{ approval.server_name }}</strong>
+                        <br>
+                        <small class="text-muted">Port {{ approval.server_port }}</small>
+                    </td>
+                    <td>
+                        {% if approval.status == 'pending' %}
+                            <span class="badge bg-warning">PENDING</span>
+                        {% elif approval.status == 'approved' %}
+                            <span class="badge bg-success">APPROVED</span>
+                        {% elif approval.status == 'rejected' %}
+                            <span class="badge bg-danger">REJECTED</span>
+                        {% elif approval.status == 'expired' %}
+                            <span class="badge bg-secondary">EXPIRED</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small>{{ approval.created_at|date:"d.m.Y H:i" }}</small>
+                    </td>
+                    <td>
+                        <small>{{ approval.deadline|date:"d.m.Y H:i" }}</small>
+                        {% if approval.status == 'pending' and not approval.is_expired %}
+                            <br>
+                            <span class="text-danger" title="Time remaining">
+                                {% with remaining=approval.deadline|timesince:approval.created_at %}
+                                    ⏱️ {{ remaining }}
+                                {% endwith %}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if approval.approved_by %}
+                            <small>{{ approval.approved_by }}</small>
+                        {% else %}
+                            <small class="text-muted">-</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'approvals:detail' approval.token %}"
+                           class="btn btn-sm btn-info">
+                            View
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        No approvals found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

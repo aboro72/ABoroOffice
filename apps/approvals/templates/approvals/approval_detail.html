@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Approval Detail{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Approval Request</h1>
+            <p class="text-muted">{{ approval.server_name }} (Port {{ approval.server_port }})</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if approval.status == 'pending' %}
+                <span class="badge bg-warning" style="font-size: 1rem;">PENDING</span>
+            {% elif approval.status == 'approved' %}
+                <span class="badge bg-success" style="font-size: 1rem;">APPROVED</span>
+            {% elif approval.status == 'rejected' %}
+                <span class="badge bg-danger" style="font-size: 1rem;">REJECTED</span>
+            {% elif approval.status == 'expired' %}
+                <span class="badge bg-secondary" style="font-size: 1rem;">EXPIRED</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Approval Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Request Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Unique Token</label>
+                            <p class="font-monospace">{{ approval.token }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Status</label>
+                            <p>{{ approval.get_status_display }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Scheduled Time</label>
+                            <p>{{ approval.scheduled_time|date:"d.m.Y H:i:s" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Deadline</label>
+                            <p>
+                                {{ approval.deadline|date:"d.m.Y H:i:s" }}
+                                {% if approval.status == 'pending' and not approval.is_expired %}
+                                    <br>
+                                    <span class="badge bg-danger">{{ hours_remaining }} hours left</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Created At</label>
+                            <p>{{ approval.created_at|date:"d.m.Y H:i:s" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Server Port</label>
+                            <p>{{ approval.server_port }}</p>
+                        </div>
+                    </div>
+
+                    {% if approval.rating_schedule %}
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="fw-bold text-muted small">Rating Schedule</label>
+                            <p>{{ approval.rating_schedule.display_name }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Approval History -->
+            {% if approval.status != 'pending' %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Approval History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Approved By</label>
+                            <p>{{ approval.approved_by }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Approval Method</label>
+                            <p>{{ approval.approval_method|upper }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="fw-bold text-muted small">Approved At</label>
+                            <p>{{ approval.approved_at|date:"d.m.Y H:i:s" }}</p>
+                        </div>
+                    </div>
+
+                    {% if approval.notes %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="fw-bold text-muted small">Notes</label>
+                            <p>{{ approval.notes }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Execution Status -->
+            {% if approval.execution_status %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Execution Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Status</label>
+                            <p>
+                                {% if approval.execution_status == 'pending' %}
+                                    <span class="badge bg-secondary">PENDING</span>
+                                {% elif approval.execution_status == 'in_progress' %}
+                                    <span class="badge bg-info">IN PROGRESS</span>
+                                {% elif approval.execution_status == 'success' %}
+                                    <span class="badge bg-success">SUCCESS</span>
+                                {% elif approval.execution_status == 'failed' %}
+                                    <span class="badge bg-danger">FAILED</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="fw-bold text-muted small">Executed At</label>
+                            <p>{{ approval.executed_at|date:"d.m.Y H:i:s"|default:"-" }}</p>
+                        </div>
+                    </div>
+
+                    {% if approval.execution_output %}
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="fw-bold text-muted small">Output</label>
+                            <pre class="bg-light p-2 rounded"><code>{{ approval.execution_output }}</code></pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if approval.execution_error %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="fw-bold text-muted small">Error</label>
+                            <pre class="bg-danger bg-opacity-10 p-2 rounded text-danger"><code>{{ approval.execution_error }}</code></pre>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Reminders -->
+            {% if reminders %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Reminders Sent</h5>
+                </div>
+                <div class="card-body">
+                    {% for reminder in reminders %}
+                    <div class="row mb-3 pb-3 border-bottom">
+                        <div class="col-md-4">
+                            <label class="fw-bold text-muted small">Reminder {{ reminder.reminder_number }}</label>
+                            <p>{{ reminder.reminder_time }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="fw-bold text-muted small">Sent At</label>
+                            <p>{{ reminder.sent_at|date:"d.m.Y H:i:s"|default:"-" }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="fw-bold text-muted small">Recipients</label>
+                            <p>
+                                {% if reminder.recipients %}
+                                    {% for recipient in reminder.recipients %}
+                                        <small>{{ recipient }}</small><br>
+                                    {% endfor %}
+                                {% else %}
+                                    <small class="text-muted">-</small>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Action Buttons -->
+            {% if can_approve %}
+            <div class="card mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Actions Required</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'approvals:approve' approval.id %}" class="mb-3">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100 mb-2">
+                            ✓ Approve Request
+                        </button>
+                    </form>
+
+                    <form method="post" action="{% url 'approvals:reject' approval.id %}">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <textarea name="reason" class="form-control form-control-sm"
+                                      placeholder="Rejection reason (optional)"
+                                      rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">
+                            ✗ Reject Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Server Health -->
+            {% if server_health %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Server Health</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted small">Status</label>
+                        <p>
+                            {% if server_health.is_healthy %}
+                                <span class="badge bg-success">HEALTHY</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ server_health.status|upper }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted small">SSH Reachable</label>
+                        <p>{% if server_health.ssh_reachable %}✓ Yes{% else %}✗ No{% endif %}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted small">URL Reachable</label>
+                        <p>{% if server_health.url_reachable %}✓ Yes{% else %}✗ No{% endif %}</p>
+                    </div>
+
+                    <div>
+                        <label class="fw-bold text-muted small">Last Check</label>
+                        <p class="small">{{ server_health.last_check|date:"d.m.Y H:i:s"|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Email Recipients -->
+            {% if approval.email_recipients %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Email Recipients</h5>
+                </div>
+                <div class="card-body">
+                    {% for recipient in approval.email_recipients %}
+                        <p class="small mb-1">
+                            <i class="fas fa-envelope"></i> {{ recipient }}
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Back Link -->
+    <div class="mt-4">
+        <a href="{% url 'approvals:list' %}" class="btn btn-outline-secondary">
+            ← Back to List
+        </a>
+    </div>
+</div>
+{% endblock %}

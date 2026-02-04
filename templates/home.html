@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Home - ABoroOffice{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row align-items-center" style="min-height: 60vh;">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-4 mb-4">Welcome to ABoroOffice</h1>
+            <p class="lead mb-4">
+                Unified business application suite with SSH approval workflows,
+                classroom management, help desk ticketing, and cloud storage.
+            </p>
+
+            {% if user.is_authenticated %}
+                <div class="row mt-5">
+                    <div class="col-md-4 mb-3">
+                        <a href="{% url 'approvals:list' %}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-check-circle"></i> Approvals
+                        </a>
+                        <small class="text-muted d-block mt-2">SSH Approval Workflow</small>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{% url 'classroom:index' %}" class="btn btn-secondary btn-lg w-100">
+                            <i class="fas fa-chalkboard"></i> Classroom
+                        </a>
+                        <small class="text-muted d-block mt-2">Classroom Management</small>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="/admin/" class="btn btn-outline-secondary btn-lg w-100">
+                            <i class="fas fa-cog"></i> Admin
+                        </a>
+                        <small class="text-muted d-block mt-2">System Administration</small>
+                    </div>
+                </div>
+
+                <hr class="my-5">
+
+                <div class="row">
+                    <div class="col-md-6 mx-auto text-start">
+                        <h5>Quick Stats</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Pending Approvals
+                                <span class="badge bg-warning rounded-pill" id="pending-count">-</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Approved Today
+                                <span class="badge bg-success rounded-pill" id="approved-count">-</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <script>
+                    fetch('{% url "approvals:statistics" %}')
+                        .then(r => r.json())
+                        .then(data => {
+                            document.getElementById('pending-count').textContent = data.statistics.by_status.pending;
+                            document.getElementById('approved-count').textContent = data.statistics.by_status.approved;
+                        })
+                        .catch(e => console.log('Stats unavailable'));
+                </script>
+            {% else %}
+                <a href="/admin/login/" class="btn btn-primary btn-lg mb-3">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </a>
+                <p class="text-muted">Please log in to access ABoroOffice</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
