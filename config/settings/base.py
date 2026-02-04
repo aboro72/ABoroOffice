@@ -197,15 +197,39 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
 ]
 
-# Celery configuration (to be completed in Phase 2+)
-# CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-# CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
+# Celery configuration
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes hard limit
+
+# Celery Beat Schedule (periodic tasks)
+from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    'check-approval-deadlines': {
+        'task': 'apps.approvals.celery_tasks.check_approval_deadlines',
+        'schedule': crontab(minute=0),  # Every hour
+    },
+    'check-server-health': {
+        'task': 'apps.approvals.celery_tasks.check_server_health',
+        'schedule': crontab(minute='*/15'),  # Every 15 minutes
+    },
+}
 
 # Email configuration (to be overridden in production)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'approvals@aboro.office')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 
 # Security headers (will be enabled in production)
 # SECURE_HSTS_SECONDS = 31536000
