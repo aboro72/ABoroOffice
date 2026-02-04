@@ -20,6 +20,7 @@ from .celery_tasks import (
     send_approval_confirmed_email_task,
     send_approval_rejected_email_task,
 )
+from apps.licensing.decorators import license_required, LicenseRequiredMixin, ApproverRequiredMixin
 
 logger = logging.getLogger('approvals')
 
@@ -28,7 +29,7 @@ logger = logging.getLogger('approvals')
 # LIST & DETAIL VIEWS
 # ============================================================================
 
-class ApprovalListView(LoginRequiredMixin, ListView):
+class ApprovalListView(LicenseRequiredMixin, LoginRequiredMixin, ListView):
     """
     Display list of approvals
     Filters by status, shows pending first
@@ -37,6 +38,7 @@ class ApprovalListView(LoginRequiredMixin, ListView):
     template_name = 'approvals/approval_list.html'
     context_object_name = 'approvals'
     paginate_by = 50
+    required_feature = 'approvals'
 
     def get_queryset(self):
         """Get approvals, filtered by status if provided"""
@@ -63,7 +65,7 @@ class ApprovalListView(LoginRequiredMixin, ListView):
         return context
 
 
-class ApprovalDetailView(LoginRequiredMixin, DetailView):
+class ApprovalDetailView(LicenseRequiredMixin, LoginRequiredMixin, DetailView):
     """
     Display detailed approval information
     Shows all reminders and execution status
@@ -73,6 +75,7 @@ class ApprovalDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'approval'
     slug_field = 'token'
     slug_url_kwarg = 'token'
+    required_feature = 'approvals'
 
     def get_context_data(self, **kwargs):
         """Add related objects to context"""
@@ -110,12 +113,12 @@ class ApprovalDetailView(LoginRequiredMixin, DetailView):
 # APPROVAL WORKFLOW VIEWS
 # ============================================================================
 
-class ApprovalApproveView(LoginRequiredMixin, View):
+class ApprovalApproveView(View):
     """
     Approve an approval request
     Can be triggered via:
     1. Email token link (no auth needed)
-    2. Web form (auth required + staff)
+    2. Web form (auth required + staff/approver)
     3. API endpoint
     """
 
@@ -130,11 +133,23 @@ class ApprovalApproveView(LoginRequiredMixin, View):
             return JsonResponse({'error': 'No approval identifier provided'}, status=400)
 
         # Check permissions (if not email token)
-        if not token and (not request.user.is_staff):  # TODO: Check is_approver
-            logger.warning(
-                f"Unauthorized approval attempt by {request.user} for {approval.token}"
-            )
-            return JsonResponse({'error': 'Not authorized to approve'}, status=403)
+        if not token:
+            # Require authentication
+            if not request.user.is_authenticated:
+                logger.warning(f"Unauthenticated approval attempt for {approval.token}")
+                return JsonResponse({'error': 'Authentication required'}, status=401)
+
+            # Check license
+            if not request.user.can_access_feature('approvals'):
+                logger.warning(f"License check failed for {request.user}")
+                return JsonResponse({'error': 'Feature not available in license'}, status=403)
+
+            # Check approver status
+            if not (request.user.is_approver or request.user.is_staff):
+                logger.warning(
+                    f"Unauthorized approval attempt by {request.user} for {approval.token}"
+                )
+                return JsonResponse({'error': 'Not authorized to approve'}, status=403)
 
         # Check if already approved/rejected
         if approval.status in ['approved', 'rejected', 'expired']:
@@ -181,10 +196,10 @@ class ApprovalApproveView(LoginRequiredMixin, View):
             }, status=500)
 
 
-class ApprovalRejectView(LoginRequiredMixin, View):
+class ApprovalRejectView(ApproverRequiredMixin, LoginRequiredMixin, View):
     """
     Reject an approval request
-    Requires authentication and staff permissions
+    Requires authentication and approver permissions
     """
 
     @require_http_methods(["POST"])
@@ -192,12 +207,11 @@ class ApprovalRejectView(LoginRequiredMixin, View):
         """Handle rejection action"""
         approval = get_object_or_404(Approval, pk=pk)
 
-        # Check permissions
-        if not request.user.is_staff:  # TODO: Check is_approver
-            logger.warning(
-                f"Unauthorized rejection attempt by {request.user} for {approval.token}"
-            )
-            return JsonResponse({'error': 'Not authorized to reject'}, status=403)
+        # ApproverRequiredMixin already checks permissions in dispatch
+        # Additional license check
+        if not request.user.can_access_feature('approvals'):
+            logger.warning(f"License check failed for {request.user}")
+            return JsonResponse({'error': 'Feature not available in license'}, status=403)
 
         # Check if already approved/rejected
         if approval.status in ['approved', 'rejected', 'expired']:
@@ -248,11 +262,12 @@ class ApprovalRejectView(LoginRequiredMixin, View):
 # HEALTH CHECK VIEWS
 # ============================================================================
 
-class ServerHealthCheckView(LoginRequiredMixin, View):
+class ServerHealthCheckView(LicenseRequiredMixin, LoginRequiredMixin, View):
     """
     Get server health status
     Used by frontend to show server availability
     """
+    required_feature = 'approvals'
 
     def get(self, request, server_name=None):
         """Get health status for server(s)"""
@@ -289,11 +304,12 @@ class ServerHealthCheckView(LoginRequiredMixin, View):
             })
 
 
-class RatingScheduleStatusView(LoginRequiredMixin, View):
+class RatingScheduleStatusView(LicenseRequiredMixin, LoginRequiredMixin, View):
     """
     Get status of rating schedules
     Shows enabled/disabled and configuration
     """
+    required_feature = 'approvals'
 
     def get(self, request, schedule_id=None):
         """Get schedule status"""
@@ -334,11 +350,12 @@ class RatingScheduleStatusView(LoginRequiredMixin, View):
 # STATISTICS & REPORTING VIEWS
 # ============================================================================
 
-class ApprovalStatisticsView(LoginRequiredMixin, View):
+class ApprovalStatisticsView(LicenseRequiredMixin, LoginRequiredMixin, View):
     """
     Get approval statistics and metrics
     Shows counts by status, response times, etc.
     """
+    required_feature = 'approvals'
 
     def get(self, request):
         """Get approval statistics"""

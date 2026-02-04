@@ -101,6 +101,13 @@ class ABoroUser(AbstractUser):
         blank=True
     )
 
+    # Approvals (Phase 3) fields
+    is_approver = models.BooleanField(
+        _('is approver'),
+        default=False,
+        help_text=_('Whether this user can approve SSH execution requests')
+    )
+
     # HelpDesk extended fields
     location = models.CharField(
         _('location'),

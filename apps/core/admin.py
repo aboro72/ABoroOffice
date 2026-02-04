@@ -26,6 +26,10 @@ class ABoroUserAdmin(BaseUserAdmin):
             'fields': ('two_factor_enabled', 'storage_quota_mb', 'storage_used_mb'),
             'classes': ('collapse',)
         }),
+        (_('Approvals'), {
+            'fields': ('is_approver',),
+            'classes': ('collapse',)
+        }),
         (_('Address'), {
             'fields': ('street', 'postal_code', 'city', 'country'),
             'classes': ('collapse',)
@@ -54,8 +58,8 @@ class ABoroUserAdmin(BaseUserAdmin):
         }),
     )
 
-    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_active', 'created_at')
-    list_filter = ('is_active', 'is_staff', 'role', 'is_agent', 'created_at')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_approver', 'is_active', 'created_at')
+    list_filter = ('is_active', 'is_staff', 'is_approver', 'role', 'is_agent', 'created_at')
     search_fields = ('username', 'email', 'first_name', 'last_name')
     readonly_fields = ('created_at', 'updated_at', 'last_login', 'last_activity')
     ordering = ('-created_at',)

@@ -208,7 +208,7 @@
         <!-- Sidebar -->
         <div class="col-lg-4">
             <!-- Action Buttons -->
-            {% if can_approve %}
+            {% if can_approve and user.is_approver %}
             <div class="card mb-4 border-success">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">Actions Required</h5>
