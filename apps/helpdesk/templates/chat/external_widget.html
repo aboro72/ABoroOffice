@@ -65,7 +65,7 @@
         language: 'de'
     };
 &lt;/script&gt;
-&lt;script src="{{ request.scheme }}://{{ request.get_host }}/chat/widget.js" defer&gt;&lt;/script&gt;
+&lt;script src="{{ request.scheme }}://{{ request.get_host }}{{ helpdesk_prefix }}/chat/widget.js" defer&gt;&lt;/script&gt;
 &lt;!-- Ende Chat Widget --&gt;</code></pre>
         
         <h4>🔥 Firefox Kompatibilität - NEUE VERSION</h4>
@@ -141,6 +141,6 @@
     </script>
     
     <!-- Chat Widget Script laden -->
-    <script src="{{ request.scheme }}://{{ request.get_host }}/chat/widget.js" defer></script>
+    <script src="{{ request.scheme }}://{{ request.get_host }}{{ helpdesk_prefix }}/chat/widget.js" defer></script>
 </body>
 </html>

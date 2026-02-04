@@ -1,5 +1,5 @@
 """
-Dynamic template loader for plugins.
+Dynamic template loader for apps.cloude.cloude_apps.plugins.
 
 This loader scans the plugins/installed directory at runtime,
 allowing newly installed plugins to have their templates found

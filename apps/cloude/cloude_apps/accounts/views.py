@@ -6,17 +6,17 @@ User authentication and profile management.
 from django.views.generic import CreateView, UpdateView, TemplateView, ListView, View
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.contrib.auth.views import PasswordChangeView as DjangoPasswordChangeView
-from django.contrib.auth import logout
-from django.contrib.auth.models import User
+from django.contrib.auth import logout, get_user_model
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from accounts.models import UserProfile
+from apps.cloude.cloude_apps.accounts.models import UserProfile
 import logging
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
@@ -24,7 +24,7 @@ class LoginView(DjangoLoginView):
     """User login"""
     template_name = 'accounts/login.html'
     redirect_authenticated_user = False
-    success_url = reverse_lazy('core:landing')
+    success_url = reverse_lazy('dashboard')
 
     def get(self, request, *args, **kwargs):
         """Handle GET requests - show login form"""
@@ -112,7 +112,7 @@ class SessionManagementView(LoginRequiredMixin, ListView):
     context_object_name = 'sessions'
 
     def get_queryset(self):
-        from accounts.models import UserSession
+        from apps.cloude.cloude_apps.accounts.models import UserSession
         return UserSession.objects.filter(user=self.request.user, is_active=True)
 
 

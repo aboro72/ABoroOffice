@@ -4,9 +4,11 @@ Handles async operations: email sending, SSH execution, health checks, deadline 
 """
 
 import logging
+import os
 import paramiko
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.conf import settings
 from django.core.mail import EmailMessage
 from celery import shared_task
 from celery.utils.log import get_task_logger
@@ -15,6 +17,23 @@ from .models import Approval, ApprovalSettings, RatingSchedule, ServerHealthChec
 from .email_service import EmailService
 
 logger = get_task_logger(__name__)
+
+def _get_ssh_config():
+    cfg = getattr(settings, 'APPROVALS_SSH', {})
+    return {
+        'username': cfg.get('USERNAME') or os.getenv('APPROVALS_SSH_USERNAME'),
+        'password': cfg.get('PASSWORD') or os.getenv('APPROVALS_SSH_PASSWORD'),
+        'key_path': cfg.get('KEY_PATH') or os.getenv('APPROVALS_SSH_KEY_PATH'),
+        'hosts': cfg.get('HOSTS', {}),
+        'health_username': cfg.get('HEALTH_USERNAME')
+        or os.getenv('APPROVALS_SSH_HEALTH_USERNAME')
+        or cfg.get('USERNAME')
+        or os.getenv('APPROVALS_SSH_USERNAME'),
+    }
+
+
+def _resolve_host(config, server_name):
+    return config.get('hosts', {}).get(server_name, server_name)
 
 
 # ============================================================================
@@ -221,6 +240,12 @@ def execute_ssh_approval_task(self, approval_id):
 
         logger.info(f"Starting SSH execution for approval {approval_id}")
         approval.execution_status = 'in_progress'
+        approval._audit_context = {
+            'action': 'execution_started',
+            'actor_label': 'system',
+            'method': 'ssh',
+            'details': {'server': approval.server_name},
+        }
         approval.save()
 
         # Get approval settings for SSH timeout
@@ -239,12 +264,29 @@ def execute_ssh_approval_task(self, approval_id):
             # NOTE: Credentials should be retrieved from secure storage (environment, vault, etc.)
             # For now, this is a template - actual SSH credentials must be configured separately
 
-            ssh_client.connect(
-                approval.server_name,
-                port=approval.server_port,
-                username='approval_user',  # Should come from secure config
-                timeout=ssh_timeout
-            )
+            ssh_config = _get_ssh_config()
+            host = _resolve_host(ssh_config, approval.server_name)
+            username = ssh_config.get('username')
+            password = ssh_config.get('password')
+            key_path = ssh_config.get('key_path')
+
+            if not username:
+                raise ValueError('SSH username is not configured')
+
+            connect_kwargs = {
+                'hostname': host,
+                'port': approval.server_port,
+                'username': username,
+                'timeout': ssh_timeout,
+            }
+            if key_path:
+                connect_kwargs['pkey'] = paramiko.RSAKey.from_private_key_file(key_path)
+            elif password:
+                connect_kwargs['password'] = password
+            else:
+                raise ValueError('SSH credentials are not configured')
+
+            ssh_client.connect(**connect_kwargs)
 
             # Execute command (dummy for now - should execute actual script)
             stdin, stdout, stderr = ssh_client.exec_command(
@@ -265,6 +307,15 @@ def execute_ssh_approval_task(self, approval_id):
             approval.execution_error = error if error else ''
             approval.execution_exit_code = exit_code
             approval.executed_at = timezone.now()
+            approval._audit_context = {
+                'action': 'execution_success' if exit_code == 0 else 'execution_failed',
+                'actor_label': 'system',
+                'method': 'ssh',
+                'details': {
+                    'server': approval.server_name,
+                    'exit_code': exit_code,
+                },
+            }
             approval.save()
 
             logger.info(f"SSH execution completed for approval {approval_id} (exit code: {exit_code})")
@@ -282,6 +333,12 @@ def execute_ssh_approval_task(self, approval_id):
             logger.error(f"{error_msg} for approval {approval_id}")
             approval.execution_status = 'failed'
             approval.execution_error = error_msg
+            approval._audit_context = {
+                'action': 'execution_failed',
+                'actor_label': 'system',
+                'method': 'ssh',
+                'details': {'server': approval.server_name, 'reason': 'auth_failed'},
+            }
             approval.save()
             return {
                 'success': False,
@@ -293,6 +350,12 @@ def execute_ssh_approval_task(self, approval_id):
             logger.error(f"{error_msg} for approval {approval_id}")
             approval.execution_status = 'failed'
             approval.execution_error = error_msg
+            approval._audit_context = {
+                'action': 'execution_failed',
+                'actor_label': 'system',
+                'method': 'ssh',
+                'details': {'server': approval.server_name, 'reason': 'ssh_exception'},
+            }
             approval.save()
             raise self.retry(exc=ssh_exc, countdown=300)
         except Exception as exc:
@@ -300,6 +363,12 @@ def execute_ssh_approval_task(self, approval_id):
             logger.error(f"{error_msg} for approval {approval_id}")
             approval.execution_status = 'failed'
             approval.execution_error = error_msg
+            approval._audit_context = {
+                'action': 'execution_failed',
+                'actor_label': 'system',
+                'method': 'ssh',
+                'details': {'server': approval.server_name, 'reason': 'exception'},
+            }
             approval.save()
             return {
                 'success': False,
@@ -340,10 +409,16 @@ def check_approval_deadlines():
 
         expired_count = expired_approvals.count()
         if expired_count > 0:
-            expired_approvals.update(
-                status='expired',
-                notes=f'Auto-expired at {timezone.now()}'
-            )
+            for approval in expired_approvals:
+                approval.status = 'expired'
+                approval.notes = f'Auto-expired at {timezone.now()}'
+                approval._audit_context = {
+                    'action': 'expired',
+                    'actor_label': 'system',
+                    'method': 'auto',
+                    'details': {'reason': 'deadline_passed'},
+                }
+                approval.save(update_fields=['status', 'notes'])
             logger.info(f"Marked {expired_count} approvals as expired")
 
         # Find approvals approaching deadline (within 1 hour)
@@ -392,6 +467,16 @@ def check_server_health():
 
         checked_count = 0
 
+        ssh_config = _get_ssh_config()
+        username = ssh_config.get('health_username')
+
+        if not username:
+            logger.warning("SSH health check username not configured")
+            return {
+                'success': False,
+                'message': 'SSH health check username not configured',
+            }
+
         for schedule in schedules:
             try:
                 # Check if server is accessible
@@ -399,10 +484,11 @@ def check_server_health():
                 ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
                 try:
+                    host = _resolve_host(ssh_config, schedule.server_url_prefix)
                     ssh_client.connect(
-                        schedule.server_url_prefix,
+                        host,
                         port=schedule.ssh_port,
-                        username='health_check',
+                        username=username,
                         timeout=5
                     )
                     ssh_client.close()

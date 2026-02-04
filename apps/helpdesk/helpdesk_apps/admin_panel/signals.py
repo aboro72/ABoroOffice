@@ -7,7 +7,7 @@ from django.core.cache import cache
 from .models import SystemSettings
 
 try:
-    from helpdesk_apps.chat.models import ChatSettings
+    from apps.helpdesk.helpdesk_apps.chat.models import ChatSettings
 except ImportError:
     ChatSettings = None
 

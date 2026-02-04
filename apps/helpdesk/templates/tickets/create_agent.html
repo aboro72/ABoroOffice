@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Fetch customer search results
-        fetch(`/tickets/api/search-customers/?q=${encodeURIComponent(query)}`)
+        fetch(`{{ helpdesk_prefix }}/tickets/api/search-customers/?q=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(data => {
                 resultsDiv.innerHTML = '';

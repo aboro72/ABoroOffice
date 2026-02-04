@@ -179,7 +179,7 @@ function sendMessage(event) {
     // Disable input while sending
     messageInput.disabled = true;
     
-    fetch(`/chat/api/agent/send/${sessionId}/`, {
+    fetch(`{{ helpdesk_prefix }}/chat/api/agent/send/${sessionId}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ function sendMessage(event) {
 }
 
 function loadNewMessages() {
-    fetch(`/chat/api/messages/${sessionId}/`)
+    fetch(`{{ helpdesk_prefix }}/chat/api/messages/${sessionId}/`)
     .then(response => response.json())
     .then(data => {
         if (data.success) {
@@ -278,7 +278,7 @@ function addMessageToChat(msg) {
 
 function endChat() {
     if (confirm('Möchten Sie diesen Chat wirklich beenden?')) {
-        fetch(`/chat/api/end/${sessionId}/`, {
+        fetch(`{{ helpdesk_prefix }}/chat/api/end/${sessionId}/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}'

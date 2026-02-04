@@ -3,7 +3,7 @@ Storage Stats Widget - Shows user's storage usage statistics.
 """
 
 from typing import Dict, Any
-from plugins.widgets import DashboardWidgetProvider
+from apps.cloude.cloude_apps.plugins.widgets import DashboardWidgetProvider
 
 
 class StorageStatsWidget(DashboardWidgetProvider):
@@ -17,7 +17,7 @@ class StorageStatsWidget(DashboardWidgetProvider):
 
     def get_context(self, request) -> Dict[str, Any]:
         """Get storage statistics for the current user."""
-        from core.models import StorageFile, StorageFolder
+        from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder
 
         profile = request.user.profile
 

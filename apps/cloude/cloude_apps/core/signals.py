@@ -5,12 +5,13 @@ Handles automatic tasks on model changes.
 
 from django.db.models.signals import post_save, post_delete, pre_delete
 from django.dispatch import receiver
-from django.contrib.auth.models import User
-from core.models import StorageFile, StorageFolder, FileVersion, ActivityLog
+from django.contrib.auth import get_user_model
+from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder, FileVersion, ActivityLog
 import os
 import logging
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 @receiver(post_save, sender=StorageFile)

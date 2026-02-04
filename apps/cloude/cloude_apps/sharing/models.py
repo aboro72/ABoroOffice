@@ -4,15 +4,16 @@ Includes file sharing, permissions, and public links.
 """
 
 from django.db import models
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.core.validators import MinValueValidator
+from django.conf import settings
 import uuid
 import secrets
 from datetime import timedelta
+from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder
 
 
 def generate_public_link_token():
@@ -34,8 +35,7 @@ class SharePermission(models.Model):
         ('admin', _('Admin')),
     ]
 
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='share_permissions',
         verbose_name=_('User')
@@ -57,8 +57,7 @@ class SharePermission(models.Model):
         verbose_name=_('Permission type'),
         db_index=True
     )
-    granted_by = models.ForeignKey(
-        User,
+    granted_by = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name='granted_share_permissions',
@@ -88,16 +87,13 @@ class UserShare(models.Model):
     Direct user-to-user sharing.
     Share files/folders with specific users.
     """
-    from core.models import StorageFile, StorageFolder
 
-    owner = models.ForeignKey(
-        User,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='shares_created',
         verbose_name=_('Owner')
     )
-    shared_with = models.ForeignKey(
-        User,
+    shared_with = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='shares_received',
         verbose_name=_('Shared with')
@@ -178,10 +174,8 @@ class PublicLink(models.Model):
     Public shareable links for files and folders.
     Can be password protected and have expiration dates.
     """
-    from core.models import StorageFile, StorageFolder
 
-    owner = models.ForeignKey(
-        User,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='public_links',
         verbose_name=_('Owner')
@@ -321,10 +315,8 @@ class GroupShare(models.Model):
     """
     Group-based sharing for teams.
     """
-    from core.models import StorageFile, StorageFolder
 
-    owner = models.ForeignKey(
-        User,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='group_shares_created',
         verbose_name=_('Owner')
@@ -334,7 +326,7 @@ class GroupShare(models.Model):
         verbose_name=_('Group name')
     )
     members = models.ManyToManyField(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name='group_shares_member_of',
         verbose_name=_('Members')
     )
@@ -389,8 +381,7 @@ class ShareLog(models.Model):
         ('password_changed', _('Password changed')),
     ]
 
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name='share_logs',

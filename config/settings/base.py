@@ -41,6 +41,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Auth redirects
+LOGIN_REDIRECT_URL = '/dashboard/'
+
 # Installed apps
 INSTALLED_APPS = [
     # Django admin
@@ -63,13 +66,27 @@ INSTALLED_APPS = [
 
     # Phase 4: HelpDesk (tickets, knowledge, chat, admin_panel)
     'apps.helpdesk.apps.HelpDeskConfig',
+    'apps.helpdesk.helpdesk_apps.tickets.apps.TicketsConfig',
+    'apps.helpdesk.helpdesk_apps.knowledge.apps.KnowledgeConfig',
+    'apps.helpdesk.helpdesk_apps.chat.apps.ChatConfig',
+    'apps.helpdesk.helpdesk_apps.admin_panel.apps.AdminPanelConfig',
+    'apps.helpdesk.helpdesk_apps.main.apps.MainConfig',
+    'apps.helpdesk.helpdesk_apps.api.apps.ApiConfig',
 
     # Phase 5: Cloude (storage, files, sharing)
     'apps.cloude.apps.CloudeConfig',
+    'apps.cloude.cloude_apps.accounts.apps.AccountsConfig',
+    'apps.cloude.cloude_apps.core.apps.CoreConfig',
+    'apps.cloude.cloude_apps.storage.apps.StorageConfig',
+    'apps.cloude.cloude_apps.sharing.apps.SharingConfig',
+    'apps.cloude.cloude_apps.plugins.apps.PluginsConfig',
+    'apps.cloude.cloude_apps.api.apps.ApiConfig',
 
     # Third-party apps (to be added as phases progress)
-    # 'rest_framework',
-    # 'rest_framework.authtoken',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'drf_spectacular',
     # 'django_extensions',
     # 'corsheaders',
 ]
@@ -82,6 +99,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.core.middleware.AppToggleMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -89,16 +107,26 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'apps' / 'cloude' / 'cloude_apps' / 'templates',
+        ],
+        'APP_DIRS': False,
         'OPTIONS': {
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+                'apps.cloude.cloude_apps.plugins.template_loader.PluginTemplateLoader',
+            ],
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
+            'apps.helpdesk.helpdesk_apps.main.context_processors.branding_context',
+            'apps.core.context_processors.system_settings_context',
+        ],
+    },
     },
 ]
 
@@ -197,6 +225,11 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
 ]
 
+# DRF configuration
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
 # Celery configuration
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
@@ -231,6 +264,27 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 
+# Branding defaults
+APP_NAME = os.getenv('APP_NAME', 'ABoroOffice')
+COMPANY_NAME = os.getenv('COMPANY_NAME', 'ABoroOffice')
+LOGO_URL = os.getenv('LOGO_URL', '')
+APP_TITLE = os.getenv('APP_TITLE', 'ABoroOffice')
+
+# Approvals settings
+APPROVALS_ENABLED = os.getenv('APPROVALS_ENABLED', 'False') == 'True'
+APPROVALS_RATE_LIMIT = {
+    'count': int(os.getenv('APPROVALS_RATE_LIMIT_COUNT', 10)),
+    'period': int(os.getenv('APPROVALS_RATE_LIMIT_PERIOD', 600)),
+}
+
+APPROVALS_SSH = {
+    'USERNAME': os.getenv('APPROVALS_SSH_USERNAME', ''),
+    'PASSWORD': os.getenv('APPROVALS_SSH_PASSWORD', ''),
+    'KEY_PATH': os.getenv('APPROVALS_SSH_KEY_PATH', ''),
+    'HEALTH_USERNAME': os.getenv('APPROVALS_SSH_HEALTH_USERNAME', ''),
+    'HOSTS': {},
+}
+
 # Security headers (will be enabled in production)
 # SECURE_HSTS_SECONDS = 31536000
 # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -240,3 +294,21 @@ SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 # License settings
 LICENSE_CHECK_ENABLED = os.getenv('LICENSE_CHECK_ENABLED', 'True') == 'True'
 LICENSE_TRIAL_DAYS = 30
+
+# Cloude (Cloud Storage) settings
+ALLOWED_FILE_EXTENSIONS = {
+    # Documents
+    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
+    'txt', 'csv', 'json', 'xml',
+    # Images
+    'jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp',
+    # Video
+    'mp4', 'avi', 'mov', 'mkv', 'webm',
+    # Audio
+    'mp3', 'wav', 'flac', 'aac', 'ogg',
+    # Archives
+    'zip', 'rar', '7z', 'tar', 'gz', 'bz2',
+}
+
+# Helpdesk URL prefix (mount point)
+HELPDESK_URL_PREFIX = '/helpdesk'

@@ -27,7 +27,7 @@ class MarkdownPreviewConfig(AppConfig):
         logger.info("Initializing Markdown Preview Plugin")
 
         try:
-            from plugins.hooks import hook_registry, FILE_PREVIEW_PROVIDER
+            from apps.cloude.cloude_apps.plugins.hooks import hook_registry, FILE_PREVIEW_PROVIDER
             from markdown_preview.handlers import MarkdownPreviewProvider
 
             # Register the handler for markdown file types

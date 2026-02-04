@@ -497,18 +497,21 @@
                 {% if user.role == 'admin' %}
                 <a href="{% url 'tickets:create' %}">Ticket erstellen</a>
                 <a href="{% url 'chat:agent_dashboard' %}">💬 Chat Dashboard</a>
-                <a href="{% url 'accounts:user_list' %}">Benutzerverwaltung</a>
+                <a href="{% url 'helpdesk_accounts:user_list' %}">Benutzerverwaltung</a>
+                <a href="/api-docs/">API Docs</a>
                 <a href="/admin/">Admin</a>
                 {% elif user.role == 'support_agent' and user.support_level == 4 %}
                 <a href="{% url 'chat:agent_dashboard' %}">💬 Chat Dashboard</a>
-                <a href="{% url 'accounts:user_list' %}">Benutzer/Kundenverwaltung</a>
+                <a href="{% url 'helpdesk_accounts:user_list' %}">Benutzer/Kundenverwaltung</a>
+                <a href="/api-docs/">API Docs</a>
                 {% elif user.role == 'support_agent' %}
                 <a href="{% url 'chat:agent_dashboard' %}">💬 Chat Dashboard</a>
-                <a href="{% url 'accounts:user_list' %}">Kundenverwaltung</a>
+                <a href="{% url 'helpdesk_accounts:user_list' %}">Kundenverwaltung</a>
+                <a href="/api-docs/">API Docs</a>
                 {% endif %}
                 {% else %}
-                <a href="{% url 'accounts:login' %}">Login</a>
-                <a href="{% url 'accounts:register' %}">Registrieren</a>
+                <a href="{% url 'helpdesk_accounts:login' %}">Login</a>
+                <a href="{% url 'helpdesk_accounts:register' %}">Registrieren</a>
                 {% endif %}
                 {% if user.is_authenticated %}
                 <div class="user-info">
@@ -518,7 +521,7 @@
                         {% if user.role == 'support_agent' %}Support Agent L{{ user.support_level }}{% endif %}
                         {% if user.role == 'customer' %}Kunde{% endif %}
                     </span>
-                    <form method="post" action="{% url 'accounts:logout' %}" style="display: flex; align-items: center; height: 100%; margin: 0;">
+                    <form method="post" action="{% url 'helpdesk_accounts:logout' %}" style="display: flex; align-items: center; height: 100%; margin: 0;">
                         {% csrf_token %}
                         <button type="submit" style="background: none; border: none; color: white; cursor: pointer; padding: 8px 12px; border-radius: 5px; transition: background 0.3s; font-size: 14px; display: flex; align-items: center; height: 100%;">Logout</button>
                     </form>
@@ -598,7 +601,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Load chat widget data
-        fetch('/chat/widget-data/?customer=true&user_name={{ user.full_name|urlencode }}&user_email={{ user.email|urlencode }}')
+        fetch('{{ helpdesk_prefix }}/chat/widget-data/?customer=true&user_name={{ user.full_name|urlencode }}&user_email={{ user.email|urlencode }}')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -762,7 +765,7 @@
             page_url: window.location.href
         };
         
-        fetch('/chat/api/start/', {
+        fetch('{{ helpdesk_prefix }}/chat/api/start/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -813,7 +816,7 @@
             message: message
         };
         
-        fetch('/chat/api/send/', {
+        fetch('{{ helpdesk_prefix }}/chat/api/send/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -838,7 +841,7 @@
     function loadMessages() {
         if (!chatSession) return;
         
-        fetch(`/chat/api/messages/${sessionId}/`)
+        fetch(`{{ helpdesk_prefix }}/chat/api/messages/${sessionId}/`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {

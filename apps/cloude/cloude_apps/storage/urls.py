@@ -3,7 +3,7 @@ URL configuration for Storage app.
 """
 
 from django.urls import path
-from storage import views
+from apps.cloude.cloude_apps.storage import views
 
 app_name = 'storage'
 

@@ -6,8 +6,9 @@ Stores plugin metadata, state, and operation logs.
 
 import uuid
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 
 class Plugin(models.Model):
@@ -88,7 +89,7 @@ class Plugin(models.Model):
         help_text="Current status of the plugin"
     )
 
-    # Module path (e.g., 'plugins.installed.markdown_preview')
+    # Module path (e.g., 'apps.cloude.cloude_apps.plugins.installed.markdown_preview')
     module_name = models.CharField(
         max_length=255,
         blank=True,
@@ -116,8 +117,7 @@ class Plugin(models.Model):
     )
 
     # Metadata
-    installed_by = models.ForeignKey(
-        User,
+    installed_by = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -220,8 +220,7 @@ class PluginLog(models.Model):
         db_index=True,
         help_text="Type of action performed"
     )
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -248,3 +247,4 @@ class PluginLog(models.Model):
 
     def __str__(self):
         return f"{self.plugin.name}: {self.action} at {self.created_at}"
+User = get_user_model()

@@ -3,11 +3,14 @@ Django REST Framework Serializers for CloudService API.
 """
 
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from core.models import StorageFile, StorageFolder, FileVersion, ActivityLog, Notification
-from accounts.models import UserProfile
-from sharing.models import UserShare, PublicLink, SharePermission
-from storage.models import StorageStats
+from drf_spectacular.utils import extend_schema_field, OpenApiTypes
+from django.contrib.auth import get_user_model
+from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder, FileVersion, ActivityLog, Notification
+from apps.cloude.cloude_apps.accounts.models import UserProfile
+
+User = get_user_model()
+from apps.cloude.cloude_apps.sharing.models import UserShare, PublicLink, SharePermission
+from apps.cloude.cloude_apps.storage.models import StorageStats
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,7 +24,9 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile']
         read_only_fields = ['id']
+        ref_name = 'CloudeUser'
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_profile(self, obj):
         """Get user profile data"""
         if hasattr(obj, 'profile'):
@@ -58,6 +63,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return obj.get_storage_used_percentage()
 
 
+class BreadcrumbItemSerializer(serializers.Serializer):
+    """Serializer for breadcrumb items"""
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+
 class StorageFolderSerializer(serializers.ModelSerializer):
     """Serializer for StorageFolder model"""
     breadcrumb = serializers.SerializerMethodField()
@@ -73,14 +84,17 @@ class StorageFolderSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
 
+    @extend_schema_field(BreadcrumbItemSerializer(many=True))
     def get_breadcrumb(self, obj):
         """Get breadcrumb path"""
         return [{'id': f.id, 'name': f.name} for f in obj.breadcrumb]
 
+    @extend_schema_field(OpenApiTypes.INT)
     def get_file_count(self, obj):
         """Get total file count"""
         return obj.get_file_count()
 
+    @extend_schema_field(OpenApiTypes.FLOAT)
     def get_size(self, obj):
         """Get folder size in MB"""
         return obj.get_size() / (1024 * 1024)
@@ -116,14 +130,17 @@ class StorageFileSerializer(serializers.ModelSerializer):
             'version_count', 'download_count', 'last_accessed'
         ]
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_icon_class(self, obj):
         """Get icon class for file type"""
         return obj.get_icon_class()
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_extension(self, obj):
         """Get file extension"""
         return obj.get_extension()
 
+    @extend_schema_field(OpenApiTypes.FLOAT)
     def get_size_mb(self, obj):
         """Get file size in MB"""
         return obj.size / (1024 * 1024)
@@ -185,10 +202,12 @@ class PublicLinkSerializer(serializers.ModelSerializer):
             'password_hash': {'write_only': True}
         }
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_url(self, obj):
         """Get public link URL"""
         return obj.get_url()
 
+    @extend_schema_field(OpenApiTypes.BOOL)
     def get_is_expired(self, obj):
         """Check if link is expired"""
         return obj.is_expired()
@@ -198,6 +217,7 @@ class ActivityLogSerializer(serializers.ModelSerializer):
     """Serializer for ActivityLog model"""
     user_username = serializers.CharField(source='user.username', read_only=True)
     activity_type_display = serializers.CharField(source='get_activity_type_display', read_only=True)
+    ip_address = serializers.CharField(read_only=True)
 
     class Meta:
         model = ActivityLog
@@ -234,10 +254,12 @@ class StorageStatsSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+    @extend_schema_field(OpenApiTypes.FLOAT)
     def get_total_size_mb(self, obj):
         """Get total size in MB"""
         return obj.get_total_size_mb()
 
+    @extend_schema_field(OpenApiTypes.FLOAT)
     def get_total_size_gb(self, obj):
         """Get total size in GB"""
         return obj.get_total_size_gb()
@@ -282,6 +304,7 @@ class SearchResultSerializer(serializers.Serializer):
     name = serializers.CharField()
     url = serializers.SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_url(self, obj):
         """Get URL for result"""
         if obj['type'] == 'file':
@@ -289,3 +312,39 @@ class SearchResultSerializer(serializers.Serializer):
         elif obj['type'] == 'folder':
             return f"/storage/folder/{obj['id']}/"
         return None
+
+
+class StorageQuotaSerializer(serializers.Serializer):
+    """Serializer for storage quota response"""
+    quota = serializers.IntegerField()
+    used = serializers.IntegerField()
+    remaining = serializers.IntegerField()
+    percentage_used = serializers.FloatField()
+    is_full = serializers.BooleanField()
+    is_warning = serializers.BooleanField()
+
+
+class RestoreFileVersionRequestSerializer(serializers.Serializer):
+    """Request payload for restoring a file version"""
+    version_id = serializers.IntegerField()
+
+
+class RestoreFileVersionResponseSerializer(serializers.Serializer):
+    """Response payload for restoring a file version"""
+    message = serializers.CharField()
+    version_number = serializers.IntegerField()
+
+
+class MessageResponseSerializer(serializers.Serializer):
+    """Generic message response"""
+    message = serializers.CharField()
+
+
+class UpdateSharePermissionRequestSerializer(serializers.Serializer):
+    """Request payload for updating share permission"""
+    permission = serializers.CharField()
+
+
+class SetPublicLinkPasswordRequestSerializer(serializers.Serializer):
+    """Request payload for setting public link password"""
+    password = serializers.CharField(allow_blank=True, required=False)

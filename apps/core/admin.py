@@ -27,7 +27,7 @@ class ABoroUserAdmin(BaseUserAdmin):
             'classes': ('collapse',)
         }),
         (_('Approvals'), {
-            'fields': ('is_approver',),
+            'fields': ('is_approver', 'approval_groups'),
             'classes': ('collapse',)
         }),
         (_('Address'), {

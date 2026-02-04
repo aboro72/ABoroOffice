@@ -1,5 +1,5 @@
 from django.contrib import admin
-from helpdesk_apps.common.admin_mixins import ZoneinfoSafeDateHierarchyMixin
+from apps.helpdesk.helpdesk_apps.common.admin_mixins import ZoneinfoSafeDateHierarchyMixin
 from .models import Ticket, TicketComment, TicketAttachment, Category
 
 

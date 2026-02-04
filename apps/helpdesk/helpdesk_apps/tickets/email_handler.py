@@ -20,7 +20,7 @@ class EmailToTicketHandler:
     def __init__(self, verbose=False, limit=None, folder=None, dry_run=False, stdout=None):
         # Get IMAP settings from database or environment
         try:
-            from helpdesk_apps.admin_panel.settings_helper import get_imap_settings
+            from apps.helpdesk.helpdesk_apps.admin_panel.settings_helper import get_imap_settings
             imap_config = get_imap_settings()
             self.imap_host = imap_config['host']
             self.imap_port = imap_config['port']
@@ -192,10 +192,11 @@ class EmailToTicketHandler:
         - Subsequent runs: fetches only emails since last sync
         Returns tuple (created_count, updated_count, error_count)
         """
-        from helpdesk_apps.tickets.models import Ticket
-        from helpdesk_apps.accounts.models import User
-        from helpdesk_apps.admin_panel.models import SystemSettings
+        from apps.helpdesk.helpdesk_apps.tickets.models import Ticket
+        from django.contrib.auth import get_user_model
+        from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
         from django.utils.timezone import now as timezone_now
+        User = get_user_model()
 
         created_count = 0
         updated_count = 0
@@ -288,7 +289,7 @@ class EmailToTicketHandler:
 
                             if not self.dry_run:
                                 # Create comment
-                                from helpdesk_apps.tickets.models import TicketComment
+                                from apps.helpdesk.helpdesk_apps.tickets.models import TicketComment
                                 comment = TicketComment(
                                     ticket=ticket,
                                     author_name=sender_email,
@@ -366,7 +367,7 @@ class EmailToTicketHandler:
         # Update sync tracking if no errors and at least one email was processed
         if not self.dry_run and (created_count > 0 or updated_count > 0):
             try:
-                from helpdesk_apps.admin_panel.models import SystemSettings
+                from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
                 from django.utils.timezone import now as timezone_now
 
                 settings_obj = SystemSettings.get_settings()

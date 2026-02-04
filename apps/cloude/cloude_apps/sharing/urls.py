@@ -3,7 +3,7 @@ URL configuration for Sharing app.
 """
 
 from django.urls import path
-from sharing import views
+from apps.cloude.cloude_apps.sharing import views
 
 app_name = 'sharing'
 

@@ -6,7 +6,7 @@
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
     <h1 style="font-size: 28px; font-weight: 600; margin: 0;">👥 Benutzerverwaltung</h1>
     {% if can_create_users %}
-    <a href="{% url 'accounts:user_create' %}" class="btn btn-primary">
+    <a href="{% url 'helpdesk_accounts:user_create' %}" class="btn btn-primary">
         <i class="fas fa-plus"></i> Neuen Benutzer erstellen
     </a>
     {% endif %}
@@ -107,12 +107,12 @@
                     </td>
                     <td style="padding: 12px; text-align: center;">
                         <div style="display: flex; gap: 5px; justify-content: center;">
-                            <a href="{% url 'accounts:user_detail' user.id %}" 
+                            <a href="{% url 'helpdesk_accounts:user_detail' user.id %}" 
                                style="padding: 6px 10px; background: #17a2b8; color: white; text-decoration: none; border-radius: 4px; font-size: 12px;" 
                                title="Details anzeigen">
                                 👁️
                             </a>
-                            <a href="{% url 'accounts:user_edit' user.id %}" 
+                            <a href="{% url 'helpdesk_accounts:user_edit' user.id %}" 
                                style="padding: 6px 10px; background: #ffc107; color: #212529; text-decoration: none; border-radius: 4px; font-size: 12px;" 
                                title="Bearbeiten">
                                 ✏️
@@ -176,7 +176,7 @@
         <h3>Keine Benutzer gefunden</h3>
         <p>{% if search or role_filter or status_filter %}Versuchen Sie andere Suchkriterien.{% else %}Es sind noch keine Benutzer vorhanden.{% endif %}</p>
         {% if can_create_users %}
-        <a href="{% url 'accounts:user_create' %}" class="btn btn-primary" style="margin-top: 15px;">
+        <a href="{% url 'helpdesk_accounts:user_create' %}" class="btn btn-primary" style="margin-top: 15px;">
             Ersten Benutzer erstellen
         </a>
         {% endif %}

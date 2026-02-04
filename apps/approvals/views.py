@@ -14,6 +14,8 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.urls import reverse
+from django.conf import settings
+from django.core.cache import cache
 
 from .models import Approval, ApprovalSettings, RatingSchedule, ServerHealthCheck
 from .celery_tasks import (
@@ -23,6 +25,26 @@ from .celery_tasks import (
 from apps.licensing.decorators import license_required, LicenseRequiredMixin, ApproverRequiredMixin
 
 logger = logging.getLogger('approvals')
+
+
+def _get_client_ip(request):
+    """Best-effort client IP extraction."""
+    forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if forwarded_for:
+        return forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR')
+
+
+def _check_rate_limit(key, max_count, period_seconds):
+    """Simple cache-based rate limiter."""
+    current = cache.get(key, 0)
+    if current >= max_count:
+        return False
+    if current == 0:
+        cache.set(key, 1, timeout=period_seconds)
+    else:
+        cache.incr(key)
+    return True
 
 
 # ============================================================================
@@ -42,7 +64,13 @@ class ApprovalListView(LicenseRequiredMixin, LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Get approvals, filtered by status if provided"""
-        queryset = Approval.objects.all().order_by('-created_at')
+        queryset = (
+            Approval.objects
+            .select_related('rating_schedule')
+            .prefetch_related('reminders')
+            .filter(archived=False)
+            .order_by('-created_at')
+        )
 
         # Filter by status
         status = self.request.GET.get('status')
@@ -77,13 +105,21 @@ class ApprovalDetailView(LicenseRequiredMixin, LoginRequiredMixin, DetailView):
     slug_url_kwarg = 'token'
     required_feature = 'approvals'
 
+    def get_queryset(self):
+        return (
+            Approval.objects
+            .select_related('rating_schedule')
+            .prefetch_related('reminders', 'audit_logs')
+            .filter(archived=False)
+        )
+
     def get_context_data(self, **kwargs):
         """Add related objects to context"""
         context = super().get_context_data(**kwargs)
         approval = self.object
 
         # Add reminders
-        context['reminders'] = approval.approvalreminder_set.all().order_by('reminder_number')
+        context['reminders'] = approval.reminders.all().order_by('reminder_number')
 
         # Add health status
         try:
@@ -97,7 +133,7 @@ class ApprovalDetailView(LicenseRequiredMixin, LoginRequiredMixin, DetailView):
         context['can_approve'] = (
             approval.status == 'pending' and
             not approval.is_expired() and
-            self.request.user.is_staff  # TODO: Add is_approver check
+            approval.user_can_approve(self.request.user)
         )
 
         # Hours remaining
@@ -124,6 +160,23 @@ class ApprovalApproveView(View):
 
     def post(self, request, token=None, pk=None):
         """Handle approval action"""
+        client_ip = _get_client_ip(request)
+
+        # Rate limit token-based approvals (email links)
+        if token:
+            rate_limit = getattr(
+                settings,
+                'APPROVALS_RATE_LIMIT',
+                {'count': 10, 'period': 600},
+            )
+            if not _check_rate_limit(
+                key=f"approvals:approve:{token}:{client_ip}",
+                max_count=rate_limit.get('count', 10),
+                period_seconds=rate_limit.get('period', 600),
+            ):
+                logger.warning(f"Rate limit exceeded for approval token {token} from {client_ip}")
+                return JsonResponse({'error': 'Rate limit exceeded'}, status=429)
+
         # Get approval by token (email link) or pk (form/API)
         if token:
             approval = get_object_or_404(Approval, token=token)
@@ -139,13 +192,13 @@ class ApprovalApproveView(View):
                 logger.warning(f"Unauthenticated approval attempt for {approval.token}")
                 return JsonResponse({'error': 'Authentication required'}, status=401)
 
-            # Check license
-            if not request.user.can_access_feature('approvals'):
+            # Check license (if enabled)
+            if getattr(settings, 'LICENSE_CHECK_ENABLED', True) and not request.user.can_access_feature('approvals'):
                 logger.warning(f"License check failed for {request.user}")
                 return JsonResponse({'error': 'Feature not available in license'}, status=403)
 
-            # Check approver status
-            if not (request.user.is_approver or request.user.is_staff):
+            # Check approver status and group access
+            if not approval.user_can_approve(request.user):
                 logger.warning(
                     f"Unauthorized approval attempt by {request.user} for {approval.token}"
                 )
@@ -160,6 +213,16 @@ class ApprovalApproveView(View):
 
         # Check if expired
         if approval.is_expired():
+            approval._audit_context = {
+                'action': 'expired',
+                'actor_user': request.user if request.user.is_authenticated else None,
+                'actor_label': 'system',
+                'method': 'auto',
+                'ip_address': client_ip,
+                'user_agent': request.META.get('HTTP_USER_AGENT', ''),
+                'details': {'reason': 'deadline_passed'},
+            }
+            approval.mark_expired()
             logger.warning(f"Cannot approve {approval.token}: deadline passed")
             return JsonResponse({'error': 'Approval deadline has passed'}, status=400)
 
@@ -167,9 +230,29 @@ class ApprovalApproveView(View):
         try:
             approval.status = 'approved'
             approval.approved_at = timezone.now()
-            approval.approved_by = request.user.email if request.user.email else request.user.username
-            approval.approval_method = 'email' if token else 'gui'
+            if token:
+                approval.approved_by = 'email-token'
+                approval.approval_method = 'email'
+            else:
+                approval.approved_by = request.user.email if request.user.email else request.user.username
+                approval.approval_method = 'gui'
+            approval._audit_context = {
+                'action': 'approved',
+                'actor_user': request.user if request.user.is_authenticated else None,
+                'actor_label': approval.approved_by or 'email-token',
+                'method': approval.approval_method,
+                'ip_address': client_ip,
+                'user_agent': request.META.get('HTTP_USER_AGENT', ''),
+            }
             approval.save()
+            approval.log_action(
+                action='approved',
+                actor_user=request.user if request.user.is_authenticated else None,
+                actor_label=approval.approved_by or 'email-token',
+                method=approval.approval_method,
+                ip_address=client_ip,
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+            )
 
             logger.info(
                 f"Approval approved: {approval.token} by {approval.approved_by} "
@@ -206,12 +289,16 @@ class ApprovalRejectView(ApproverRequiredMixin, LoginRequiredMixin, View):
     def post(self, request, pk):
         """Handle rejection action"""
         approval = get_object_or_404(Approval, pk=pk)
+        client_ip = _get_client_ip(request)
 
-        # ApproverRequiredMixin already checks permissions in dispatch
-        # Additional license check
-        if not request.user.can_access_feature('approvals'):
+        # ApproverRequiredMixin already checks basic permissions in dispatch
+        # Additional license and group checks
+        if getattr(settings, 'LICENSE_CHECK_ENABLED', True) and not request.user.can_access_feature('approvals'):
             logger.warning(f"License check failed for {request.user}")
             return JsonResponse({'error': 'Feature not available in license'}, status=403)
+        if not approval.user_can_approve(request.user):
+            logger.warning(f"Approval group check failed for {request.user} on {approval.token}")
+            return JsonResponse({'error': 'Not authorized to approve'}, status=403)
 
         # Check if already approved/rejected
         if approval.status in ['approved', 'rejected', 'expired']:
@@ -230,6 +317,15 @@ class ApprovalRejectView(ApproverRequiredMixin, LoginRequiredMixin, View):
             approval.approved_by = request.user.email if request.user.email else request.user.username
             approval.approval_method = 'gui'
             approval.notes = f'Rejected by {approval.approved_by}. Reason: {reason}' if reason else 'Rejected'
+            approval._audit_context = {
+                'action': 'rejected',
+                'actor_user': request.user,
+                'actor_label': approval.approved_by,
+                'method': 'gui',
+                'ip_address': client_ip,
+                'user_agent': request.META.get('HTTP_USER_AGENT', ''),
+                'details': {'reason': reason},
+            }
             approval.save()
 
             logger.info(
@@ -363,14 +459,15 @@ class ApprovalStatisticsView(LicenseRequiredMixin, LoginRequiredMixin, View):
         from django.utils.timezone import now, timedelta
 
         # Overall counts
-        total = Approval.objects.count()
-        pending = Approval.objects.filter(status='pending').count()
-        approved = Approval.objects.filter(status='approved').count()
-        rejected = Approval.objects.filter(status='rejected').count()
-        expired = Approval.objects.filter(status='expired').count()
+        base_qs = Approval.objects.filter(archived=False)
+        total = base_qs.count()
+        pending = base_qs.filter(status='pending').count()
+        approved = base_qs.filter(status='approved').count()
+        rejected = base_qs.filter(status='rejected').count()
+        expired = base_qs.filter(status='expired').count()
 
         # Calculate average approval time
-        approved_with_time = Approval.objects.filter(
+        approved_with_time = base_qs.filter(
             status='approved',
             approved_at__isnull=False,
             created_at__isnull=False
@@ -386,11 +483,11 @@ class ApprovalStatisticsView(LicenseRequiredMixin, LoginRequiredMixin, View):
 
         # Last 7 days stats
         week_ago = now() - timedelta(days=7)
-        last_week_count = Approval.objects.filter(created_at__gte=week_ago).count()
+        last_week_count = base_qs.filter(created_at__gte=week_ago).count()
 
         # Most active servers
         server_stats = (
-            Approval.objects
+            base_qs
             .values('server_name')
             .annotate(count=Count('id'))
             .order_by('-count')[:5]

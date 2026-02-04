@@ -1,10 +1,10 @@
 """
-Management command to discover and optionally activate plugins.
+Management command to discover and optionally activate apps.cloude.cloude_apps.plugins.
 """
 
 from django.core.management.base import BaseCommand, CommandError
-from plugins.loader import PluginLoader
-from plugins.models import Plugin
+from apps.cloude.cloude_apps.plugins.loader import PluginLoader
+from apps.cloude.cloude_apps.plugins.models import Plugin
 
 
 class Command(BaseCommand):
@@ -25,7 +25,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         loader = PluginLoader()
 
-        self.stdout.write('Discovering plugins...')
+        self.stdout.write('Discovering apps.cloude.cloude_apps.plugins...')
         discovered = loader.discover_plugins()
 
         if not discovered:

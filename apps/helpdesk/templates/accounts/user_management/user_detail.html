@@ -9,11 +9,11 @@
     </h1>
     <div style="display: flex; gap: 10px;">
         {% if can_edit %}
-        <a href="{% url 'accounts:user_edit' target_user.id %}" class="btn btn-primary">
+        <a href="{% url 'helpdesk_accounts:user_edit' target_user.id %}" class="btn btn-primary">
             ✏️ Bearbeiten
         </a>
         {% endif %}
-        <a href="{% url 'accounts:user_list' %}" class="btn btn-secondary">
+        <a href="{% url 'helpdesk_accounts:user_list' %}" class="btn btn-secondary">
             ← Zurück zur Übersicht
         </a>
     </div>

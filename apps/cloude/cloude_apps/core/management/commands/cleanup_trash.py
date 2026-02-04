@@ -4,7 +4,7 @@ Management command to cleanup expired trash items.
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from storage.models import TrashBin
+from apps.cloude.cloude_apps.storage.models import TrashBin
 import logging
 
 logger = logging.getLogger(__name__)

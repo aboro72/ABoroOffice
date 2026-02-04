@@ -5,7 +5,7 @@ Displays an animated analog clock in the file preview.
 Great for testing the plugin system - you can immediately see it working!
 """
 
-from plugins.preview import FilePreviewProvider
+from apps.cloude.cloude_apps.plugins.preview import FilePreviewProvider
 import logging
 
 logger = logging.getLogger(__name__)

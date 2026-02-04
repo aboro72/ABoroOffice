@@ -4,7 +4,7 @@ Real-time updates for file operations.
 """
 
 from django.urls import path
-from core.consumers import NotificationConsumer, FileUploadConsumer
+from apps.cloude.cloude_apps.core.consumers import NotificationConsumer, FileUploadConsumer
 
 websocket_urlpatterns = [
     path('ws/notifications/', NotificationConsumer.as_asgi(), name='ws_notifications'),

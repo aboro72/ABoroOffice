@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import SystemSettings
-from helpdesk_apps.api.license_manager import LicenseManager
+from apps.helpdesk.helpdesk_apps.api.license_manager import LicenseManager
 from datetime import datetime
 import json
 

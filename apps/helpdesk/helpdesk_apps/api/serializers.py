@@ -2,9 +2,12 @@
 DRF Serializers for ABoro-Soft Helpdesk API
 """
 from rest_framework import serializers
-from helpdesk_apps.accounts.models import User
-from helpdesk_apps.tickets.models import Ticket, TicketComment, Category
-from helpdesk_apps.knowledge.models import KnowledgeArticle
+from django.contrib.auth import get_user_model
+from apps.helpdesk.helpdesk_apps.tickets.models import Ticket, TicketComment, Category
+from apps.helpdesk.helpdesk_apps.knowledge.models import KnowledgeArticle
+
+
+User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -18,21 +21,57 @@ class UserSerializer(serializers.ModelSerializer):
             'is_active', 'last_login', 'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'last_login']
+        ref_name = 'HelpdeskUser'
+
+
+class LoginRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+
+class AuthResponseSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    user = UserSerializer()
+    success = serializers.BooleanField()
+
+
+class LogoutResponseSerializer(serializers.Serializer):
+    success = serializers.BooleanField()
+    message = serializers.CharField()
+
+class LicenseValidateRequestSerializer(serializers.Serializer):
+    license_key = serializers.CharField()
+
+
+class LicenseValidateResponseSerializer(serializers.Serializer):
+    valid = serializers.BooleanField()
+    license_info = serializers.JSONField(required=False)
+    error = serializers.CharField(required=False)
+
+
+class HealthResponseSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    version = serializers.CharField()
+    timestamp = serializers.CharField()
+
+
+class StatsResponseSerializer(serializers.Serializer):
+    stats = serializers.JSONField()
 
 
 class TicketCommentSerializer(serializers.ModelSerializer):
     """Serialize TicketComment model"""
 
-    created_by_username = serializers.CharField(
-        source='created_by.username',
+    author_username = serializers.CharField(
+        source='author.username',
         read_only=True
     )
 
     class Meta:
         model = TicketComment
         fields = [
-            'id', 'ticket', 'created_by', 'created_by_username',
-            'content', 'created_at', 'updated_at'
+            'id', 'ticket', 'author', 'author_username',
+            'content', 'created_at', 'updated_at', 'is_internal'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'ticket']
 

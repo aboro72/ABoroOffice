@@ -10,4 +10,4 @@ Usage:
     - Plugin hooks system for extensibility
 """
 
-default_app_config = 'plugins.apps.PluginsConfig'
+default_app_config = 'apps.cloude.cloude_apps.plugins.apps.PluginsConfig'

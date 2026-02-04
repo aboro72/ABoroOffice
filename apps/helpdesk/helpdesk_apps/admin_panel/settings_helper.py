@@ -15,7 +15,7 @@ def get_imap_settings():
         dict: IMAP configuration
     """
     try:
-        from helpdesk_apps.admin_panel.models import SystemSettings
+        from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
         system_settings = SystemSettings.get_settings()
 
         return {
@@ -52,7 +52,7 @@ def get_smtp_settings():
         dict: SMTP configuration
     """
     try:
-        from helpdesk_apps.admin_panel.models import SystemSettings
+        from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
         system_settings = SystemSettings.get_settings()
 
         return {

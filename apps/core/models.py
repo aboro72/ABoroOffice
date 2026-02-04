@@ -107,6 +107,12 @@ class ABoroUser(AbstractUser):
         default=False,
         help_text=_('Whether this user can approve SSH execution requests')
     )
+    approval_groups = models.ManyToManyField(
+        'approvals.RatingSchedule',
+        blank=True,
+        related_name='approvers',
+        help_text=_('Rating schedules this user is allowed to approve')
+    )
 
     # HelpDesk extended fields
     location = models.CharField(
@@ -240,6 +246,52 @@ class ABoroUser(AbstractUser):
         """Update last activity timestamp."""
         self.last_activity = timezone.now()
         self.save(update_fields=['last_activity'])
+
+    def get_dashboard_stats(self):
+        """Return Helpdesk dashboard stats for this user."""
+        try:
+            from django.utils import timezone as dj_timezone
+            from apps.helpdesk.helpdesk_apps.tickets.models import Ticket
+        except Exception:
+            return {}
+
+        stats = {
+            'my_tickets': 0,
+            'open_tickets': 0,
+            'resolved_tickets': 0,
+            'closed_tickets': 0,
+            'my_assigned': 0,
+            'unassigned': 0,
+            'in_progress': 0,
+            'resolved': 0,
+            'total_tickets': 0,
+            'closed_today': 0,
+        }
+
+        try:
+            if self.role == 'customer':
+                user_tickets = Ticket.objects.filter(created_by=self)
+                stats['my_tickets'] = user_tickets.count()
+                stats['open_tickets'] = user_tickets.filter(
+                    status__in=['open', 'in_progress', 'pending']
+                ).count()
+                stats['resolved_tickets'] = user_tickets.filter(status='resolved').count()
+                stats['closed_tickets'] = user_tickets.filter(status='closed').count()
+            elif self.role == 'support_agent':
+                stats['my_assigned'] = Ticket.objects.filter(assigned_to=self).count()
+                stats['unassigned'] = Ticket.objects.filter(assigned_to__isnull=True).count()
+                stats['in_progress'] = Ticket.objects.filter(status='in_progress').count()
+                stats['resolved'] = Ticket.objects.filter(status='resolved').count()
+            else:
+                stats['total_tickets'] = Ticket.objects.count()
+                stats['open_tickets'] = Ticket.objects.filter(status='open').count()
+                stats['in_progress'] = Ticket.objects.filter(status='in_progress').count()
+                today = dj_timezone.localdate()
+                stats['closed_today'] = Ticket.objects.filter(closed_at__date=today).count()
+        except Exception:
+            return stats
+
+        return stats
 
 
 class SystemSettings(models.Model):

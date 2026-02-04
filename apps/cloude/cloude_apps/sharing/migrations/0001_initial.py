@@ -2,7 +2,7 @@
 
 import django.core.validators
 import django.db.models.deletion
-import sharing.models
+from apps.cloude.cloude_apps.sharing.models import generate_public_link_token
 from django.conf import settings
 from django.db import migrations, models
 
@@ -110,7 +110,7 @@ class Migration(migrations.Migration):
                     "token",
                     models.CharField(
                         db_index=True,
-                        default=sharing.models.generate_public_link_token,
+                        default=generate_public_link_token,
                         max_length=32,
                         unique=True,
                         verbose_name="Token",

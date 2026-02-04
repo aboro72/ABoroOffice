@@ -3,10 +3,12 @@ Tests for CloudService models.
 """
 
 import pytest
-from django.contrib.auth.models import User
-from core.models import StorageFile, StorageFolder, FileVersion
-from accounts.models import UserProfile
-from sharing.models import UserShare, PublicLink
+from django.contrib.auth import get_user_model
+from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder, FileVersion
+from apps.cloude.cloude_apps.accounts.models import UserProfile
+
+User = get_user_model()
+from apps.cloude.cloude_apps.sharing.models import UserShare, PublicLink
 
 
 @pytest.mark.django_db

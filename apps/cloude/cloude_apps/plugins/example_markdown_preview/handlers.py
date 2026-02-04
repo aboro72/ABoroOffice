@@ -4,7 +4,7 @@ Markdown preview provider handler.
 Implements the FilePreviewProvider interface to render Markdown files as HTML.
 """
 
-from plugins.preview import FilePreviewProvider
+from apps.cloude.cloude_apps.plugins.preview import FilePreviewProvider
 import markdown
 import logging
 

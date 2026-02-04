@@ -12,7 +12,7 @@ from django.db.models import Q, Sum
 from django.core.files.base import ContentFile
 from django import forms
 
-from core.models import StorageFile, StorageFolder
+from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder
 import logging
 import mimetypes
 
@@ -165,14 +165,14 @@ class FileDetailView(LoginRequiredMixin, DetailView):
         # Check for active plugins (.plug files)
         # These can be positioned on left, center, or right
         try:
-            from plugins.models import Plugin
+            from apps.cloude.cloude_apps.plugins.models import Plugin
 
             active_plugins = Plugin.objects.filter(enabled=True, status='active')
 
             for plugin in active_plugins:
                 try:
                     # Load plugin preview for .plug files
-                    from plugins.hooks import hook_registry, FILE_PREVIEW_PROVIDER
+                    from apps.cloude.cloude_apps.plugins.hooks import hook_registry, FILE_PREVIEW_PROVIDER
 
                     handlers = hook_registry.get_handlers(
                         FILE_PREVIEW_PROVIDER,
@@ -531,7 +531,7 @@ class FileVersionsView(LoginRequiredMixin, ListView):
     context_object_name = 'versions'
 
     def get_queryset(self):
-        from core.models import FileVersion
+        from apps.cloude.cloude_apps.core.models import FileVersion
         file_id = self.kwargs.get('file_id')
         return FileVersion.objects.filter(file_id=file_id)
 
@@ -552,7 +552,7 @@ class RestoreVersionView(LoginRequiredMixin, DetailView):
     pk_url_kwarg = 'file_id'
 
     def post(self, request, *args, **kwargs):
-        from core.models import FileVersion
+        from apps.cloude.cloude_apps.core.models import FileVersion
         file_obj = self.get_object()
         version_id = request.POST.get('version_id')
 
@@ -674,7 +674,7 @@ class EmptyTrashView(LoginRequiredMixin, TemplateView):
         return redirect('storage:trash')
 
     def post(self, request, *args, **kwargs):
-        from storage.models import TrashBin
+        from apps.cloude.cloude_apps.storage.models import TrashBin
         trash_item = get_object_or_404(TrashBin, id=self.kwargs.get('trash_id'), user=request.user)
         # Permanently delete the file
         if trash_item.file:

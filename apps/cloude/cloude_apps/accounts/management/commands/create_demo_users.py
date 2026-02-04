@@ -3,11 +3,12 @@ Management command to create demo users for testing.
 """
 
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
-from accounts.models import UserProfile
+from django.contrib.auth import get_user_model
+from apps.cloude.cloude_apps.accounts.models import UserProfile
 import logging
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 class Command(BaseCommand):

@@ -848,7 +848,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.session-item[data-session-id], .session-item-compact[data-session-id]').forEach(item => {
         item.addEventListener('click', function() {
             const sessionId = this.dataset.sessionId;
-            window.location.href = `/chat/agent/session/${sessionId}/`;
+            window.location.href = `{{ helpdesk_prefix }}/chat/agent/session/${sessionId}/`;
         });
     });
 });
@@ -872,7 +872,7 @@ function takeSession(sessionId) {
     button.disabled = true;
     button.textContent = 'Übernehme...';
 
-    fetch(`/chat/agent/take/${sessionId}/`, {
+    fetch(`{{ helpdesk_prefix }}/chat/agent/take/${sessionId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
@@ -888,7 +888,7 @@ function takeSession(sessionId) {
     })
     .then(data => {
         if (data.success) {
-            window.location.href = `/chat/agent/session/${sessionId}/`;
+            window.location.href = `{{ helpdesk_prefix }}/chat/agent/session/${sessionId}/`;
         } else {
             alert(data.error || 'Fehler beim Übernehmen der Session');
             button.disabled = false;

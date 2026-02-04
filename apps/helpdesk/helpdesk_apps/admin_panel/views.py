@@ -17,7 +17,7 @@ import logging
 
 from .models import SystemSettings, AuditLog
 from .forms import SystemSettingsForm, TestEmailForm, TestIMAPForm, LicenseForm
-from helpdesk_apps.api.license_manager import LicenseManager
+from apps.helpdesk.helpdesk_apps.api.license_manager import LicenseManager
 
 logger = logging.getLogger(__name__)
 

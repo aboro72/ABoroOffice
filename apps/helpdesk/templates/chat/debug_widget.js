@@ -96,7 +96,7 @@
             try {
                 // Test 1: Simple GET request to widget data
                 this.log('Test 1: Fetching widget data...');
-                const response1 = await fetch(`${config.chatHost}/chat/widget-data/`, {
+                const response1 = await fetch(`${config.chatHost}{{ helpdesk_prefix }}/chat/widget-data/`, {
                     method: 'GET',
                     mode: 'cors',
                     credentials: 'omit', // Firefox-freundlich
@@ -110,7 +110,7 @@
                 
                 // Test 2: OPTIONS preflight request
                 this.log('Test 2: Testing OPTIONS preflight...');
-                const response2 = await fetch(`${config.chatHost}/chat/api/start/`, {
+                const response2 = await fetch(`${config.chatHost}{{ helpdesk_prefix }}/chat/api/start/`, {
                     method: 'OPTIONS',
                     mode: 'cors',
                     credentials: 'omit',
@@ -127,7 +127,7 @@
                 this.log('Test 3: Testing actual API call...');
                 this.sessionId = 'debug_' + Math.random().toString(36).substr(2, 9);
                 
-                const response3 = await fetch(`${config.chatHost}/chat/api/start/`, {
+                const response3 = await fetch(`${config.chatHost}{{ helpdesk_prefix }}/chat/api/start/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -153,7 +153,7 @@
                     
                     // Test 4: Message polling
                     this.log('Test 4: Testing message polling...');
-                    const response4 = await fetch(`${config.chatHost}/chat/api/messages/${this.sessionId}/`, {
+                    const response4 = await fetch(`${config.chatHost}{{ helpdesk_prefix }}/chat/api/messages/${this.sessionId}/`, {
                         method: 'GET',
                         mode: 'cors',
                         credentials: 'omit',

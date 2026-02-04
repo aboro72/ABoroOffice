@@ -61,7 +61,7 @@ def send_ticket_reply_via_email(ticket_id, comment_id):
     """
     Task to send ticket comments/replies via email to the customer
     """
-    from helpdesk_apps.tickets.models import Ticket, TicketComment
+    from apps.helpdesk.helpdesk_apps.tickets.models import Ticket, TicketComment
     from django.core.mail import send_mail
     from django.template.loader import render_to_string
     from django.conf import settings
@@ -82,13 +82,14 @@ def send_ticket_reply_via_email(ticket_id, comment_id):
             return {'status': 'error', 'reason': 'No email address'}
 
         # Prepare email context
+        prefix = getattr(settings, 'HELPDESK_URL_PREFIX', '')
         context = {
             'ticket_number': ticket.ticket_number,
             'ticket_title': ticket.title,
             'comment_content': comment.content,
             'author_name': comment.author.get_full_name() if comment.author else comment.author_name,
             'site_url': settings.SITE_URL,
-            'ticket_url': f"{settings.SITE_URL}/tickets/{ticket.id}/",
+            'ticket_url': f"{settings.SITE_URL.rstrip('/')}{prefix}/tickets/{ticket.id}/",
         }
 
         # Render email template (you'll need to create this template)

@@ -1,1 +1,1 @@
-default_app_config = 'api.apps.ApiConfig'
+default_app_config = 'apps.cloude.cloude_apps.api.apps.ApiConfig'

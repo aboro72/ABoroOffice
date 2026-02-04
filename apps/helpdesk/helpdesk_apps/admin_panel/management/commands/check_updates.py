@@ -5,7 +5,7 @@ Checks GitHub for available updates and notifies admin
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from helpdesk_apps.admin_panel.update_manager import (
+from apps.helpdesk.helpdesk_apps.admin_panel.update_manager import (
     UpdateChecker, UpdateDownloader, UpdateNotification,
     check_and_notify_updates, install_updates_task
 )

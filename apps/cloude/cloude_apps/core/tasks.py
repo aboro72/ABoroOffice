@@ -4,15 +4,17 @@ Celery tasks for background processing.
 
 from celery import shared_task
 from django.utils import timezone
+from django.db import models
 from django.core.mail import send_mail
 from django.conf import settings
-from django.contrib.auth.models import User
-from core.models import StorageFile, StorageFolder, ActivityLog, Notification
-from accounts.models import UserProfile
-from storage.models import StorageStats, StorageQuotaAlert, TrashBin
+from django.contrib.auth import get_user_model
+from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder, ActivityLog, Notification
+from apps.cloude.cloude_apps.accounts.models import UserProfile
+from apps.cloude.cloude_apps.storage.models import StorageStats, StorageQuotaAlert, TrashBin
 import logging
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 @shared_task(name='cleanup_trash', bind=True)
@@ -57,7 +59,7 @@ def update_storage_stats(self):
                 total_size=models.Sum('size')
             )['total_size'] or 0
 
-            from core.models import FileVersion
+            from apps.cloude.cloude_apps.core.models import FileVersion
             stats.total_versions = FileVersion.objects.filter(
                 file__owner=user
             ).count()
@@ -189,7 +191,7 @@ def cleanup_old_versions(self, days=30):
     Delete old file versions.
     Configurable retention period.
     """
-    from core.models import FileVersion
+    from apps.cloude.cloude_apps.core.models import FileVersion
 
     cutoff_date = timezone.now() - timezone.timedelta(days=days)
     old_versions = FileVersion.objects.filter(
@@ -209,7 +211,7 @@ def generate_backup(self, user_id):
     """
     Generate backup of user's files.
     """
-    from storage.models import StorageBackup
+    from apps.cloude.cloude_apps.storage.models import StorageBackup
     import tarfile
     import os
 

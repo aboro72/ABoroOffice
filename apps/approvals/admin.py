@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from .models import (
     Approval, ApprovalReminder, ApprovalSettings,
-    ServerHealthCheck, RatingSchedule
+    ServerHealthCheck, RatingSchedule, ApprovalAuditLog
 )
 
 
@@ -152,6 +152,32 @@ class ApprovalReminderInline(admin.TabularInline):
     extra = 0
     readonly_fields = ('reminder_number', 'reminder_time', 'sent_at', 'recipients')
     can_delete = False
+
+
+@admin.register(ApprovalAuditLog)
+class ApprovalAuditLogAdmin(admin.ModelAdmin):
+    """Admin for Approval Audit Logs."""
+
+    list_display = ('created_at', 'action', 'approval', 'actor_user', 'actor_label', 'method')
+    list_filter = ('action', 'method', 'created_at')
+    search_fields = ('approval__server_name', 'approval__token', 'actor_label')
+    readonly_fields = (
+        'approval',
+        'action',
+        'actor_user',
+        'actor_label',
+        'method',
+        'ip_address',
+        'user_agent',
+        'details',
+        'created_at',
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Approval)

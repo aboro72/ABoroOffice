@@ -3,7 +3,7 @@ REST API Views for CloudService.
 Django REST Framework with comprehensive CRUD operations.
 """
 
-from rest_framework import viewsets, status, generics, filters
+from rest_framework import viewsets, status, generics, filters, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
@@ -15,22 +15,28 @@ from django.db.models import Q, Count, Sum
 from django.http import FileResponse
 from django.utils import timezone
 from django.core.exceptions import PermissionDenied
+from django.contrib.auth import get_user_model
 
-from core.models import StorageFile, StorageFolder, FileVersion, ActivityLog, Notification
-from accounts.models import UserProfile
-from sharing.models import UserShare, PublicLink, SharePermission
-from storage.models import StorageStats
-from api.serializers import (
+from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder, FileVersion, ActivityLog, Notification
+from apps.cloude.cloude_apps.accounts.models import UserProfile
+from apps.cloude.cloude_apps.sharing.models import UserShare, PublicLink, SharePermission
+from apps.cloude.cloude_apps.storage.models import StorageStats
+from apps.cloude.cloude_apps.api.serializers import (
     StorageFileSerializer, StorageFileDetailSerializer, StorageFolderSerializer,
     FileVersionSerializer, UserShareSerializer, PublicLinkSerializer,
     ActivityLogSerializer, NotificationSerializer, UserSerializer,
     StorageStatsSerializer, FileUploadSerializer, BulkDeleteSerializer,
-    SearchResultSerializer
+    SearchResultSerializer, StorageQuotaSerializer,
+    RestoreFileVersionRequestSerializer, RestoreFileVersionResponseSerializer,
+    MessageResponseSerializer, UpdateSharePermissionRequestSerializer,
+    SetPublicLinkPasswordRequestSerializer
 )
-from api.permissions import IsFileOwnerOrShared, IsPublicLinkValid
+from apps.cloude.cloude_apps.api.permissions import IsFileOwnerOrShared, IsPublicLinkValid
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample
 import logging
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -46,6 +52,7 @@ class StorageFileViewSet(viewsets.ModelViewSet):
     Supports CRUD operations with permissions.
     """
     serializer_class = StorageFileSerializer
+    queryset = StorageFile.objects.all()
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
     pagination_class = StandardResultsSetPagination
@@ -188,6 +195,7 @@ class StorageFileViewSet(viewsets.ModelViewSet):
 class StorageFolderViewSet(viewsets.ModelViewSet):
     """ViewSet for folder operations"""
     serializer_class = StorageFolderSerializer
+    queryset = StorageFolder.objects.all()
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -240,7 +248,24 @@ class FileVersionsView(generics.ListAPIView):
 class RestoreFileVersionView(generics.GenericAPIView):
     """Restore file to previous version"""
     permission_classes = [IsAuthenticated]
+    serializer_class = RestoreFileVersionRequestSerializer
 
+    @extend_schema(
+        request=RestoreFileVersionRequestSerializer,
+        responses=RestoreFileVersionResponseSerializer,
+        examples=[
+            OpenApiExample(
+                'Restore Version',
+                value={'version_id': 3},
+                request_only=True
+            ),
+            OpenApiExample(
+                'Restore OK',
+                value={'message': 'File restored successfully', 'version_number': 4},
+                response_only=True
+            )
+        ],
+    )
     def post(self, request, file_id):
         """Restore file version"""
         file_obj = get_object_or_404(StorageFile, id=file_id, owner=request.user)
@@ -274,6 +299,7 @@ class RestoreFileVersionView(generics.GenericAPIView):
 class UserShareViewSet(viewsets.ModelViewSet):
     """ViewSet for user shares"""
     serializer_class = UserShareSerializer
+    queryset = UserShare.objects.all()
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
 
@@ -314,6 +340,7 @@ class UserShareViewSet(viewsets.ModelViewSet):
 class PublicLinkViewSet(viewsets.ModelViewSet):
     """ViewSet for public links"""
     serializer_class = PublicLinkSerializer
+    queryset = PublicLink.objects.all()
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     lookup_field = 'token'
@@ -346,6 +373,7 @@ class PublicLinkViewSet(viewsets.ModelViewSet):
 class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for activity logs"""
     serializer_class = ActivityLogSerializer
+    queryset = ActivityLog.objects.all()
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     filter_backends = [filters.OrderingFilter, filters.SearchFilter]
@@ -360,6 +388,7 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for users"""
     serializer_class = UserSerializer
+    queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
 
@@ -383,7 +412,25 @@ class StorageStatsView(generics.RetrieveAPIView):
 class StorageQuotaView(generics.GenericAPIView):
     """Get storage quota information"""
     permission_classes = [IsAuthenticated]
+    serializer_class = StorageQuotaSerializer
 
+    @extend_schema(
+        responses=StorageQuotaSerializer,
+        examples=[
+            OpenApiExample(
+                'Quota Example',
+                value={
+                    'quota': 5368709120,
+                    'used': 123456789,
+                    'remaining': 5245252331,
+                    'percentage_used': 2.3,
+                    'is_full': False,
+                    'is_warning': False
+                },
+                response_only=True
+            )
+        ],
+    )
     def get(self, request):
         """Get quota details"""
         profile = request.user.profile
@@ -401,7 +448,9 @@ class StorageQuotaView(generics.GenericAPIView):
 class FileDownloadAPIView(generics.GenericAPIView):
     """Download file via API"""
     permission_classes = [IsAuthenticated]
+    serializer_class = serializers.Serializer
 
+    @extend_schema(responses={200: OpenApiTypes.BINARY})
     def get(self, request, file_id):
         """Download file"""
         file_obj = get_object_or_404(StorageFile, id=file_id)
@@ -503,6 +552,20 @@ class SearchAPIView(generics.GenericAPIView):
     serializer_class = SearchResultSerializer
     pagination_class = StandardResultsSetPagination
 
+    @extend_schema(
+        examples=[
+            OpenApiExample(
+                'Search Example',
+                value={'q': 'report'},
+                request_only=True
+            ),
+            OpenApiExample(
+                'Search Result',
+                value=[{'type': 'file', 'id': 12, 'name': 'report.pdf'}],
+                response_only=True
+            )
+        ]
+    )
     def get(self, request):
         """Search"""
         query = request.query_params.get('q', '')
@@ -552,7 +615,12 @@ class NotificationListView(generics.ListAPIView):
 class MarkNotificationReadView(generics.GenericAPIView):
     """Mark notification as read"""
     permission_classes = [IsAuthenticated]
+    serializer_class = MessageResponseSerializer
 
+    @extend_schema(
+        responses=MessageResponseSerializer,
+        examples=[OpenApiExample('Read OK', value={'message': 'Marked as read'}, response_only=True)]
+    )
     def post(self, request, notification_id):
         """Mark as read"""
         notification = get_object_or_404(Notification, id=notification_id, user=request.user)
@@ -565,7 +633,15 @@ class MarkNotificationReadView(generics.GenericAPIView):
 class UpdateSharePermissionView(generics.GenericAPIView):
     """Update share permission"""
     permission_classes = [IsAuthenticated]
+    serializer_class = UpdateSharePermissionRequestSerializer
 
+    @extend_schema(
+        request=UpdateSharePermissionRequestSerializer,
+        responses=UserShareSerializer,
+        examples=[
+            OpenApiExample('Update Permission', value={'permission': 'edit'}, request_only=True)
+        ],
+    )
     def post(self, request, share_id):
         """Update permission"""
         share = get_object_or_404(UserShare, id=share_id, owner=request.user)
@@ -580,7 +656,15 @@ class UpdateSharePermissionView(generics.GenericAPIView):
 class SetPublicLinkPasswordView(generics.GenericAPIView):
     """Set password for public link"""
     permission_classes = [IsAuthenticated]
+    serializer_class = SetPublicLinkPasswordRequestSerializer
 
+    @extend_schema(
+        request=SetPublicLinkPasswordRequestSerializer,
+        responses=MessageResponseSerializer,
+        examples=[
+            OpenApiExample('Set Password', value={'password': 'secret123'}, request_only=True)
+        ],
+    )
     def post(self, request, link_id):
         """Set password"""
         link = get_object_or_404(PublicLink, id=link_id, owner=request.user)
@@ -594,6 +678,7 @@ class SetPublicLinkPasswordView(generics.GenericAPIView):
 
 
 # Plugin Management Views
+@extend_schema(exclude=True)
 class PluginActivateView(APIView):
     """Activate a plugin"""
     permission_classes = [IsAdminUser]
@@ -601,8 +686,8 @@ class PluginActivateView(APIView):
     def post(self, request, plugin_id):
         """Activate plugin"""
         try:
-            from plugins.models import Plugin
-            from plugins.loader import PluginLoader
+            from apps.cloude.cloude_apps.plugins.models import Plugin
+            from apps.cloude.cloude_apps.plugins.loader import PluginLoader
             from django.contrib import messages
 
             plugin = get_object_or_404(Plugin, id=plugin_id)
@@ -621,6 +706,7 @@ class PluginActivateView(APIView):
             return redirect('core:settings')
 
 
+@extend_schema(exclude=True)
 class PluginDeactivateView(APIView):
     """Deactivate a plugin"""
     permission_classes = [IsAdminUser]
@@ -628,8 +714,8 @@ class PluginDeactivateView(APIView):
     def post(self, request, plugin_id):
         """Deactivate plugin"""
         try:
-            from plugins.models import Plugin
-            from plugins.loader import PluginLoader
+            from apps.cloude.cloude_apps.plugins.models import Plugin
+            from apps.cloude.cloude_apps.plugins.loader import PluginLoader
             from django.contrib import messages
 
             plugin = get_object_or_404(Plugin, id=plugin_id)
@@ -648,6 +734,7 @@ class PluginDeactivateView(APIView):
             return redirect('core:settings')
 
 
+@extend_schema(exclude=True)
 class PluginDiscoverView(APIView):
     """Discover plugins from filesystem"""
     permission_classes = [IsAdminUser]
@@ -655,7 +742,7 @@ class PluginDiscoverView(APIView):
     def post(self, request):
         """Scan plugins directory and register new plugins"""
         try:
-            from plugins.loader import PluginLoader
+            from apps.cloude.cloude_apps.plugins.loader import PluginLoader
             from django.contrib import messages
             from django.shortcuts import redirect
 
@@ -678,6 +765,7 @@ class PluginDiscoverView(APIView):
             return redirect('core:settings')
 
 
+@extend_schema(exclude=True)
 class PluginSettingsView(APIView):
     """View and update plugin settings"""
     permission_classes = [IsAdminUser]
@@ -685,7 +773,7 @@ class PluginSettingsView(APIView):
     def get(self, request, plugin_id):
         """Show plugin settings form"""
         from django.shortcuts import render
-        from plugins.models import Plugin
+        from apps.cloude.cloude_apps.plugins.models import Plugin
 
         plugin = get_object_or_404(Plugin, id=plugin_id)
 
@@ -708,7 +796,7 @@ class PluginSettingsView(APIView):
         """Save plugin settings"""
         from django.shortcuts import redirect
         from django.contrib import messages
-        from plugins.models import Plugin
+        from apps.cloude.cloude_apps.plugins.models import Plugin
 
         plugin = get_object_or_404(Plugin, id=plugin_id)
 
@@ -738,4 +826,4 @@ class PluginSettingsView(APIView):
         except Exception as e:
             messages.error(request, f'❌ Fehler beim Speichern: {str(e)}')
 
-        return redirect('api:plugin_settings', plugin_id=plugin_id)
+        return redirect('cloude_api:plugin_settings', plugin_id=plugin_id)

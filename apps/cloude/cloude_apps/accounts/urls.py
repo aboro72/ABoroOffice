@@ -4,7 +4,7 @@ URL configuration for Accounts app.
 
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from accounts import views
+from apps.cloude.cloude_apps.accounts import views
 
 app_name = 'accounts'
 

@@ -135,7 +135,7 @@
             ℹ️ Nach der Registrierung können Sie sofort Support-Tickets erstellen.
         </div>
 
-        <form method="post" action="{% url 'accounts:register' %}">
+        <form method="post" action="{% url 'helpdesk_accounts:register' %}">
             {% csrf_token %}
 
             <div class="form-row">
@@ -191,7 +191,7 @@
         </form>
 
         <div class="login-link">
-            Bereits registriert? <a href="{% url 'accounts:login' %}">Jetzt anmelden</a>
+            Bereits registriert? <a href="{% url 'helpdesk_accounts:login' %}">Jetzt anmelden</a>
         </div>
     </div>
 </body>

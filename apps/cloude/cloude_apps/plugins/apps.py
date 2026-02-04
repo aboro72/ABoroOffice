@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class PluginsConfig(AppConfig):
     """Configuration for the plugins app"""
 
-    name = 'plugins'
+    name = 'apps.cloude.cloude_apps.plugins'
     verbose_name = 'Plugin System'
     default_auto_field = 'django.db.models.BigAutoField'
 
@@ -33,7 +33,7 @@ class PluginsConfig(AppConfig):
         logger.info("Plugin System initializing...")
 
         try:
-            from plugins.loader import PluginLoader
+            from apps.cloude.cloude_apps.plugins.loader import PluginLoader
 
             loader = PluginLoader()
 

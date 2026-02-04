@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from datetime import datetime, timedelta
 from apps.core.models import ABoroUser
+from django.conf import settings
 
 
 class ApprovalSettings(models.Model):
@@ -410,6 +411,9 @@ class Approval(models.Model):
     # Notes
     notes = models.TextField(blank=True)
 
+    # Archive
+    archived = models.BooleanField(default=False, db_index=True)
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = _('Approval Request')
@@ -469,6 +473,48 @@ class Approval(models.Model):
         self.execution_status = 'success' if exit_code == 0 else 'failed'
         self.save()
 
+    def user_can_approve(self, user):
+        """
+        Check if a user is allowed to approve this request.
+
+        Rules:
+        - Staff users can always approve.
+        - Non-approver users cannot approve.
+        - If a rating schedule is attached, approver must be assigned to it.
+        - If no schedule is attached, any approver can approve.
+        """
+        if not user or not user.is_authenticated:
+            return False
+        if user.is_staff:
+            return True
+        if not getattr(user, 'is_approver', False):
+            return False
+        if self.rating_schedule_id:
+            return user.approval_groups.filter(pk=self.rating_schedule_id).exists()
+        return True
+
+    def log_action(
+        self,
+        action,
+        actor_user=None,
+        actor_label='',
+        method='',
+        ip_address=None,
+        user_agent='',
+        details=None,
+    ):
+        """Create an audit log entry for this approval."""
+        ApprovalAuditLog.objects.create(
+            approval=self,
+            action=action,
+            actor_user=actor_user,
+            actor_label=actor_label,
+            method=method,
+            ip_address=ip_address,
+            user_agent=user_agent or '',
+            details=details or {},
+        )
+
 
 class ApprovalReminder(models.Model):
     """
@@ -500,3 +546,50 @@ class ApprovalReminder(models.Model):
 
     def __str__(self):
         return f"Reminder {self.reminder_number} - {self.approval.server_name}"
+
+
+class ApprovalAuditLog(models.Model):
+    """Audit log for approval workflow actions."""
+
+    ACTION_CHOICES = [
+        ('created', _('Created')),
+        ('approved', _('Approved')),
+        ('rejected', _('Rejected')),
+        ('expired', _('Expired')),
+        ('execution_started', _('Execution Started')),
+        ('execution_success', _('Execution Success')),
+        ('execution_failed', _('Execution Failed')),
+        ('email_sent', _('Email Sent')),
+    ]
+
+    approval = models.ForeignKey(
+        Approval,
+        on_delete=models.CASCADE,
+        related_name='audit_logs',
+    )
+    action = models.CharField(max_length=30, choices=ACTION_CHOICES)
+    actor_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approval_audit_logs',
+    )
+    actor_label = models.CharField(max_length=255, blank=True)
+    method = models.CharField(max_length=50, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    details = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = _('Approval Audit Log')
+        verbose_name_plural = _('Approval Audit Logs')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['approval', '-created_at']),
+            models.Index(fields=['action', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.action} - {self.approval.server_name} ({self.created_at})"

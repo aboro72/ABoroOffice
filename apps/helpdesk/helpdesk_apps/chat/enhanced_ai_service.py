@@ -14,9 +14,9 @@ import re
 from typing import Optional, Dict, List, Tuple
 from django.db.models import Q
 from django.utils import timezone
-from helpdesk_apps.admin_panel.models import SystemSettings
-from helpdesk_apps.knowledge.models import KnowledgeArticle
-from helpdesk_apps.api.license_checker import LicenseFeatureChecker
+from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
+from apps.helpdesk.helpdesk_apps.knowledge.models import KnowledgeArticle
+from apps.helpdesk.helpdesk_apps.api.license_checker import LicenseFeatureChecker
 
 logger = logging.getLogger(__name__)
 
@@ -280,7 +280,7 @@ class EnhancedAIService:
     def _create_ticket_from_session(self, session, latest_message: str, context: Dict) -> Optional[str]:
         """Erstelle Ticket aus Chat-Session"""
         try:
-            from helpdesk_apps.tickets.models import Ticket, Category
+            from apps.helpdesk.helpdesk_apps.tickets.models import Ticket, Category
             
             # Chat-Inhalt zusammenstellen
             messages = session.messages.filter(
@@ -326,7 +326,7 @@ class EnhancedAIService:
     
     def _determine_ticket_category(self, message: str, session) -> 'Category':
         """Bestimme Ticket-Kategorie basierend auf Chat-Inhalt"""
-        from helpdesk_apps.tickets.models import Category
+        from apps.helpdesk.helpdesk_apps.tickets.models import Category
         
         # Versuche Kategorie basierend auf Keywords zu bestimmen
         message_lower = message.lower()

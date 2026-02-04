@@ -1,7 +1,7 @@
 """
 Django admin interface for plugin management.
 
-Allows administrators to upload, activate, deactivate, and manage plugins.
+Allows administrators to upload, activate, deactivate, and manage apps.cloude.cloude_apps.plugins.
 """
 
 import json
@@ -13,8 +13,8 @@ from django.contrib import messages
 from django.utils.html import format_html, mark_safe
 from django.template.response import TemplateResponse
 
-from plugins.models import Plugin, PluginLog
-from plugins.loader import PluginLoader
+from apps.cloude.cloude_apps.plugins.models import Plugin, PluginLog
+from apps.cloude.cloude_apps.plugins.loader import PluginLoader
 import logging
 
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now as timezone_now
 import json
-from helpdesk_apps.api.license_manager import LicenseManager
+from apps.helpdesk.helpdesk_apps.api.license_manager import LicenseManager
 
 
 class SystemSettings(models.Model):
@@ -222,6 +222,14 @@ class SystemSettings(models.Model):
         verbose_name=_('Updated By')
     )
 
+    # App Toggles (global)
+    app_toggles = models.JSONField(
+        _('App Toggles'),
+        default=dict,
+        blank=True,
+        help_text='Enable/disable modules globally'
+    )
+
     class Meta:
         verbose_name = _('System Settings')
         verbose_name_plural = _('System Settings')
@@ -367,8 +375,13 @@ class AuditLog(models.Model):
     ]
 
     action = models.CharField(_('Action'), max_length=20, choices=ACTION_CHOICES)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-                            null=True, blank=True, related_name='audit_logs')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='helpdesk_audit_logs',
+    )
     content_type = models.CharField(_('Content Type'), max_length=255)
     object_id = models.IntegerField(_('Object ID'), null=True, blank=True)
     description = models.TextField(_('Description'))

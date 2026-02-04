@@ -1,0 +1,77 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}Administration | ABoroOffice{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Administrator Dashboard</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <a class="btn btn-primary w-100" href="/dashboard/">Allgemeines Dashboard</a>
+        </div>
+        <div class="col-md-3">
+            <a class="btn btn-primary w-100" href="/admin-dashboard/">Admin Dashboard</a>
+        </div>
+        <div class="col-md-3">
+            <a class="btn btn-outline-primary w-100" href="/helpdesk/">Helpdesk</a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <a class="btn btn-outline-primary w-100" href="/storage/">Cloud Storage</a>
+        </div>
+        {% if app_toggles.classroom %}
+        <div class="col-md-3">
+            <a class="btn btn-outline-secondary w-100" href="/classroom/">Classroom</a>
+        </div>
+        {% endif %}
+        {% if app_toggles.cloudstorage %}
+        <div class="col-md-3">
+            <a class="btn btn-outline-secondary w-100" href="/cloudstorage/core/landing/">Cloude Landing</a>
+        </div>
+        <div class="col-md-3">
+            <a class="btn btn-outline-secondary w-100" href="/cloudstorage/core/settings/">Cloude Settings</a>
+        </div>
+        {% endif %}
+        <div class="col-md-3">
+            <a class="btn btn-outline-secondary w-100" href="/admin/auth/group/">Groups</a>
+        </div>
+    </div>
+
+    {% if app_list %}
+        <div class="row g-3">
+            {% for app in app_list %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <strong>{{ app.name }}</strong>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group">
+                                {% for model in app.models %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>{{ model.name }}</span>
+                                        <span>
+                                            {% if model.admin_url %}
+                                                <a class="btn btn-sm btn-outline-primary" href="{{ model.admin_url }}">Öffnen</a>
+                                            {% endif %}
+                                            {% if model.add_url %}
+                                                <a class="btn btn-sm btn-outline-success" href="{{ model.add_url }}">Neu</a>
+                                            {% endif %}
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>{% translate "You don't have permission to view or edit anything." %}</p>
+    {% endif %}
+</div>
+{% endblock %}

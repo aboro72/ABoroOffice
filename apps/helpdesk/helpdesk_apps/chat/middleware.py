@@ -18,9 +18,11 @@ class ChatWidgetFrameMiddleware:
         
     def __call__(self, request):
         response = self.get_response(request)
-        
+        prefix = getattr(settings, 'HELPDESK_URL_PREFIX', '')
+        widget_path = f"{prefix}/chat/widget/"
+
         # Nur für Chat Widget URLs
-        if request.path.startswith('/chat/widget/'):
+        if request.path.startswith(widget_path) or request.path.startswith('/chat/widget/'):
             # Hole Referrer (die Domain, die das Widget einbettet)
             referrer = request.META.get('HTTP_REFERER', '')
             origin = request.META.get('HTTP_ORIGIN', '')
@@ -89,9 +91,15 @@ class ChatCorsMiddleware:
         origin = request.META.get('HTTP_ORIGIN', '')
         user_agent = request.META.get('HTTP_USER_AGENT', '')
         is_firefox = 'Firefox' in user_agent
+        prefix = getattr(settings, 'HELPDESK_URL_PREFIX', '')
+        api_path = f"{prefix}/chat/api/"
+        widget_path = f"{prefix}/chat/widget"
         
         # Handle preflight requests
-        if request.method == 'OPTIONS' and (request.path.startswith('/chat/api/') or request.path.startswith('/chat/widget')):
+        if request.method == 'OPTIONS' and (
+            request.path.startswith(api_path) or request.path.startswith(widget_path) or
+            request.path.startswith('/chat/api/') or request.path.startswith('/chat/widget')
+        ):
             response = HttpResponse()
             
             # Hole erlaubte Domains aus Chat-Einstellungen
@@ -120,7 +128,9 @@ class ChatCorsMiddleware:
         response = self.get_response(request)
         
         # Add CORS headers to all chat-related responses
-        if (request.path.startswith('/chat/api/') or 
+        if (request.path.startswith(api_path) or 
+            request.path.startswith(widget_path) or 
+            request.path.startswith('/chat/api/') or 
             request.path.startswith('/chat/widget') or 
             request.path.endswith('widget.js') or
             request.path.endswith('debug-widget.js')):

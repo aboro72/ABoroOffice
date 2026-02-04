@@ -257,7 +257,7 @@
         
         async startChatSession() {
             try {
-                const response = await fetch(`${config.chatHost}/chat/api/start/`, {
+                const response = await fetch(`${config.chatHost}{{ helpdesk_prefix }}/chat/api/start/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -356,7 +356,7 @@
             this.messageInput.value = '';
             
             try {
-                const response = await fetch(`${config.chatHost}/chat/api/send/`, {
+                const response = await fetch(`${config.chatHost}{{ helpdesk_prefix }}/chat/api/send/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -387,7 +387,7 @@
             
             this.pollInterval = setInterval(async () => {
                 try {
-                    const response = await fetch(`${config.chatHost}/chat/api/messages/${this.sessionId}/`, {
+                    const response = await fetch(`${config.chatHost}{{ helpdesk_prefix }}/chat/api/messages/${this.sessionId}/`, {
                         mode: 'cors'
                     });
                     

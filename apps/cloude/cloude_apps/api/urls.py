@@ -4,10 +4,11 @@ URL configuration for API (REST Framework).
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from api import views
+from apps.cloude.cloude_apps.api import views
 
 # Create router
 router = DefaultRouter()
+router.include_format_suffixes = False
 router.register(r'files', views.StorageFileViewSet, basename='file')
 router.register(r'folders', views.StorageFolderViewSet, basename='folder')
 router.register(r'shares', views.UserShareViewSet, basename='share')

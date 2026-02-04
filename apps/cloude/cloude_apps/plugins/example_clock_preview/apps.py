@@ -23,7 +23,7 @@ class ClockPreviewConfig(AppConfig):
         logger.info("Initializing Clock Preview Plugin")
 
         try:
-            from plugins.hooks import hook_registry, FILE_PREVIEW_PROVIDER
+            from apps.cloude.cloude_apps.plugins.hooks import hook_registry, FILE_PREVIEW_PROVIDER
             from clock_preview.handlers import ClockPreviewProvider
 
             # Register the handler for .plug files

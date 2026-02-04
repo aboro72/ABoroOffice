@@ -10,7 +10,7 @@ Usage:
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-from helpdesk_apps.tickets.email_handler import EmailToTicketHandler
+from apps.helpdesk.helpdesk_apps.tickets.email_handler import EmailToTicketHandler
 import logging
 from datetime import datetime
 

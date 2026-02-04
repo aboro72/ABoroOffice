@@ -3,7 +3,7 @@ Template tags for admin panel
 """
 from django import template
 from django.utils.safestring import mark_safe
-from helpdesk_apps.admin_panel.models import SystemSettings
+from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
 
 register = template.Library()
 

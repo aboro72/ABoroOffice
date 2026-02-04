@@ -1,7 +1,7 @@
 from django import forms
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from helpdesk_apps.admin_panel.models import SystemSettings
-from helpdesk_apps.chat.models import ChatSettings
+from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
+from apps.helpdesk.helpdesk_apps.chat.models import ChatSettings
 
 
 class AdminSettingsForm(forms.Form):

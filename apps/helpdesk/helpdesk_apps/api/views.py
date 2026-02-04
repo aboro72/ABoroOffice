@@ -2,7 +2,7 @@
 REST API Views for ABoro-Soft Helpdesk
 Provides complete API access for Desktop clients and third-party integrations
 """
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -19,18 +19,23 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
-from helpdesk_apps.accounts.models import User
-from helpdesk_apps.tickets.models import Ticket, TicketComment, Category
-from helpdesk_apps.knowledge.models import KnowledgeArticle
+from apps.helpdesk.helpdesk_apps.tickets.models import Ticket, TicketComment, Category
+from apps.helpdesk.helpdesk_apps.knowledge.models import KnowledgeArticle
 from .serializers import (
     UserSerializer, TicketSerializer, TicketCommentSerializer,
-    CategorySerializer, KnowledgeArticleSerializer
+    CategorySerializer, KnowledgeArticleSerializer,
+    LoginRequestSerializer, AuthResponseSerializer,
+    HealthResponseSerializer, StatsResponseSerializer,
+    LicenseValidateRequestSerializer, LicenseValidateResponseSerializer
+    , LogoutResponseSerializer
 )
 from .license_manager import LicenseManager
 from .license_checker import LicenseFeatureChecker
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 class LicenseValidationMixin:
@@ -79,15 +84,23 @@ class LicenseValidationMixin:
             }, status=status.HTTP_403_FORBIDDEN)
 
         return True, None
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-        return True, None
 
 
 class AuthViewSet(viewsets.ViewSet):
     """Authentication endpoints"""
+    serializer_class = AuthResponseSerializer
 
+    @extend_schema(
+        request=LoginRequestSerializer,
+        responses=AuthResponseSerializer,
+        examples=[
+            OpenApiExample(
+                'Login Example',
+                value={'email': 'agent@aboro.local', 'password': 'Demo123!'},
+                request_only=True
+            ),
+        ],
+    )
     @csrf_exempt
     @require_http_methods(["POST"])
     def login(self, request):
@@ -126,6 +139,16 @@ class AuthViewSet(viewsets.ViewSet):
 
     @csrf_exempt
     @require_http_methods(["POST"])
+    @extend_schema(
+        responses=LogoutResponseSerializer,
+        examples=[
+            OpenApiExample(
+                'Logout OK',
+                value={'success': True, 'message': 'Logged out'},
+                response_only=True
+            )
+        ]
+    )
     def logout(self, request):
         """Logout and invalidate token"""
         try:
@@ -137,6 +160,10 @@ class AuthViewSet(viewsets.ViewSet):
 
     @csrf_exempt
     @require_http_methods(["POST"])
+    @extend_schema(
+        request=LicenseValidateRequestSerializer,
+        responses=LicenseValidateResponseSerializer
+    )
     def validate_license(self, request):
         """
         Validate license key
@@ -170,6 +197,7 @@ class TicketViewSet(viewsets.ModelViewSet, LicenseValidationMixin):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = TicketSerializer
+    queryset = Ticket.objects.all()
 
     def get_queryset(self):
         """Filter tickets based on user role"""
@@ -184,6 +212,16 @@ class TicketViewSet(viewsets.ModelViewSet, LicenseValidationMixin):
         else:  # customer
             return Ticket.objects.filter(created_by=user)
 
+    @extend_schema(
+        responses=TicketSerializer,
+        examples=[
+            OpenApiExample(
+                'List Tickets',
+                value={'tickets': [], 'total': 0, 'pages': 0, 'current_page': 1},
+                response_only=True
+            )
+        ],
+    )
     def list(self, request, *args, **kwargs):
         """
         List tickets
@@ -243,6 +281,17 @@ class TicketViewSet(viewsets.ModelViewSet, LicenseValidationMixin):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+    @extend_schema(
+        request=TicketSerializer,
+        responses=TicketSerializer,
+        examples=[
+            OpenApiExample(
+                'Create Ticket',
+                value={'title': 'Drucker defekt', 'description': 'Papierstau', 'priority': 'high'},
+                request_only=True
+            )
+        ],
+    )
     def create(self, request):
         """
         Create new ticket
@@ -423,7 +472,18 @@ class StatsViewSet(viewsets.ViewSet, LicenseValidationMixin):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    serializer_class = StatsResponseSerializer
 
+    @extend_schema(
+        responses=StatsResponseSerializer,
+        examples=[
+            OpenApiExample(
+                'Stats Example',
+                value={'my_tickets': 3, 'open_tickets': 2, 'resolved_tickets': 1},
+                response_only=True
+            )
+        ],
+    )
     def list(self, request):
         """
         Get dashboard statistics
@@ -433,10 +493,20 @@ class StatsViewSet(viewsets.ViewSet, LicenseValidationMixin):
         if not is_valid:
             return error_response
 
-        stats = request.user.get_dashboard_stats()
-        return Response(stats)
+        stats = request.user.get_dashboard_stats() if hasattr(request.user, 'get_dashboard_stats') else {}
+        return Response({'stats': stats})
 
     @action(detail=False, methods=['get'])
+    @extend_schema(
+        responses=StatsResponseSerializer,
+        examples=[
+            OpenApiExample(
+                'Performance Example',
+                value={'total_tickets': 10, 'open_tickets': 2, 'resolved': 5},
+                response_only=True
+            )
+        ],
+    )
     def performance(self, request):
         """
         Get team performance metrics
@@ -463,6 +533,16 @@ class StatsViewSet(viewsets.ViewSet, LicenseValidationMixin):
         return Response(stats)
 
     @action(detail=False, methods=['get'])
+    @extend_schema(
+        responses=StatsResponseSerializer,
+        examples=[
+            OpenApiExample(
+                'By Agent Example',
+                value={'agent1': {'total': 5, 'open': 1, 'resolved': 3, 'closed': 1}},
+                response_only=True
+            )
+        ],
+    )
     def by_agent(self, request):
         """
         Get statistics by support agent
@@ -491,10 +571,9 @@ class StatsViewSet(viewsets.ViewSet, LicenseValidationMixin):
 
 class HealthCheckViewSet(viewsets.ViewSet):
     """Health check endpoints"""
+    serializer_class = HealthResponseSerializer
 
-    @csrf_exempt
-    @require_http_methods(["GET"])
-    def check(self, request):
+    def list(self, request):
         """
         Health check endpoint
         GET /api/v1/health/
@@ -504,6 +583,10 @@ class HealthCheckViewSet(viewsets.ViewSet):
             'version': '1.0.0',
             'timestamp': str(timezone.now())
         })
+
+    # Backwards-compat alias (not used by router)
+    def check(self, request):
+        return self.list(request)
 
 
 # NOTE: License generation endpoint is intentionally NOT included in the customer-facing API

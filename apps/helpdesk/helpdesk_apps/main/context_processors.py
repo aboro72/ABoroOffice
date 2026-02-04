@@ -15,8 +15,9 @@ def branding_context(request):
     - app_title: Application title for HTML title tags
     """
     return {
-        'app_name': settings.APP_NAME,
-        'company_name': settings.COMPANY_NAME,
-        'logo_url': settings.LOGO_URL,
-        'app_title': settings.APP_TITLE,
+        'app_name': getattr(settings, 'APP_NAME', 'ABoroOffice'),
+        'company_name': getattr(settings, 'COMPANY_NAME', 'ABoroOffice'),
+        'logo_url': getattr(settings, 'LOGO_URL', ''),
+        'app_title': getattr(settings, 'APP_TITLE', 'ABoroOffice'),
+        'helpdesk_prefix': getattr(settings, 'HELPDESK_URL_PREFIX', ''),
     }

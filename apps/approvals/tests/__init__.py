@@ -1,0 +1,3 @@
+"""
+Approvals app test package.
+"""

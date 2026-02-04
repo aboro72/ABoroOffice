@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% block head %}
+    <title>{{ title|default:"Swagger" }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% if favicon_href %}<link rel="icon" href="{{ favicon_href }}">{% endif %}
+    <link rel="stylesheet" href="{{ swagger_ui_css }}">
+    <style>
+      html { box-sizing: border-box; overflow-y: scroll; }
+      *, *:after, *:before { box-sizing: inherit; }
+      body { background: #f4f6f8; margin: 0; font-family: "Segoe UI", Arial, sans-serif; }
+      .aboro-bar {
+        background: linear-gradient(90deg, #1c3a70, #2e5090);
+        color: #fff;
+        padding: 10px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .aboro-title { font-weight: 600; letter-spacing: 0.2px; }
+      .aboro-links { display: flex; gap: 10px; flex-wrap: wrap; }
+      .aboro-links a {
+        color: #fff;
+        text-decoration: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.12);
+        font-size: 13px;
+      }
+      .aboro-links a:hover { background: rgba(255,255,255,0.22); }
+    </style>
+    {% endblock head %}
+  </head>
+  <body>
+    {% block body %}
+    <div class="aboro-bar">
+      <div class="aboro-title">ABoroOffice API</div>
+      <div class="aboro-links">
+        <a href="/api-docs/">API Übersicht</a>
+        <a href="/helpdesk/api/docs/">Helpdesk Swagger</a>
+        <a href="/helpdesk/api/redoc/">Helpdesk ReDoc</a>
+        <a href="/cloudstorage/api/docs/">Cloud Swagger</a>
+        <a href="/cloudstorage/api/redoc/">Cloud ReDoc</a>
+        <a href="/admin-dashboard/">Admin Dashboard</a>
+      </div>
+    </div>
+    <div id="swagger-ui"></div>
+    <script src="{{ swagger_ui_bundle }}"></script>
+    <script src="{{ swagger_ui_standalone }}"></script>
+    {% if script_url %}
+    <script src="{{ script_url }}"></script>
+    {% else %}
+    <script>
+    {% include template_name_js %}
+    </script>
+    {% endif %}
+    {% endblock %}
+  </body>
+</html>

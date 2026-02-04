@@ -52,7 +52,7 @@ class PluginLoader:
         Returns:
             List of discovered plugin manifests
         """
-        from plugins.models import Plugin, PluginLog
+        from apps.cloude.cloude_apps.plugins.models import Plugin, PluginLog
 
         discovered = []
         logger.info(f"Discovering plugins in {self.PLUGINS_DIR}")
@@ -217,7 +217,7 @@ class PluginLoader:
         Raises:
             Exception: If extraction fails
         """
-        from plugins.models import Plugin
+        from apps.cloude.cloude_apps.plugins.models import Plugin
 
         logger.info(f"Extracting plugin {plugin_id} from {zip_path}")
 
@@ -280,7 +280,7 @@ class PluginLoader:
         Raises:
             Exception: If loading fails
         """
-        from plugins.models import Plugin, PluginLog
+        from apps.cloude.cloude_apps.plugins.models import Plugin, PluginLog
 
         logger.info(f"Loading plugin {plugin_id}")
 
@@ -373,8 +373,8 @@ class PluginLoader:
         Raises:
             Exception: If unloading fails
         """
-        from plugins.models import Plugin, PluginLog
-        from plugins.hooks import hook_registry
+        from apps.cloude.cloude_apps.plugins.models import Plugin, PluginLog
+        from apps.cloude.cloude_apps.plugins.hooks import hook_registry
 
         logger.info(f"Unloading plugin {plugin_id}")
 
@@ -436,7 +436,7 @@ class PluginLoader:
         Called on Django startup via AppConfig.ready().
         Skips plugins with errors and logs them.
         """
-        from plugins.models import Plugin
+        from apps.cloude.cloude_apps.plugins.models import Plugin
 
         logger.info("Loading all enabled plugins...")
 
@@ -469,7 +469,7 @@ class PluginLoader:
         Returns:
             True if successful
         """
-        from plugins.models import Plugin
+        from apps.cloude.cloude_apps.plugins.models import Plugin
 
         try:
             plugin = Plugin.objects.get(pk=plugin_id)
@@ -510,7 +510,7 @@ class PluginLoader:
 
         Safe to call during Django startup.
         """
-        from plugins.models import Plugin
+        from apps.cloude.cloude_apps.plugins.models import Plugin
 
         logger.info("Registering hooks for enabled plugins...")
 

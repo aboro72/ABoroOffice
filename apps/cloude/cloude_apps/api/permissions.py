@@ -3,7 +3,7 @@ Custom permissions for API.
 """
 
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from sharing.models import UserShare, PublicLink
+from apps.cloude.cloude_apps.sharing.models import UserShare, PublicLink
 
 
 class IsFileOwnerOrShared(BasePermission):

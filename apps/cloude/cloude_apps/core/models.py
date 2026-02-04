@@ -4,7 +4,6 @@ Includes file management, storage structure and file versioning.
 """
 
 from django.db import models
-from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.db.models import F, Q, Sum, Count
@@ -49,8 +48,7 @@ class StorageFolder(TimeStampedModel):
     - CharField with max_length for improved validation
     - ForeignKey with on_delete for cleaner cascade behavior
     """
-    owner = models.ForeignKey(
-        User,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='folders',
         verbose_name=_('Owner')
@@ -138,8 +136,7 @@ class StorageFile(TimeStampedModel):
     Represents a file in the cloud storage.
     Includes metadata and version management.
     """
-    owner = models.ForeignKey(
-        User,
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='files',
         verbose_name=_('Owner')
@@ -431,8 +428,7 @@ class ActivityLog(TimeStampedModel):
         ('permission_change', _('Permission Change')),
     ]
 
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='activity_logs',
         verbose_name=_('User')
@@ -497,8 +493,7 @@ class Notification(models.Model):
         ('file_deleted', _('File deleted')),
     ]
 
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='notifications',
         verbose_name=_('User')

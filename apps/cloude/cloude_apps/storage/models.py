@@ -4,10 +4,13 @@ Extensions to core file management.
 """
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.db.models import Sum
+from django.conf import settings
+from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,7 +22,7 @@ class StorageStats(models.Model):
     Updated periodically via Celery tasks.
     """
     user = models.OneToOneField(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='storage_stats',
         verbose_name=_('User')
@@ -72,8 +75,7 @@ class StorageBackup(models.Model):
         ('failed', _('Failed')),
     ]
 
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='backups',
         verbose_name=_('User')
@@ -130,18 +132,14 @@ class TrashBin(models.Model):
     """
     Soft delete - moved to trash instead of permanent deletion.
     """
-    from core.models import StorageFile, StorageFolder
 
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='trash',
         verbose_name=_('User')
     )
 
     # Generic relation to file or folder
-    from django.contrib.contenttypes.fields import GenericForeignKey
-    from django.contrib.contenttypes.models import ContentType
 
     content_type = models.ForeignKey(
         ContentType,
@@ -193,8 +191,7 @@ class StorageQuotaAlert(models.Model):
         ('full', _('Full - 100% used')),
     ]
 
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='quota_alerts',
         verbose_name=_('User')

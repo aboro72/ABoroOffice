@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.db.models import Q
 from datetime import datetime
-from helpdesk_apps.api.license_checker import LicenseFeatureChecker, require_feature
+from apps.helpdesk.helpdesk_apps.api.license_checker import LicenseFeatureChecker, require_feature
 
 User = get_user_model()
 
@@ -19,7 +19,7 @@ User = get_user_model()
 def dashboard(request):
     """Main dashboard view with license checking"""
     # Initialize license checker with current license
-    from helpdesk_apps.admin_panel.models import SystemSettings
+    from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
     settings_obj = SystemSettings.get_settings()
     if settings_obj.license_code:
         LicenseFeatureChecker.set_license(settings_obj.license_code)
@@ -41,10 +41,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['stats'] = self.request.user.get_dashboard_stats()
+        context['stats'] = self.request.user.get_dashboard_stats() if hasattr(self.request.user, 'get_dashboard_stats') else {}
         
         # Add license information
-        from helpdesk_apps.admin_panel.models import SystemSettings
+        from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
         settings_obj = SystemSettings.get_settings()
         if settings_obj.license_code:
             LicenseFeatureChecker.set_license(settings_obj.license_code)
@@ -63,9 +63,9 @@ def admin_settings(request):
     if not (request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'admin')):
         return HttpResponseForbidden('Sie haben keine Berechtigung, diese Seite zu sehen.')
     
-    from helpdesk_apps.admin_panel.models import SystemSettings
-    from helpdesk_apps.chat.models import ChatSettings
-    from helpdesk_apps.main.forms import AdminSettingsForm
+    from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
+    from apps.helpdesk.helpdesk_apps.chat.models import ChatSettings
+    from apps.helpdesk.helpdesk_apps.main.forms import AdminSettingsForm
     
     # Get or create settings objects
     system_settings = SystemSettings.get_settings()
@@ -85,7 +85,8 @@ def admin_settings(request):
     # Generate chat widget embed code
     # Use site_url from database if available, otherwise use Django settings
     site_url = system_settings.site_url if system_settings.site_url else getattr(settings, 'SITE_URL', 'http://localhost:8000')
-    widget_url = f"{site_url}/chat/widget/"
+    prefix = getattr(settings, 'HELPDESK_URL_PREFIX', '')
+    widget_url = f"{site_url}{prefix}/chat/widget/"
     
     # Standard iFrame Code (kann in einigen Browsern blockiert werden)
     embed_code = f'''<!-- Aboro-IT Helpdesk Live Chat Widget (iFrame) -->
@@ -173,7 +174,7 @@ def admin_settings(request):
     native_js_code = f'''<!-- Aboro-IT Helpdesk Live Chat Widget (Native JavaScript - Maximale Kompatibilität) -->
 <script>
 (function() {{
-    var CHAT_API_BASE = '{site_url}/chat/api';
+    var CHAT_API_BASE = '{site_url}{prefix}/chat/api';
     var currentSessionId = null;
     var messages = [];
     var messageCheckInterval = null;
@@ -360,8 +361,8 @@ def admin_settings(request):
 
 def debug_widget_codes(request):
     """Debug view to show widget codes without login requirement"""
-    from helpdesk_apps.admin_panel.models import SystemSettings
-    from helpdesk_apps.chat.models import ChatSettings
+    from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
+    from apps.helpdesk.helpdesk_apps.chat.models import ChatSettings
     
     # Get settings
     system_settings = SystemSettings.get_settings()
@@ -370,7 +371,8 @@ def debug_widget_codes(request):
     # Generate widget codes
     # Use site_url from database if available, otherwise use Django settings
     site_url = system_settings.site_url if system_settings.site_url else getattr(settings, 'SITE_URL', 'http://localhost:8000')
-    widget_url = f"{site_url}/chat/widget/"
+    prefix = getattr(settings, 'HELPDESK_URL_PREFIX', '')
+    widget_url = f"{site_url}{prefix}/chat/widget/"
     
     embed_code = f'''<!-- Aboro-IT Helpdesk Live Chat Widget -->
 <iframe src="{widget_url}" 
@@ -414,9 +416,9 @@ def is_admin(user):
 @user_passes_test(is_admin)
 def manage_license(request):
     """Manage license code - integrated into main app"""
-    from helpdesk_apps.admin_panel.models import SystemSettings
-    from helpdesk_apps.admin_panel.forms import LicenseForm
-    from helpdesk_apps.api.license_manager import LicenseManager
+    from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
+    from apps.helpdesk.helpdesk_apps.admin_panel.forms import LicenseForm
+    from apps.helpdesk.helpdesk_apps.api.license_manager import LicenseManager
     
     settings_obj = SystemSettings.get_settings()
     license_info = None
@@ -754,7 +756,7 @@ def game_save_score(request):
         coins_collected = int(data.get('coins', 0))
         time_played = int(data.get('time', 0))
 
-        from helpdesk_apps.main.models import GameHighscore
+        from apps.helpdesk.helpdesk_apps.main.models import GameHighscore
 
         # Create new highscore entry
         highscore = GameHighscore.objects.create(
@@ -785,7 +787,7 @@ def game_save_score(request):
 def game_get_highscores(request):
     """Get top highscores (AJAX)"""
     try:
-        from helpdesk_apps.main.models import GameHighscore
+        from apps.helpdesk.helpdesk_apps.main.models import GameHighscore
 
         limit = int(request.GET.get('limit', 10))
         scores = GameHighscore.get_top_scores(limit)
@@ -840,7 +842,7 @@ def game_save_score_viruskong(request):
         score = int(data.get('score', 0))
         level_reached = int(data.get('level', 1))
 
-        from helpdesk_apps.main.models import VirusKongHighscore
+        from apps.helpdesk.helpdesk_apps.main.models import VirusKongHighscore
 
         # Create new highscore entry
         highscore = VirusKongHighscore.objects.create(
@@ -869,7 +871,7 @@ def game_save_score_viruskong(request):
 def game_get_highscores_viruskong(request):
     """Get top Virus Kong highscores (AJAX)"""
     try:
-        from helpdesk_apps.main.models import VirusKongHighscore
+        from apps.helpdesk.helpdesk_apps.main.models import VirusKongHighscore
 
         limit = int(request.GET.get('limit', 10))
         scores = VirusKongHighscore.get_top_scores(limit)

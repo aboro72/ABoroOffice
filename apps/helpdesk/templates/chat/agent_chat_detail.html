@@ -327,7 +327,7 @@ function sendMessage() {
     textarea.value = '';
     
     // Send to server
-    fetch(`/chat/agent/send/${currentSessionId}/`, {
+    fetch(`{{ helpdesk_prefix }}/chat/agent/send/${currentSessionId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
@@ -392,7 +392,7 @@ function refreshMessages() {
         params.append('since', lastMessageTime);
     }
 
-    fetch(`/chat/agent/messages/${currentSessionId}/?${params}`)
+    fetch(`{{ helpdesk_prefix }}/chat/agent/messages/${currentSessionId}/?${params}`)
     .then(response => {
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -464,7 +464,7 @@ function scrollToBottom() {
 }
 
 function useFaqTemplate(articleId) {
-    fetch(`/chat/agent/faq-template/${currentSessionId}/`, {
+    fetch(`{{ helpdesk_prefix }}/chat/agent/faq-template/${currentSessionId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
@@ -495,7 +495,7 @@ function useFaqTemplate(articleId) {
 function transferToAI() {
     if (!confirm('Chat-Session an KI übertragen?')) return;
 
-    fetch(`/chat/agent/transfer-ai/${currentSessionId}/`, {
+    fetch(`{{ helpdesk_prefix }}/chat/agent/transfer-ai/${currentSessionId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
@@ -511,7 +511,7 @@ function transferToAI() {
     .then(data => {
         if (data.success) {
             alert('Session an KI übertragen');
-            window.location.href = '/chat/agent/';
+            window.location.href = '{{ helpdesk_prefix }}/chat/agent/';
         } else {
             alert(data.error || 'Fehler beim Übertragen an KI');
         }
@@ -526,7 +526,7 @@ function closeSession() {
     const reason = prompt('Grund für Schließung (optional):') || 'Von Agent geschlossen';
     const createTicket = confirm('Soll ein Ticket erstellt werden?');
 
-    fetch(`/chat/agent/close/${currentSessionId}/`, {
+    fetch(`{{ helpdesk_prefix }}/chat/agent/close/${currentSessionId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
@@ -550,7 +550,7 @@ function closeSession() {
                 message += `. Ticket ${data.ticket_number} erstellt.`;
             }
             alert(message);
-            window.location.href = '/chat/agent/';
+            window.location.href = '{{ helpdesk_prefix }}/chat/agent/';
         } else {
             alert(data.error || 'Fehler beim Schließen der Session');
         }
@@ -564,7 +564,7 @@ function closeSession() {
 function createTicket() {
     const reason = prompt('Grund für Ticket-Erstellung:') || 'Manuelle Ticket-Erstellung';
 
-    fetch(`/chat/agent/close/${currentSessionId}/`, {
+    fetch(`{{ helpdesk_prefix }}/chat/agent/close/${currentSessionId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
@@ -584,7 +584,7 @@ function createTicket() {
     .then(data => {
         if (data.success) {
             alert(`Ticket ${data.ticket_number} erstellt`);
-            window.location.href = '/chat/agent/';
+            window.location.href = '{{ helpdesk_prefix }}/chat/agent/';
         } else {
             alert(data.error || 'Fehler beim Erstellen des Tickets');
         }

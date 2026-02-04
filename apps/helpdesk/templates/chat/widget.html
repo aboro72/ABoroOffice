@@ -189,7 +189,7 @@ function startChat() {
         page_url: window.location.href
     };
     
-    fetch('/chat/api/start/', {
+    fetch('{{ helpdesk_prefix }}/chat/api/start/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ function sendMessage() {
         message: message
     };
     
-    fetch('/chat/api/send/', {
+    fetch('{{ helpdesk_prefix }}/chat/api/send/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -263,7 +263,7 @@ function sendMessage() {
 function loadMessages() {
     if (!chatSession) return;
     
-    fetch(`/chat/api/messages/${sessionId}/`)
+    fetch(`{{ helpdesk_prefix }}/chat/api/messages/${sessionId}/`)
     .then(response => response.json())
     .then(data => {
         if (data.success) {

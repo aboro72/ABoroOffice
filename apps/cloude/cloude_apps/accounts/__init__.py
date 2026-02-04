@@ -1,1 +1,1 @@
-default_app_config = 'accounts.apps.AccountsConfig'
+default_app_config = 'apps.cloude.cloude_apps.accounts.apps.AccountsConfig'

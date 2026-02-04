@@ -269,7 +269,7 @@ class MeinPluginConfig(AppConfig):
     name = 'mein_plugin'
 
     def ready(self):
-        from plugins.hooks import hook_registry, UI_DASHBOARD_WIDGET
+        from apps.cloude.cloude_apps.plugins.hooks import hook_registry, UI_DASHBOARD_WIDGET
         from mein_plugin.widget import MeinWidgetProvider
 
         hook_registry.register(
@@ -357,7 +357,7 @@ class QuoteConfig(AppConfig):
     name = 'quote_plugin'
 
     def ready(self):
-        from plugins.hooks import hook_registry, UI_DASHBOARD_WIDGET
+        from apps.cloude.cloude_apps.plugins.hooks import hook_registry, UI_DASHBOARD_WIDGET
         from quote_plugin.widget import QuoteWidgetProvider
 
         hook_registry.register(
@@ -430,7 +430,22 @@ Compress-Archive -Path mein_plugin -DestinationPath mein_plugin.zip</code></pre>
                         </ol>
                     </div>
                 </div>
+            
+            <!-- More Docs -->
+            <section id="docs" class="mb-5">
+                <h2>Weitere Dokumentation</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <p>Zus??tzliche Details findest du im Markdown-Handbuch:</p>
+                        <ul>
+                            <li><code>docs/PLUGINS_DEVELOPER.md</code> ??? Vollst??ndiger Plugin-Guide</li>
+                            <li><code>docs/API_INDEX.md</code> ??? API-Index</li>
+                        </ul>
+                        <p class="mb-0">Wenn du Beispiele oder Templates brauchst, sag Bescheid ??? ich f??ge sie gerne hinzu.</p>
+                    </div>
+                </div>
             </section>
+</section>
         </div>
     </div>
 </div>

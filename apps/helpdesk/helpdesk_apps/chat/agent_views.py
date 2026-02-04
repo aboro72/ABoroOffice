@@ -4,6 +4,7 @@ Für Agents und Administratoren zum Verwalten von Chat-Sessions
 """
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
@@ -14,11 +15,12 @@ from datetime import timedelta
 import json
 
 from .models import ChatSession, ChatMessage, ChatSettings
-from helpdesk_apps.tickets.models import Ticket
-from helpdesk_apps.knowledge.models import KnowledgeArticle
-from helpdesk_apps.accounts.models import User
-from helpdesk_apps.admin_panel.models import SystemSettings
+from apps.helpdesk.helpdesk_apps.tickets.models import Ticket
+from apps.helpdesk.helpdesk_apps.knowledge.models import KnowledgeArticle
+from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
 from .ai_service import get_ai_response_for_chat
+
+User = get_user_model()
 
 
 def is_support_staff(user):
@@ -267,7 +269,7 @@ def close_chat_session(request, session_id):
 
 def create_ticket_from_chat(session, created_by):
     """Erstelle Ticket aus Chat-Session"""
-    from helpdesk_apps.tickets.models import Ticket, Category
+    from apps.helpdesk.helpdesk_apps.tickets.models import Ticket, Category
     
     # Chat-Nachrichten zusammenfassen
     messages = session.messages.filter(

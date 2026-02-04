@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
         aiSuggestionBox.style.display = 'none';
 
         // Make AJAX request
-        fetch(`/tickets/${ticketId}/api/ai-suggest/`, {
+        fetch(`{{ helpdesk_prefix }}/tickets/${ticketId}/api/ai-suggest/`, {
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',

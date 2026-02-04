@@ -5,13 +5,14 @@ File and folder sharing management.
 
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse_lazy
 from django.http import JsonResponse, FileResponse
 from django.db.models import Q
 
-from sharing.models import UserShare, PublicLink, GroupShare, ShareLog
-from core.models import StorageFile, StorageFolder
+from apps.cloude.cloude_apps.sharing.models import UserShare, PublicLink, GroupShare, ShareLog
+from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder
 import logging
 
 logger = logging.getLogger(__name__)
@@ -25,8 +26,6 @@ class ShareView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('sharing:shares_list')
 
     def get_context_data(self, **kwargs):
-        from django.contrib.auth.models import User
-
         context = super().get_context_data(**kwargs)
         content_type = self.kwargs.get('content_type')
         object_id = self.kwargs.get('object_id')
@@ -46,6 +45,7 @@ class ShareView(LoginRequiredMixin, CreateView):
             )
 
         # Get list of users (exclude current user)
+        User = get_user_model()
         context['users'] = User.objects.exclude(id=self.request.user.id).order_by('username')
 
         return context

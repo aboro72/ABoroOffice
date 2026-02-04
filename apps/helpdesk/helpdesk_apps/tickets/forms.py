@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from .models import Ticket, TicketComment
 
 
@@ -43,7 +44,7 @@ class AgentTicketCreateForm(forms.ModelForm):
             'placeholder': 'Kundenname (z.B. "Max Mustermann") oder Email eingeben...',
             'id': 'customer-search-field',
             'autocomplete': 'off',
-            'data-url': '/tickets/api/search-customers/'
+            'data-url': f"{getattr(settings, 'HELPDESK_URL_PREFIX', '')}/tickets/api/search-customers/"
         }),
         help_text='Geben Sie den Namen oder die Email eines Kunden ein, um diesen zu suchen'
     )

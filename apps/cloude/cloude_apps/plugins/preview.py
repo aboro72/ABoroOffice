@@ -1,5 +1,5 @@
 """
-Base classes for file preview plugins.
+Base classes for file preview apps.cloude.cloude_apps.plugins.
 
 Plugin developers should inherit from FilePreviewProvider to implement
 custom file type previews.
@@ -11,7 +11,7 @@ from typing import List
 
 class FilePreviewProvider(ABC):
     """
-    Abstract base class for file preview plugins.
+    Abstract base class for file preview apps.cloude.cloude_apps.plugins.
 
     Subclass this to implement preview functionality for specific file types.
 

@@ -3,13 +3,14 @@ URL configuration for classroom app.
 """
 
 from django.urls import path
+from . import views
 
 app_name = 'classroom'
 
 # Placeholder URL patterns - to be implemented
 urlpatterns = [
     # Landing page
-    # path('', views.LandingPageView.as_view(), name='landing'),
+    path('', views.ClassroomIndexView.as_view(), name='index'),
 
     # Classroom management (staff only)
     # path('classrooms/', views.ClassroomListStaffView.as_view(), name='classroom_list_staff'),

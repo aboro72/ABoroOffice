@@ -3,7 +3,7 @@ Recent Files Widget - Shows user's most recently uploaded files.
 """
 
 from typing import Dict, Any
-from plugins.widgets import DashboardWidgetProvider
+from apps.cloude.cloude_apps.plugins.widgets import DashboardWidgetProvider
 
 
 class RecentFilesWidget(DashboardWidgetProvider):
@@ -17,7 +17,7 @@ class RecentFilesWidget(DashboardWidgetProvider):
 
     def get_context(self, request) -> Dict[str, Any]:
         """Get recent files for the current user."""
-        from core.models import StorageFile
+        from apps.cloude.cloude_apps.core.models import StorageFile
 
         recent_files = StorageFile.objects.filter(
             owner=request.user

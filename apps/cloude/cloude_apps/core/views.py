@@ -8,8 +8,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from pathlib import Path
-from core.models import ActivityLog
-from plugins.hooks import hook_registry, UI_DASHBOARD_WIDGET
+from apps.cloude.cloude_apps.core.models import ActivityLog
+from apps.cloude.cloude_apps.plugins.hooks import hook_registry, UI_DASHBOARD_WIDGET
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        from core.models import StorageFile, StorageFolder
+        from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder
 
         context['total_files'] = StorageFile.objects.filter(
             owner=self.request.user
@@ -73,7 +73,7 @@ def search(request):
         return redirect('accounts:login')
 
     query = request.GET.get('q', '')
-    from core.models import StorageFile, StorageFolder
+    from apps.cloude.cloude_apps.core.models import StorageFile, StorageFolder
 
     files = StorageFile.objects.filter(
         owner=request.user,
@@ -105,7 +105,7 @@ class SettingsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         # Get plugin data
         try:
-            from plugins.models import Plugin, PluginLog
+            from apps.cloude.cloude_apps.plugins.models import Plugin, PluginLog
             context['plugins'] = Plugin.objects.all().order_by('-uploaded_at')
             context['plugin_logs'] = PluginLog.objects.all().order_by('-created_at')[:20]
             context['has_plugins'] = Plugin.objects.exists()
@@ -129,8 +129,8 @@ class SettingsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             return redirect('core:settings')
 
         try:
-            from plugins.loader import PluginLoader
-            from plugins.models import Plugin, PluginLog
+            from apps.cloude.cloude_apps.plugins.loader import PluginLoader
+            from apps.cloude.cloude_apps.plugins.models import Plugin, PluginLog
 
             loader = PluginLoader()
 
@@ -201,7 +201,7 @@ def settings(request):
 
 class DebugPluginsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     """Debug plugins view - for development/troubleshooting"""
-    template_name = 'core/debug_plugins.html'
+    template_name = 'core/debug_apps.cloude.cloude_apps.plugins.html'
 
     def test_func(self):
         """Only allow superusers"""
@@ -212,7 +212,7 @@ class DebugPluginsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         # Get plugins
         try:
-            from plugins.models import Plugin
+            from apps.cloude.cloude_apps.plugins.models import Plugin
             context['plugins'] = Plugin.objects.all().order_by('-uploaded_at')
         except Exception as e:
             context['plugins'] = []
@@ -220,7 +220,7 @@ class DebugPluginsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         # Get hook information
         try:
-            from plugins.hooks import hook_registry, FILE_PREVIEW_PROVIDER
+            from apps.cloude.cloude_apps.plugins.hooks import hook_registry, FILE_PREVIEW_PROVIDER
 
             hooks_info = "=== HOOK REGISTRY DEBUG ===\n\n"
 

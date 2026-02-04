@@ -3,5 +3,5 @@ from django.apps import AppConfig
 
 class KnowledgeConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.knowledge'
+    name = 'apps.helpdesk.helpdesk_apps.knowledge'
     verbose_name = 'Wissensdatenbank'

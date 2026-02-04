@@ -3,14 +3,14 @@ import logging
 import requests
 from django.conf import settings
 from django.db.models import Q
-from helpdesk_apps.admin_panel.models import SystemSettings
-from helpdesk_apps.knowledge.models import KnowledgeArticle
+from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
+from apps.helpdesk.helpdesk_apps.knowledge.models import KnowledgeArticle
 
 logger = logging.getLogger(__name__)
 
 # Import Unified AI Service für LLAMA3-Integration
 try:
-    from helpdesk_apps.ai.unified_ai_service import unified_ai_service
+    from apps.helpdesk.helpdesk_apps.ai.unified_ai_service import unified_ai_service
     UNIFIED_AI_AVAILABLE = unified_ai_service.is_available()
 except ImportError:
     UNIFIED_AI_AVAILABLE = False

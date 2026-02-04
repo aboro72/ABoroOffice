@@ -14,8 +14,8 @@ import time
 import threading
 from .models import ChatSession, ChatMessage, ChatSettings
 from .enhanced_ai_service import get_ai_response_for_chat
-from helpdesk_apps.admin_panel.models import SystemSettings
-from helpdesk_apps.api.license_checker import LicenseFeatureChecker, require_feature
+from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
+from apps.helpdesk.helpdesk_apps.api.license_checker import LicenseFeatureChecker, require_feature
 
 User = get_user_model()
 

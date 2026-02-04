@@ -77,7 +77,7 @@ class HookRegistry:
         Clear all hooks registered by a specific plugin.
 
         Args:
-            plugin_module: Module prefix (e.g., 'plugins.installed.markdown_preview')
+            plugin_module: Module prefix (e.g., 'apps.cloude.cloude_apps.plugins.installed.markdown_preview')
         """
         removed_count = 0
         for hook_name in list(self._hooks.keys()):

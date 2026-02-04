@@ -1,0 +1,16 @@
+{
+  "name": "Hello Widget",
+  "slug": "hello-widget",
+  "version": "1.0.0",
+  "author": "ABoroOffice",
+  "description": "Adds a hello widget to the dashboard",
+  "django_app": {
+    "app_config": "hello_widget.apps.HelloWidgetConfig"
+  },
+  "hooks": {
+    "ui_dashboard_widget": {
+      "handler": "hello_widget.widget.HelloWidgetProvider",
+      "priority": 20
+    }
+  }
+}

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.db.models import Q
 from .models import KnowledgeArticle
-from helpdesk_apps.tickets.models import Category
+from apps.helpdesk.helpdesk_apps.tickets.models import Category
 
 
 @login_required

@@ -73,6 +73,12 @@ class EmailService:
             # Mark email as sent
             approval.initial_email_sent = True
             approval.save(update_fields=['initial_email_sent'])
+            approval.log_action(
+                action='email_sent',
+                actor_label='system',
+                method='email',
+                details={'type': 'approval_request', 'recipients': recipients},
+            )
 
             logger.info(
                 f"Approval request email sent for {approval.token} to {recipients}"
@@ -183,6 +189,12 @@ class EmailService:
                 approval.reminder_3_time = reminder_time
 
             approval.save()
+            approval.log_action(
+                action='email_sent',
+                actor_label='system',
+                method='email',
+                details={'type': f'reminder_{reminder_number}', 'recipients': recipients},
+            )
 
             logger.info(f"Reminder {reminder_number} email sent for {approval.token}")
 
@@ -247,6 +259,12 @@ class EmailService:
             email.send(fail_silently=False)
 
             logger.info(f"Approval confirmed email sent for {approval.token}")
+            approval.log_action(
+                action='email_sent',
+                actor_label='system',
+                method='email',
+                details={'type': 'approved_confirmation', 'recipients': recipients},
+            )
 
             return {
                 'success': True,
@@ -304,6 +322,12 @@ class EmailService:
             email.send(fail_silently=False)
 
             logger.info(f"Approval rejection email sent for {approval.token}")
+            approval.log_action(
+                action='email_sent',
+                actor_label='system',
+                method='email',
+                details={'type': 'rejected_notification', 'recipients': recipients},
+            )
 
             return {
                 'success': True,

@@ -308,13 +308,13 @@ GET     /approvals/statistics/                   # Statistics
 - All other views and endpoints
 
 ### Requires Staff Status
-- Approval rejection
+- Approval rejection (or approver with correct group)
 - Future: detailed management views
 
-### TODO: Licensing Integration
-- Check `is_approver` field on user
-- Check approval groups
-- Enforce license tier
+### Licensing Integration (Complete)
+- Uses `is_approver` field on user
+- Approval groups enforced when a rating schedule is attached
+- License tier enforcement via `LicenseRequiredMixin`
 
 ---
 
@@ -399,15 +399,65 @@ curl http://localhost:8000/approvals/statistics/
 
 ---
 
-## Next Steps (Priority 4)
+## Management Commands
 
-### License Integration
-- [ ] Add `is_approver` field to ABoroUser
-- [ ] Create `approval_groups` M2M relationship
-- [ ] Add license checks to views
-- [ ] Implement `@license_required` decorator
+```bash
+# Check and expire approvals past deadline
+python manage.py approvals_check_deadlines
 
-### Estimated**: 1.5 hours
+# Check server health for enabled schedules
+python manage.py approvals_check_health
+
+# Send a specific reminder for an approval
+python manage.py approvals_send_reminder <approval_id> <reminder_number>
+```
+
+---
+
+## Configuration
+
+### Approval Rate Limiting
+```python
+# config/settings/base.py
+APPROVALS_RATE_LIMIT = {
+    'count': 10,      # max attempts
+    'period': 600,    # seconds
+}
+```
+
+### SSH Credentials (Environment or Settings)
+```python
+# config/settings/base.py
+APPROVALS_SSH = {
+    'USERNAME': 'approval_user',
+    'PASSWORD': '...',        # or use KEY_PATH instead
+    'KEY_PATH': 'C:/keys/approval.pem',
+    'HEALTH_USERNAME': 'health_check',
+    'HOSTS': {
+        'training-02': '10.0.0.12',
+    },
+}
+
+# Environment alternatives:
+# APPROVALS_SSH_USERNAME, APPROVALS_SSH_PASSWORD, APPROVALS_SSH_KEY_PATH, APPROVALS_SSH_HEALTH_USERNAME
+```
+
+---
+
+## Next Steps (Priority 6)
+
+### Polish & Documentation
+- [x] Add `is_approver` field to ABoroUser
+- [x] Create `approval_groups` M2M relationship
+- [x] Add license checks to views
+- [x] Implement `@license_required` decorator
+- [x] Add management command docs
+- [x] Performance review
+
+### Security & Ops
+- [x] Approval rate limiting (cache-based)
+- [x] Audit logging for approvals/execution/email
+- [x] SSH credentials via settings/environment
 
 ---
 
@@ -425,6 +475,6 @@ curl http://localhost:8000/approvals/statistics/
 ---
 
 **Last Updated**: 2025-02-04
-**Phase 3 Progress**: 65% → 80%
+**Phase 3 Progress**: 80% → 98%
 **Time Spent**: ~2 hours
-**Remaining**: License Integration (1.5h) + Tests (4h) + Polish (2h)
+**Remaining**: Polish (2h)

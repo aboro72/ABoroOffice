@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings - ABoroOffice{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="display-6 mb-1">System Settings</h1>
+            <p class="text-muted mb-0">Zentrale Konfiguration für Branding und Theme</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/admin-dashboard/" class="btn btn-outline-primary">Admin Dashboard</a>
+            <a href="/dashboard/" class="btn btn-outline-secondary">User Dashboard</a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">Branding</div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ branding_form.app_name.label }}</label>
+                            {{ branding_form.app_name }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ branding_form.company_name.label }}</label>
+                            {{ branding_form.company_name }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ branding_form.site_url.label }}</label>
+                            {{ branding_form.site_url }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ branding_form.logo.label }}</label>
+                            {{ branding_form.logo }}
+                        </div>
+                        <button type="submit" name="save_branding" class="btn btn-primary w-100">
+                            Branding speichern
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header">Design Theme</div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ theme_form.theme_variant.label }}</label>
+                            {{ theme_form.theme_variant }}
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label">{{ theme_form.primary_color.label }}</label>
+                                {{ theme_form.primary_color }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">{{ theme_form.secondary_color.label }}</label>
+                                {{ theme_form.secondary_color }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">{{ theme_form.accent_color.label }}</label>
+                                {{ theme_form.accent_color }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">{{ theme_form.danger_color.label }}</label>
+                                {{ theme_form.danger_color }}
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">{{ theme_form.font_family.label }}</label>
+                            {{ theme_form.font_family }}
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">{{ theme_form.border_radius.label }}</label>
+                            {{ theme_form.border_radius }}
+                        </div>
+                        <div class="form-check mt-3">
+                            {{ theme_form.enable_dark_mode }}
+                            <label class="form-check-label" for="{{ theme_form.enable_dark_mode.id_for_label }}">
+                                {{ theme_form.enable_dark_mode.label }}
+                            </label>
+                        </div>
+                        <button type="submit" name="save_theme" class="btn btn-primary mt-3 w-100">
+                            Theme speichern
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">App Toggles</div>
+        <div class="card-body">
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                <div class="col-md-3 form-check">
+                    {{ app_toggles_form.approvals }}
+                    <label class="form-check-label" for="{{ app_toggles_form.approvals.id_for_label }}">
+                        {{ app_toggles_form.approvals.label }}
+                    </label>
+                </div>
+                <div class="col-md-3 form-check">
+                    {{ app_toggles_form.helpdesk }}
+                    <label class="form-check-label" for="{{ app_toggles_form.helpdesk.id_for_label }}">
+                        {{ app_toggles_form.helpdesk.label }}
+                    </label>
+                </div>
+                <div class="col-md-3 form-check">
+                    {{ app_toggles_form.cloudstorage }}
+                    <label class="form-check-label" for="{{ app_toggles_form.cloudstorage.id_for_label }}">
+                        {{ app_toggles_form.cloudstorage.label }}
+                    </label>
+                </div>
+                <div class="col-md-3 form-check">
+                    {{ app_toggles_form.classroom }}
+                    <label class="form-check-label" for="{{ app_toggles_form.classroom.id_for_label }}">
+                        {{ app_toggles_form.classroom.label }}
+                    </label>
+                </div>
+                <div class="col-12">
+                    <button type="submit" name="save_app_toggles" class="btn btn-primary w-100">
+                        App Toggles speichern
+                    </button>
+                </div>
+            </form>
+            <small class="text-muted d-block mt-2">
+                Deaktivierte Apps werden ausgeblendet und gesperrt.
+            </small>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Weitere Einstellungen</div>
+        <div class="card-body d-grid gap-2">
+            <a href="/admin-dashboard/" class="btn btn-outline-primary">Plugin System & Module (Admin Dashboard)</a>
+            <a href="/helpdesk/settings/" class="btn btn-outline-secondary">Helpdesk Settings (Legacy)</a>
+            <a href="/cloudstorage/core/settings/" class="btn btn-outline-secondary">Cloud Settings (Legacy)</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

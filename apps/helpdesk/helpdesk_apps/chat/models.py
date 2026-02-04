@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.conf import settings
 
 User = get_user_model()
 
@@ -19,8 +20,7 @@ class ChatSession(models.Model):
     ended_at = models.DateTimeField(null=True, blank=True)
     
     # Assignment
-    assigned_agent = models.ForeignKey(
-        User, 
+    assigned_agent = models.ForeignKey(settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True,
@@ -73,8 +73,7 @@ class ChatMessage(models.Model):
     # Sender information
     is_from_visitor = models.BooleanField(default=True)
     sender_name = models.CharField(max_length=100)
-    agent = models.ForeignKey(
-        User, 
+    agent = models.ForeignKey(settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True,

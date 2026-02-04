@@ -5,14 +5,14 @@ import anthropic
 import logging
 from django.conf import settings
 from .models import Ticket, TicketComment
-from helpdesk_apps.knowledge.models import KnowledgeArticle
-from helpdesk_apps.admin_panel.models import SystemSettings
+from apps.helpdesk.helpdesk_apps.knowledge.models import KnowledgeArticle
+from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
 
 logger = logging.getLogger(__name__)
 
 # Import Unified AI Service für LLAMA3
 try:
-    from helpdesk_apps.ai.unified_ai_service import unified_ai_service
+    from apps.helpdesk.helpdesk_apps.ai.unified_ai_service import unified_ai_service
     UNIFIED_AI_AVAILABLE = unified_ai_service.is_available()
 except ImportError:
     UNIFIED_AI_AVAILABLE = False

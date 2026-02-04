@@ -5,7 +5,7 @@ Django 5.x Features: Enhanced models with new field types.
 """
 
 from django.db import models
-from django.contrib.auth.models import User, AbstractUser
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -30,7 +30,7 @@ class UserProfile(models.Model):
     ]
 
     user = models.OneToOneField(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='profile',
         verbose_name=_('User')
@@ -128,7 +128,7 @@ class UserProfile(models.Model):
         Calculate total storage used by user.
         Returns value in bytes.
         """
-        from core.models import StorageFile
+        from apps.cloude.cloude_apps.core.models import StorageFile
 
         used = StorageFile.objects.filter(owner=self.user).aggregate(
             total=Sum('size')
@@ -175,8 +175,7 @@ class UserSession(models.Model):
     """
     Track user sessions and login history.
     """
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='sessions',
         verbose_name=_('User')
@@ -249,7 +248,7 @@ class TwoFactorAuth(models.Model):
     Two-factor authentication settings.
     """
     user = models.OneToOneField(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='two_factor_auth',
         verbose_name=_('User')
@@ -300,8 +299,7 @@ class PasswordReset(models.Model):
     """
     Password reset tokens.
     """
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='password_resets',
         verbose_name=_('User')
@@ -354,8 +352,7 @@ class AuditLog(models.Model):
         ('permission_revoke', _('Permission revoked')),
     ]
 
-    user = models.ForeignKey(
-        User,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='audit_logs',
         verbose_name=_('User')

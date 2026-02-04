@@ -14,18 +14,22 @@
 
             {% if user.is_authenticated %}
                 <div class="row mt-5">
+                    {% if app_toggles.approvals %}
                     <div class="col-md-4 mb-3">
                         <a href="{% url 'approvals:list' %}" class="btn btn-primary btn-lg w-100">
                             <i class="fas fa-check-circle"></i> Approvals
                         </a>
                         <small class="text-muted d-block mt-2">SSH Approval Workflow</small>
                     </div>
+                    {% endif %}
+                    {% if app_toggles.classroom %}
                     <div class="col-md-4 mb-3">
                         <a href="{% url 'classroom:index' %}" class="btn btn-secondary btn-lg w-100">
                             <i class="fas fa-chalkboard"></i> Classroom
                         </a>
                         <small class="text-muted d-block mt-2">Classroom Management</small>
                     </div>
+                    {% endif %}
                     <div class="col-md-4 mb-3">
                         <a href="/admin/" class="btn btn-outline-secondary btn-lg w-100">
                             <i class="fas fa-cog"></i> Admin
@@ -36,6 +40,7 @@
 
                 <hr class="my-5">
 
+                {% if app_toggles.approvals %}
                 <div class="row">
                     <div class="col-md-6 mx-auto text-start">
                         <h5>Quick Stats</h5>
@@ -61,6 +66,7 @@
                         })
                         .catch(e => console.log('Stats unavailable'));
                 </script>
+                {% endif %}
             {% else %}
                 <a href="/admin/login/" class="btn btn-primary btn-lg mb-3">
                     <i class="fas fa-sign-in-alt"></i> Sign In

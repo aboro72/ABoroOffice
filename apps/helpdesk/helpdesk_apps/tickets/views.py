@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.utils import timezone
@@ -9,10 +10,10 @@ from django.db import models
 from .models import Ticket, TicketComment, Category
 from .forms import TicketCreateForm, TicketCommentForm, AgentTicketCreateForm
 from .ai_service import ai_service
-from helpdesk_apps.accounts.models import User
 import logging
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 def notify_agents_new_ticket(ticket):
@@ -36,7 +37,8 @@ def notify_agents_new_ticket(ticket):
 
     # Build ticket URL using SITE_URL setting
     site_url = settings.SITE_URL.rstrip('/')
-    ticket_url = f"{site_url}/tickets/{ticket.pk}/"
+    prefix = getattr(settings, 'HELPDESK_URL_PREFIX', '')
+    ticket_url = f"{site_url}{prefix}/tickets/{ticket.pk}/"
 
     subject = f'Neues Ticket: {ticket.ticket_number} - {ticket.title}'
 
@@ -94,7 +96,8 @@ def notify_agent_ticket_escalation(ticket, escalated_from_agent, escalated_to_ag
 
     # Build ticket URL using SITE_URL setting
     site_url = settings.SITE_URL.rstrip('/')
-    ticket_url = f"{site_url}/tickets/{ticket.pk}/"
+    prefix = getattr(settings, 'HELPDESK_URL_PREFIX', '')
+    ticket_url = f"{site_url}{prefix}/tickets/{ticket.pk}/"
 
     # Get priority display
     priority_display = ticket.get_priority_display()
@@ -359,7 +362,7 @@ def ticket_detail(request, pk):
                 try:
                     from django.core.mail import send_mail
                     from django.template.loader import render_to_string
-                    from helpdesk_apps.admin_panel.models import SystemSettings
+                    from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
 
                     # Get settings
                     system_settings = SystemSettings.get_settings()
@@ -377,7 +380,11 @@ def ticket_detail(request, pk):
                                 'comment_content': comment.content,
                                 'author_name': comment.author.full_name if comment.author else 'Support Team',
                                 'site_url': settings.SITE_URL.rstrip('/'),
-                                'ticket_url': f"{settings.SITE_URL.rstrip('/')}/tickets/{ticket.id}/",
+                                'ticket_url': (
+                                    f"{settings.SITE_URL.rstrip('/')}"
+                                    f"{getattr(settings, 'HELPDESK_URL_PREFIX', '')}"
+                                    f"/tickets/{ticket.id}/"
+                                ),
                             }
 
                             # Render email template

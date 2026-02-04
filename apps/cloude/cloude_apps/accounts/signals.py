@@ -4,11 +4,12 @@ Django signals for Accounts app.
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
-from accounts.models import UserProfile, AuditLog
+from django.contrib.auth import get_user_model
+from apps.cloude.cloude_apps.accounts.models import UserProfile, AuditLog
 import logging
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 @receiver(post_save, sender=User)
@@ -23,7 +24,7 @@ def create_user_profile(sender, instance, created, **kwargs):
             logger.info(f"Created user profile for: {instance.username}")
 
             # Create root folder for user
-            from core.models import StorageFolder
+            from apps.cloude.cloude_apps.core.models import StorageFolder
             StorageFolder.objects.get_or_create(
                 owner=instance,
                 parent=None,
