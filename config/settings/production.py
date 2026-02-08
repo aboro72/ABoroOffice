@@ -24,18 +24,9 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 INSTALLED_APPS = [app for app in INSTALLED_APPS if app != 'debug_toolbar']  # noqa: F405
 MIDDLEWARE = [m for m in MIDDLEWARE if m != 'debug_toolbar.middleware.DebugToolbarMiddleware']  # noqa: F405
 
-# Database configuration for production (must use PostgreSQL)
+# Database configuration for production
 DATABASES = {  # noqa: F405
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'aboro_office'),
-        'USER': os.getenv('DB_USER', 'aboro'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
-        'ATOMIC_REQUESTS': True,
-        'CONN_MAX_AGE': 600,
-    }
+    'default': build_database_config(default_engine='postgresql'),  # noqa: F405
 }
 
 # Cache configuration for production (use Redis)

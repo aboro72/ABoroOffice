@@ -55,6 +55,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
+class HelpdeskHelpView(LoginRequiredMixin, TemplateView):
+    template_name = 'main/help.html'
+
+
 @login_required
 def admin_settings(request):
     """Admin settings view - combines System Settings and Chat Settings"""

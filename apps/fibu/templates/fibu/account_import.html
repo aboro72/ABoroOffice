@@ -1,0 +1,25 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Konten importieren{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Konten importieren (CSV)</h2>
+        <a class="btn btn-outline-secondary" href="/fibu/accounts/">Zurück</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-primary" type="submit">Import starten</button>
+            </form>
+            <hr>
+            <p class="mb-1"><strong>Erwartete Spalten:</strong> <code>code</code>, <code>name</code>, optional <code>account_type</code></p>
+            <p class="mb-0 text-muted">Trennzeichen: <code>;</code> oder <code>,</code>. Beispiel: <code>4000;Umsatzerlöse 19%;income</code></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

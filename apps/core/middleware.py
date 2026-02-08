@@ -1,4 +1,4 @@
-from django.http import Http404
+﻿from django.http import Http404
 from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
 
 
@@ -50,5 +50,22 @@ class AppToggleMiddleware:
             or path.startswith('/core/')
         ) and not is_enabled('cloudstorage', True):
             raise Http404()
+        if path.startswith('/crm/') and not is_enabled('crm', False):
+            raise Http404()
+        if path.startswith('/contracts/') and not is_enabled('contracts', False):
+            raise Http404()
+        if path.startswith('/marketing/') and not is_enabled('marketing', False):
+            raise Http404()
+        if path.startswith('/erp/') and not is_enabled('erp', False):
+            raise Http404()
+        if path.startswith('/personnel/') and not is_enabled('personnel', False):
+            raise Http404()
+        if path.startswith('/fibu/') and not is_enabled('fibu', False):
+            raise Http404()
+        if path.startswith('/projects/') and not is_enabled('projects', False):
+            raise Http404()
+        if path.startswith('/workflows/') and not is_enabled('workflows', False):
+            raise Http404()
 
         return self.get_response(request)
+

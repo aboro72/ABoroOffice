@@ -24,6 +24,10 @@ class RssFeedWidgetProvider(DashboardWidgetProvider):
     widget_size = "medium"
     widget_order = 25
 
+    def get_css_classes(self) -> str:
+        # Wider layout for RSS feed (approx. 3/4 width)
+        return 'col-md-9'
+
     RSS_URL = "https://www.heise.de/rss/heise-atom.xml"
     CACHE_KEY = "heise_rss_feed"
     CACHE_TIMEOUT = 300  # 5 minutes

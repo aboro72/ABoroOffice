@@ -1,0 +1,18 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Mahnwesen ausführen{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header">Mahnwesen ausführen</div>
+        <div class="card-body">
+            <p class="mb-3">Startet den automatischen Mahnlauf für überfällige Rechnungen.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">Jetzt ausführen</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

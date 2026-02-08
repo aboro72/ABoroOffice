@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Workflows{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Workflows</h2>
+    <a class="btn btn-primary" href="/workflows/workflows/create/">Neuer Workflow</a>
+  </div>
+  <div class="list-group">
+    {% for w in workflows %}
+      <a class="list-group-item list-group-item-action" href="/workflows/workflows/{{ w.id }}/">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="fw-bold">{{ w.name }}</div>
+            <div class="text-muted">{{ w.is_active|yesno:"Aktiv,Inaktiv" }} · Trigger: {{ w.get_trigger_type_display }}</div>
+          </div>
+          <div class="text-muted">{{ w.created_at|date:"Y-m-d" }}</div>
+        </div>
+      </a>
+    {% empty %}
+      <div class="text-muted">Keine Workflows.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

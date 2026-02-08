@@ -10,7 +10,8 @@ django-extensions==3.2.3
 
 # Database
 psycopg2-binary==2.9.11  # PostgreSQL (recommended)
-# mysqlclient==2.2.7  # MySQL alternative (requires manual setup on Windows)
+# mysqlclient==2.2.7  # MySQL/MariaDB (optional, requires manual setup on Windows)
+# mssql-django==1.4.2  # MSSQL (optional, requires ODBC driver)
 
 # REST Framework - Django 6.0 Compatible
 djangorestframework==3.14.0
@@ -63,6 +64,7 @@ paramiko==4.0.0
 pandas==2.3.3
 openpyxl==3.1.5
 python-docx==1.2.0
+PyPDF2==3.0.1
 
 # Pydantic - Windows-compatible version (v1.x with pre-built wheels)
 # Avoids Rust compiler requirement from pydantic v2.x

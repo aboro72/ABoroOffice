@@ -125,6 +125,12 @@
                         {{ app_toggles_form.classroom.label }}
                     </label>
                 </div>
+                <div class="col-md-3 form-check">
+                    {{ app_toggles_form.contracts }}
+                    <label class="form-check-label" for="{{ app_toggles_form.contracts.id_for_label }}">
+                        {{ app_toggles_form.contracts.label }}
+                    </label>
+                </div>
                 <div class="col-12">
                     <button type="submit" name="save_app_toggles" class="btn btn-primary w-100">
                         App Toggles speichern

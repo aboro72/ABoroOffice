@@ -1,0 +1,33 @@
+{
+  "name": "Demo Widget",
+  "slug": "demo-widget",
+  "version": "1.0.0",
+  "author": "ABoroOffice",
+  "description": "Starter template with settings and a simple dashboard widget.",
+  "django_app": {
+    "app_config": "demo_widget.apps.DemoWidgetConfig"
+  },
+  "hooks": {
+    "ui_dashboard_widget": {
+      "handler": "demo_widget.widget.DemoWidgetProvider",
+      "priority": 30
+    }
+  },
+  "settings": {
+    "has_settings": true,
+    "schema": {
+      "title": {
+        "type": "text",
+        "label": "Titel",
+        "required": false,
+        "default": "Demo Plugin"
+      },
+      "city": {
+        "type": "text",
+        "label": "Ort",
+        "required": false,
+        "default": "Berlin"
+      }
+    }
+  }
+}

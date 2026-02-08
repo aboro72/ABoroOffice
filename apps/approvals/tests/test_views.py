@@ -13,7 +13,7 @@ from apps.core.models import ABoroUser
 def test_approval_list_requires_login(client):
     response = client.get('/approvals/')
     assert response.status_code == 302
-    assert '/admin/login/' in response['Location']
+    assert '/cloudstorage/accounts/login/' in response['Location']
 
 
 @pytest.mark.django_db

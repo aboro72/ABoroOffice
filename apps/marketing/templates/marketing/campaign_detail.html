@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Kampagne{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">{{ campaign.name }}</h2>
+            <div class="text-muted small">{{ campaign.objective|default:"-" }}</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/marketing/campaigns/">Zurück</a>
+            <a class="btn btn-outline-primary" href="/marketing/campaigns/{{ campaign.id }}/edit/">Bearbeiten</a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header">KPIs</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">Impressions: <strong>{{ campaign.kpi_impressions }}</strong></div>
+                        <div class="col-6">Clicks: <strong>{{ campaign.kpi_clicks }}</strong></div>
+                        <div class="col-6">Conversions: <strong>{{ campaign.kpi_conversions }}</strong></div>
+                        <div class="col-6">CTR: <strong>{{ campaign.kpi_ctr }}%</strong></div>
+                        <div class="col-6">CVR: <strong>{{ campaign.kpi_cvr }}%</strong></div>
+                        <div class="col-6">ROI: <strong>{{ campaign.kpi_roi }}%</strong></div>
+                        <div class="col-6">Spend: <strong>{{ campaign.kpi_spend }}</strong></div>
+                        <div class="col-6">Revenue: <strong>{{ campaign.kpi_revenue }}</strong></div>
+                    </div>
+                    <hr>
+                    <div class="row g-2 small text-muted">
+                        <div class="col-12">Delta seit letztem Import:</div>
+                        <div class="col-6">Impr.: {{ kpi_delta.impressions }}</div>
+                        <div class="col-6">Clicks: {{ kpi_delta.clicks }}</div>
+                        <div class="col-6">Conv.: {{ kpi_delta.conversions }}</div>
+                        <div class="col-6">Spend: {{ kpi_delta.spend }}</div>
+                        <div class="col-6">Revenue: {{ kpi_delta.revenue }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">KPI Import (CSV)</div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="import_kpi">
+                        <div class="mb-2">
+                            <input type="file" class="form-control" name="kpi_file" accept=".csv" required>
+                        </div>
+                        <button class="btn btn-primary w-100">Importieren</button>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        Erwartete Spalten: impressions, clicks, conversions, spend, revenue
+                    </small>
+                    <a class="btn btn-outline-secondary w-100 mt-2" href="/marketing/campaigns/kpi-template/">
+                        KPI-Template herunterladen
+                    </a>
+                    <a class="btn btn-outline-secondary w-100 mt-2" href="/marketing/campaigns/{{ campaign.id }}/kpi-export/">
+                        KPI-Snapshot exportieren
+                    </a>
+                    {% if campaign.last_kpi_imported_at %}
+                    <div class="small text-muted mt-2">
+                        Letzter Import: {{ campaign.last_kpi_imported_at|date:"Y-m-d H:i" }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">KPI Chart</div>
+        <div class="card-body">
+            {% for item in kpi_chart %}
+            <div class="mb-2">
+                <div class="d-flex justify-content-between">
+                    <div>{{ item.label }}</div>
+                    <div class="text-muted">{{ item.value }}</div>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ item.percent }}%;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">7‑Tage‑Trend (letzte Imports)</div>
+        <div class="card-body">
+            <div class="d-flex gap-2 mb-2">
+                <a class="btn btn-sm {% if trend_metric == 'clicks' %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                   href="?trend=clicks">Clicks</a>
+                <a class="btn btn-sm {% if trend_metric == 'impressions' %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                   href="?trend=impressions">Impressions</a>
+                <a class="btn btn-sm {% if trend_metric == 'revenue' %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                   href="?trend=revenue">Revenue</a>
+            </div>
+            {% if kpi_sparkline %}
+                <div class="d-flex align-items-end gap-2" style="height: 120px;">
+                    {% for snap in kpi_sparkline %}
+                    <div class="text-center">
+                        <div class="{% if kpi_trend_delta > 0 %}bg-success{% elif kpi_trend_delta < 0 %}bg-danger{% else %}bg-secondary{% endif %}" style="width: 18px; height: {{ snap.percent|default:0|add:5 }}px;"></div>
+                        <div class="small text-muted">{{ snap.date|date:"m-d" }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="small text-muted mt-2">
+                    Balken zeigen {{ trend_metric }} pro Import (normalisiert).
+                </div>
+                <div class="small text-muted">
+                    Min: {{ kpi_trend_min }} · Max: {{ kpi_trend_max }} · Δ: {{ kpi_trend_delta }}
+                </div>
+            {% else %}
+                <div class="text-muted">Noch keine KPI-Imports vorhanden.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">Snapshot Tabelle (letzte 7)</div>
+        <div class="card-body">
+            {% if kpi_snapshots %}
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Import</th>
+                            <th>Impr.</th>
+                            <th>Clicks</th>
+                            <th>Conv.</th>
+                            <th>Spend</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for snap in kpi_snapshots %}
+                        <tr>
+                            <td>{{ snap.imported_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ snap.impressions }}</td>
+                            <td>{{ snap.clicks }}</td>
+                            <td>{{ snap.conversions }}</td>
+                            <td>{{ snap.spend }}</td>
+                            <td>{{ snap.revenue }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-muted">Noch keine Snapshots vorhanden.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Letzte Assets</div>
+        <div class="card-body">
+            {% if assets %}
+                <ul class="list-group">
+                    {% for asset in assets %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="/marketing/assets/{{ asset.id }}/">{{ asset.title }}</a>
+                        <span class="text-muted small">{{ asset.get_status_display }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-muted">Keine Assets verknüpft.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

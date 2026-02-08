@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import models
-from .models import Ticket, TicketComment, Category
+from .models import Ticket, TicketComment, Category, SupportDepartment, SupportQueue, TicketRoutingRule
 from .forms import TicketCreateForm, TicketCommentForm, AgentTicketCreateForm
 from .ai_service import ai_service
 import logging
@@ -32,6 +32,15 @@ def notify_agents_new_ticket(ticket):
         support_level__in=[1, 2]  # Only Level 1 and Level 2 support agents
     ).exclude(id=ticket.created_by.id)
 
+    group_ids = set()
+    if ticket.queue and ticket.queue.notify_groups.exists():
+        group_ids.update(ticket.queue.notify_groups.values_list('id', flat=True))
+    if ticket.department and ticket.department.notify_groups.exists():
+        group_ids.update(ticket.department.notify_groups.values_list('id', flat=True))
+
+    if group_ids:
+        agents = agents.filter(groups__id__in=list(group_ids)).distinct()
+
     if not agents.exists():
         return
 
@@ -50,6 +59,8 @@ Ticket-Nummer: {ticket.ticket_number}
 Titel: {ticket.title}
 Priorität: {ticket.get_priority_display()}
 Kategorie: {ticket.category.name if ticket.category else 'Keine'}
+Bereich: {ticket.department.name if ticket.department else 'Keine'}
+Queue: {ticket.queue.name if ticket.queue else 'Keine'}
 Erstellt von: {ticket.created_by.full_name} ({ticket.created_by.email})
 Erstellt am: {ticket.created_at.strftime('%d.%m.%Y %H:%M')}
 
@@ -75,6 +86,28 @@ Diese Email wurde automatisch vom ABoro-Soft Helpdesk System gesendet.
         )
     except Exception as e:
         print(f"Failed to send notification email: {e}")
+
+
+def apply_routing_rules(ticket):
+    rules = TicketRoutingRule.objects.filter(is_active=True).order_by('id')
+    text = f"{ticket.title} {ticket.description}".lower()
+    for rule in rules:
+        if rule.category and rule.category_id != ticket.category_id:
+            continue
+        if rule.contains_text and rule.contains_text.lower() not in text:
+            continue
+        if rule.queue:
+            ticket.queue = rule.queue
+            ticket.department = rule.queue.department
+        if rule.department:
+            ticket.department = rule.department
+        if rule.priority:
+            ticket.priority = rule.priority
+        if rule.support_level:
+            ticket.support_level = rule.support_level
+        ticket.save(update_fields=['queue', 'department', 'priority', 'support_level', 'updated_at'])
+        return True
+    return False
 
 
 def notify_agent_ticket_escalation(ticket, escalated_from_agent, escalated_to_agent, reason=''):
@@ -170,9 +203,36 @@ def ticket_list(request):
         # Admins see all tickets
         tickets = Ticket.objects.all().order_by('-created_at')
 
+    departments = SupportDepartment.objects.filter(is_active=True).order_by('name')
+    queues = SupportQueue.objects.filter(is_active=True).select_related('department').order_by('department__name', 'name')
+
+    dept_id = request.GET.get('department', '').strip()
+    queue_id = request.GET.get('queue', '').strip()
+    scope = request.GET.get('scope', '').strip()
+
+    if dept_id:
+        tickets = tickets.filter(department_id=dept_id)
+    if queue_id:
+        tickets = tickets.filter(queue_id=queue_id)
+
+    if scope == 'mine' and request.user.role in ['support_agent', 'admin']:
+        group_ids = request.user.groups.values_list('id', flat=True)
+        dept_ids = SupportDepartment.objects.filter(notify_groups__in=group_ids).values_list('id', flat=True)
+        queue_ids = SupportQueue.objects.filter(notify_groups__in=group_ids).values_list('id', flat=True)
+        dept_by_name = SupportDepartment.objects.none()
+        if getattr(request.user, 'department', ''):
+            dept_by_name = SupportDepartment.objects.filter(name__iexact=request.user.department)
+        tickets = tickets.filter(
+            models.Q(department_id__in=dept_ids) |
+            models.Q(queue_id__in=queue_ids) |
+            models.Q(department_id__in=dept_by_name.values_list('id', flat=True))
+        )
+
     context = {
         'tickets': tickets,
         'user': request.user,
+        'departments': departments,
+        'queues': queues,
     }
     return render(request, 'tickets/list.html', context)
 
@@ -180,12 +240,13 @@ def ticket_list(request):
 @login_required
 def ticket_create(request):
     """Create a new ticket - customers create for themselves, agents can create for customers"""
-    if request.user.role not in ['customer', 'support_agent', 'admin']:
+    if request.user.role not in ['customer', 'support_agent', 'admin'] and not (request.user.is_staff or request.user.is_superuser):
         messages.error(request, 'Sie haben keine Berechtigung, Tickets zu erstellen.')
         return redirect('main:dashboard')
 
-    # Agents use a different form to specify customer
-    if request.user.role in ['support_agent', 'admin']:
+    # Agents/admins use a different form to specify customer
+    is_agent_user = request.user.role in ['support_agent', 'admin'] or request.user.is_staff or request.user.is_superuser
+    if is_agent_user:
         if request.method == 'POST':
             form = AgentTicketCreateForm(request.POST, request.FILES)
             if form.is_valid():
@@ -275,6 +336,8 @@ def ticket_create(request):
                 ticket.created_by = customer
                 ticket.save()
 
+                apply_routing_rules(ticket)
+
                 # Set SLA based on priority
                 ticket.set_priority_based_sla()
                 ticket.save()
@@ -305,6 +368,8 @@ def ticket_create(request):
                 ticket = form.save(commit=False)
                 ticket.created_by = request.user
                 ticket.save()
+
+                apply_routing_rules(ticket)
 
                 # Set SLA based on priority
                 ticket.set_priority_based_sla()

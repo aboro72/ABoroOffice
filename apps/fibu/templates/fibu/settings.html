@@ -1,0 +1,22 @@
+﻿{% extends "base.html" %}
+
+{% block title %}FiBu Einstellungen{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">FiBu Einstellungen</h2>
+        <a class="btn btn-outline-secondary" href="/fibu/help/">Hilfe</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-primary" type="submit">Speichern</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

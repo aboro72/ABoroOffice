@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Projekt{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">{{ project.name }}</h2>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="/projects/kanban/?project={{ project.id }}">Kanban</a>
+      <a class="btn btn-outline-secondary" href="/projects/gantt/?project={{ project.id }}">Gantt</a>
+      <a class="btn btn-outline-secondary" href="/projects/projects/">Zurück</a>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-12">
+      <div class="card mb-3">
+        <div class="card-header">Verknüpfungen</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3"><strong>CRM Account</strong><br>{{ project.crm_account|default:"-" }}</div>
+            <div class="col-md-3"><strong>CRM Opportunity</strong><br>{{ project.crm_opportunity|default:"-" }}</div>
+            <div class="col-md-3"><strong>ERP Angebot</strong><br>{% if project.erp_quote %}<a href="/erp/quotes/{{ project.erp_quote.id }}/">{{ project.erp_quote.number }}</a>{% else %}-{% endif %}</div>
+            <div class="col-md-3"><strong>ERP Auftrag</strong><br>{% if project.erp_order %}<a href="/erp/salesorders/{{ project.erp_order.id }}/">{{ project.erp_order.order_number|default:project.erp_order.id }}</a>{% else %}-{% endif %}</div>
+            <div class="col-md-3 mt-2"><strong>WIP Assignee</strong><br>{{ project.wip_limit_assignee|default:"-" }}</div>
+            <div class="col-md-3 mt-2"><strong>WIP Team</strong><br>{{ project.wip_limit_team|default:"-" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card mb-3">
+        <div class="card-header">Kanban (Projekt)</div>
+        <div class="card-body">
+          <div class="row g-2">
+            {% for key, title, items, limit in kanban_columns %}
+            <div class="col-md-6">
+              <div class="border rounded p-2 h-100 kanban-column" data-status="{{ key }}">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ title }}</strong>
+                  {% if limit %}
+                  <span class="badge bg-warning text-dark" title="WIP Limit {{ limit }} · Aktuell {{ items|length }}">WIP {{ items|length }}/{{ limit }}</span>
+                  {% endif %}
+                  <span class="badge bg-secondary">{{ items|length }}</span>
+                </div>
+                {% for t in items %}
+                  <div class="mt-2 kanban-item" draggable="{{ can_edit|yesno:'true,false' }}" data-task="{{ t.id }}">
+                    <a href="/projects/tasks/{{ t.id }}/">{{ t.title }}</a>
+                  </div>
+                {% empty %}
+                  <div class="text-muted small mt-2">Keine Tasks.</div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card mb-3">
+        <div class="card-header">Gantt (Projekt)</div>
+        <div class="card-body">
+          <div class="text-muted small mb-2">Zeitraum: {{ min_date }} – {{ max_date }}</div>
+          {% for row in gantt_rows %}
+          <div class="mb-2">
+            <div class="d-flex justify-content-between">
+              <div>
+                {% if row.kind == 'milestone' %}
+                <strong>▲ {{ row.item.title }}</strong>
+                {% else %}
+                <strong>{{ row.item.title }}</strong>
+                {% endif %}
+              </div>
+              <div class="text-muted small">{{ row.start }} → {{ row.end }}</div>
+            </div>
+            <div class="position-relative bg-light rounded" style="height: 12px;">
+              {% if row.kind == 'milestone' %}
+              <div class="bg-warning rounded" style="position:absolute; height:12px; left: {{ row.left_pct }}%; width: 6px;"></div>
+              {% else %}
+              <div class="bg-primary rounded" style="position:absolute; height:12px; left: {{ row.left_pct }}%; width: {{ row.width_pct }}%;"></div>
+              {% endif %}
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-muted">Keine Tasks mit Datum.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card mb-3">
+        <div class="card-header">Aufgaben</div>
+        <div class="card-body">
+          {% for t in tasks %}
+            <div class="border-bottom py-2">
+              <a href="/projects/tasks/{{ t.id }}/" class="fw-bold">{{ t.title }}</a>
+              <div class="text-muted">{{ t.status }} · {{ t.priority }}</div>
+            </div>
+          {% empty %}
+            <div class="text-muted">Keine Aufgaben.</div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">Aufgabe hinzufügen</div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {{ task_form.as_p }}
+            <button class="btn btn-primary" name="add_task" type="submit">Speichern</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card mb-3">
+        <div class="card-header">Meilensteine</div>
+        <div class="card-body">
+          {% for m in milestones %}
+            <div class="border-bottom py-2">
+              <div class="fw-bold">{{ m.title }}</div>
+              <div class="text-muted">{{ m.status }} · {{ m.due_date|default:"-" }}</div>
+            </div>
+          {% empty %}
+            <div class="text-muted">Keine Meilensteine.</div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">Meilenstein hinzufügen</div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {{ milestone_form.as_p }}
+            <button class="btn btn-primary" name="add_milestone" type="submit">Speichern</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  (function() {
+    const canEdit = {{ can_edit|yesno:"true,false" }};
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    const csrftoken = getCookie('csrftoken');
+    const items = document.querySelectorAll('.kanban-item');
+    const columns = document.querySelectorAll('.kanban-column');
+    if (!canEdit) {
+      return;
+    }
+    items.forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', item.dataset.task);
+      });
+    });
+    columns.forEach(col => {
+      col.addEventListener('dragover', (e) => e.preventDefault());
+      col.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const taskId = e.dataTransfer.getData('text/plain');
+        const status = col.dataset.status;
+        fetch(`/projects/tasks/${taskId}/status/`, {
+          method: 'POST',
+          headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
+          body: `status=${encodeURIComponent(status)}`
+        }).then(r => r.json()).then(data => {
+          if (data.ok) {
+            const card = document.querySelector(`.kanban-item[data-task="${taskId}"]`);
+            col.appendChild(card);
+          } else if (data.error) {
+            const inline = document.createElement('div');
+            inline.className = 'alert alert-warning mt-2';
+            inline.textContent = data.error;
+            col.prepend(inline);
+            setTimeout(() => inline.remove(), 3500);
+          }
+        });
+      });
+    });
+  })();
+</script>
+{% endblock %}

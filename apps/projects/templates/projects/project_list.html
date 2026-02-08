@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Projekte{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Projekte</h2>
+    <a class="btn btn-primary" href="/projects/projects/create/">Neues Projekt</a>
+  </div>
+  <div class="list-group">
+    {% for p in projects %}
+      <a class="list-group-item list-group-item-action" href="/projects/projects/{{ p.id }}/">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="fw-bold">{{ p.name }}</div>
+            <div class="text-muted">{{ p.status }}</div>
+          </div>
+          <div class="text-muted">{{ p.due_date|default:"-" }}</div>
+        </div>
+      </a>
+    {% empty %}
+      <div class="text-muted">Keine Projekte.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

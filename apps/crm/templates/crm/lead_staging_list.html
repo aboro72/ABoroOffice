@@ -1,0 +1,247 @@
+﻿{% extends "base.html" %}
+
+{% block title %}CRM - Lead-Staging{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    {% include "crm/_nav.html" %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Lead-Staging</h2>
+        <a class="btn btn-outline-secondary" href="{% url 'crm:lead_staging_needs_website' %}">Website gesucht</a>
+    </div>
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <select name="status" class="form-select">
+                <option value="">Status (alle)</option>
+                <option value="incomplete" {% if selected_status == 'incomplete' %}selected{% endif %}>Unvollständig</option>
+                <option value="ready" {% if selected_status == 'ready' %}selected{% endif %}>Bereit</option>
+                <option value="imported" {% if selected_status == 'imported' %}selected{% endif %}>Importiert</option>
+                <option value="skipped" {% if selected_status == 'skipped' %}selected{% endif %}>Übersprungen</option>
+                <option value="needs_website" {% if selected_status == 'needs_website' %}selected{% endif %}>Website gesucht</option>
+            </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-center">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="no_website" name="no_website" value="1" {% if selected_no_website %}checked{% endif %}>
+                <label class="form-check-label" for="no_website">Nur ohne Website</label>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Filtern</button>
+        </div>
+    </form>
+
+    <form method="post" action="{% url 'crm:lead_staging_bulk_import' %}">
+        {% csrf_token %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="fw-bold">Staging Eintraege</div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary btn-sm" type="submit" name="action" value="enrich">Auto-enrich</button>
+                    <button class="btn btn-outline-secondary btn-sm" type="submit" name="action" value="mark_needs_website">Website gesucht</button>
+                    <button class="btn btn-primary btn-sm" type="submit" name="action" value="import">Ausgewaehlte importieren</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th><input type="checkbox" id="select-all"></th>
+                        <th>Firma</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Lead Quelle</th>
+                        <th>Lead Status</th>
+                        <th>Enrichment</th>
+                        <th>Quelle</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td><input type="checkbox" name="selected_ids" value="{{ item.id }}" class="row-check"></td>
+                        <td>{{ item.company }}</td>
+                        <td>{{ item.name|default:"-" }}</td>
+                        <td>{{ item.get_status_display }}</td>
+                        <td>{{ item.get_lead_source_display }}</td>
+                        <td>{{ item.get_lead_status_display }}</td>
+                        <td>
+                            <div class="small">{{ item.get_enrichment_status_display }}</div>
+                            {% if item.enrichment_notes %}
+                            <div class="text-muted small">{{ item.enrichment_notes|truncatechars:50 }}</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.source }}</td>
+                        <td class="text-end">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-secondary me-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#leadDetailsModal"
+                                data-id="{{ item.id }}"
+                                data-company="{{ item.company|default_if_none:'' }}"
+                                data-name="{{ item.name|default_if_none:'' }}"
+                                data-email="{{ item.email|default_if_none:'' }}"
+                                data-phone="{{ item.phone|default_if_none:'' }}"
+                                data-website="{{ item.website_display_url|default_if_none:'' }}"
+                                data-address="{{ item.address_display|default_if_none:'' }}"
+                                data-source="{{ item.source|default_if_none:'' }}"
+                                data-status="{{ item.get_status_display|default_if_none:'' }}"
+                                data-lead-source="{{ item.get_lead_source_display|default_if_none:'' }}"
+                                data-lead-status="{{ item.get_lead_status_display|default_if_none:'' }}"
+                                data-enrichment="{{ item.get_enrichment_status_display|default_if_none:'' }}"
+                                data-notes="{{ item.enrichment_notes|default_if_none:'' }}"
+                            >
+                                Details
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary me-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#leadWebsiteModal"
+                                data-id="{{ item.id }}"
+                                data-company="{{ item.company|default_if_none:'' }}"
+                                data-website="{{ item.website_display_url|default_if_none:'' }}"
+                                data-address="{{ item.address_display|default_if_none:'' }}"
+                            >
+                                Website setzen
+                            </button>
+                            <a class="btn btn-sm btn-outline-secondary" href="{% url 'crm:lead_staging_edit' item.id %}">Bearbeiten</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">Keine Einträge vorhanden.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="leadDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lead Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Firma</dt>
+                    <dd class="col-sm-8" id="detail-company"></dd>
+                    <dt class="col-sm-4">Name</dt>
+                    <dd class="col-sm-8" id="detail-name"></dd>
+                    <dt class="col-sm-4">E-Mail</dt>
+                    <dd class="col-sm-8" id="detail-email"></dd>
+                    <dt class="col-sm-4">Telefon</dt>
+                    <dd class="col-sm-8" id="detail-phone"></dd>
+                    <dt class="col-sm-4">Website</dt>
+                    <dd class="col-sm-8" id="detail-website"></dd>
+                    <dt class="col-sm-4">Adresse</dt>
+                    <dd class="col-sm-8" id="detail-address"></dd>
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8" id="detail-status"></dd>
+                    <dt class="col-sm-4">Lead Quelle</dt>
+                    <dd class="col-sm-8" id="detail-lead-source"></dd>
+                    <dt class="col-sm-4">Lead Status</dt>
+                    <dd class="col-sm-8" id="detail-lead-status"></dd>
+                    <dt class="col-sm-4">Enrichment</dt>
+                    <dd class="col-sm-8" id="detail-enrichment"></dd>
+                    <dt class="col-sm-4">Notizen</dt>
+                    <dd class="col-sm-8" id="detail-notes"></dd>
+                    <dt class="col-sm-4">Quelle</dt>
+                    <dd class="col-sm-8" id="detail-source"></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="leadWebsiteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Website & Adresse setzen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="leadWebsiteForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Firma</label>
+                        <div class="form-control-plaintext" id="website-company"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Website</label>
+                        <input type="url" name="website" class="form-control" id="website-input" placeholder="https://...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Adresse</label>
+                        <textarea name="address" class="form-control" id="address-input" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Speichern</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const selectAll = document.getElementById('select-all');
+    const checks = document.querySelectorAll('.row-check');
+    if (selectAll) {
+        selectAll.addEventListener('change', () => {
+            checks.forEach(cb => cb.checked = selectAll.checked);
+        });
+    }
+
+    const detailsModal = document.getElementById('leadDetailsModal');
+    if (detailsModal) {
+        detailsModal.addEventListener('show.bs.modal', (event) => {
+            const button = event.relatedTarget;
+            const get = (key) => (button.getAttribute(`data-${key}`) || '-').trim() || '-';
+            document.getElementById('detail-company').textContent = get('company');
+            document.getElementById('detail-name').textContent = get('name');
+            document.getElementById('detail-email').textContent = get('email');
+            document.getElementById('detail-phone').textContent = get('phone');
+            const website = get('website');
+            const websiteEl = document.getElementById('detail-website');
+            if (website && website !== '-') {
+                websiteEl.innerHTML = `<a href="${website}" target="_blank" rel="noopener">${website}</a>`;
+            } else {
+                websiteEl.textContent = '-';
+            }
+            document.getElementById('detail-address').textContent = get('address');
+            document.getElementById('detail-status').textContent = get('status');
+            document.getElementById('detail-lead-source').textContent = get('lead-source');
+            document.getElementById('detail-lead-status').textContent = get('lead-status');
+            document.getElementById('detail-enrichment').textContent = get('enrichment');
+            document.getElementById('detail-notes').textContent = get('notes');
+            document.getElementById('detail-source').textContent = get('source');
+        });
+    }
+
+    const websiteModal = document.getElementById('leadWebsiteModal');
+    if (websiteModal) {
+        websiteModal.addEventListener('show.bs.modal', (event) => {
+            const button = event.relatedTarget;
+            const get = (key) => (button.getAttribute(`data-${key}`) || '').trim();
+            const id = get('id');
+            document.getElementById('website-company').textContent = get('company') || '-';
+            document.getElementById('website-input').value = get('website') || '';
+            document.getElementById('address-input').value = get('address') || '';
+            const form = document.getElementById('leadWebsiteForm');
+            const templateUrl = "{% url 'crm:lead_staging_quick_update' 0 %}";
+            form.action = templateUrl.replace('/0/', `/${id}/`);
+        });
+    }
+</script>
+{% endblock %}
+
+
+

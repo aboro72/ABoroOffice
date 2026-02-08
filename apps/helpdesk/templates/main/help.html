@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Helpdesk Hilfe{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 1100px; margin: 0 auto;">
+    <div class="mb-3">
+        <h2 class="mb-1">Helpdesk Hilfe</h2>
+        <div class="text-muted">Tickets, Routing, Chat, Wissen, API-Referenz.</div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">Kern-Felder (Ticket)</div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li><strong>Titel</strong>: Kurzbeschreibung des Problems.</li>
+                <li><strong>Beschreibung</strong>: Details, Schritte, Kontext.</li>
+                <li><strong>Kunde</strong>: Bestandskunde oder neu.</li>
+                <li><strong>Kategorie</strong>: Routing + Reporting.</li>
+                <li><strong>Priorität</strong>: z. B. niedrig/mittel/hoch.</li>
+                <li><strong>Status</strong>: neu/offen/in Arbeit/gelöst.</li>
+                <li><strong>Support-Level</strong>: L1-L4.</li>
+                <li><strong>Bereich/Queue</strong>: Teamzuordnung.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">Fehler-Diagnose Checkliste</div>
+        <div class="card-body">
+            <ol class="mb-0">
+                <li>Ticket fehlt -> Rolle/Gruppe + Queue prüfen.</li>
+                <li>Routing falsch -> Kategorie/Regel-Reihenfolge prüfen.</li>
+                <li>Chat Widget leer -> Script-URL + Mixed-Content prüfen.</li>
+                <li>API 403 -> Login/CSRF prüfen.</li>
+                <li>API 400 -> Pflichtfelder prüfen.</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}

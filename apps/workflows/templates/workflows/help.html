@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Workflows Hilfe{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-3">
+        <h2 class="mb-1">Workflow-Automation Hilfe</h2>
+        <div class="text-muted">Trigger, Filter, Schritte, Beispiele.</div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Schnellstart</div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Workflow erstellen.</li>
+                        <li>Trigger-Typ wählen (CRM/ERP/Marketing).</li>
+                        <li>Schritte hinzufügen und aktivieren.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Beispiele</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>ERP: Rechnung erstellt -> E-Mail senden</li>
+                        <li>ERP: Mahnung erstellt -> E-Mail + Kommentar</li>
+                        <li>CRM: Opportunity gewonnen -> Projekt erstellen</li>
+                        <li>Marketing: Content freigegeben -> Task erstellen</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

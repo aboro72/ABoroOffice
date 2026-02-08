@@ -1,6 +1,14 @@
 from django.contrib import admin
 from apps.helpdesk.helpdesk_apps.common.admin_mixins import ZoneinfoSafeDateHierarchyMixin
-from .models import Ticket, TicketComment, TicketAttachment, Category
+from .models import (
+    Ticket,
+    TicketComment,
+    TicketAttachment,
+    Category,
+    SupportDepartment,
+    SupportQueue,
+    TicketRoutingRule,
+)
 
 
 # Mobile classroom admin removed - not needed
@@ -51,7 +59,7 @@ class TicketAdmin(ZoneinfoSafeDateHierarchyMixin, admin.ModelAdmin):
             'fields': ('ticket_number', 'title', 'description')
         }),
         ('Assignment', {
-            'fields': ('created_by', 'assigned_to', 'category', 'support_level')
+            'fields': ('created_by', 'assigned_to', 'category', 'department', 'queue', 'support_level')
         }),
         ('Status & Priority', {
             'fields': ('status', 'priority')
@@ -90,3 +98,24 @@ class TicketCommentAdmin(ZoneinfoSafeDateHierarchyMixin, admin.ModelAdmin):
         if not request.user.is_authenticated:
             return False
         return request.user.is_superuser or (hasattr(request.user, 'role') and request.user.role == 'admin')
+
+
+@admin.register(SupportDepartment)
+class SupportDepartmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'is_active']
+    list_filter = ['is_active']
+    search_fields = ['name', 'description']
+
+
+@admin.register(SupportQueue)
+class SupportQueueAdmin(admin.ModelAdmin):
+    list_display = ['name', 'department', 'default_support_level', 'is_active']
+    list_filter = ['department', 'default_support_level', 'is_active']
+    search_fields = ['name', 'department__name']
+
+
+@admin.register(TicketRoutingRule)
+class TicketRoutingRuleAdmin(admin.ModelAdmin):
+    list_display = ['name', 'is_active', 'category', 'department', 'queue', 'priority', 'support_level']
+    list_filter = ['is_active', 'category', 'department', 'queue', 'priority', 'support_level']
+    search_fields = ['name', 'contains_text']

@@ -10,7 +10,8 @@ django-extensions==3.2.3
 
 # Database
 psycopg2-binary==2.9.11  # PostgreSQL (recommended)
-# mysqlclient==2.2.7  # MySQL alternative
+# mysqlclient==2.2.7  # MySQL/MariaDB (optional)
+# mssql-django==1.4.2  # MSSQL (optional, requires ODBC driver)
 
 # REST Framework - Django 6.0 Compatible
 djangorestframework==3.14.0
@@ -61,6 +62,7 @@ paramiko==4.0.0
 pandas==2.3.3
 openpyxl==3.1.5
 python-docx==1.2.0
+PyPDF2==3.0.1
 
 # Pydantic - Full version with Rust compilation support
 pydantic==2.5.3

@@ -116,6 +116,26 @@ class Plugin(models.Model):
         help_text="Position on file preview page (left, center, or right)"
     )
 
+    # Dashboard position and row
+    DASHBOARD_POSITION_CHOICES = [
+        ('inherit', _('Inherit Dashboard Setting')),
+        ('top', _('Top')),
+        ('bottom', _('Bottom')),
+        ('left', _('Left')),
+        ('right', _('Right')),
+        ('center', _('Center')),
+    ]
+    dashboard_position = models.CharField(
+        max_length=20,
+        choices=DASHBOARD_POSITION_CHOICES,
+        default='inherit',
+        help_text="Position on main dashboard (top/bottom/left/right/center)"
+    )
+    dashboard_row = models.IntegerField(
+        default=1,
+        help_text="Row order within dashboard position (lower = higher)"
+    )
+
     # Metadata
     installed_by = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

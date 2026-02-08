@@ -1,0 +1,207 @@
+<div class="container-fluid" style="max-width: 1400px;">
+    <div class="row align-items-center" style="min-height: 60vh;">
+        <div class="col-lg-10 mx-auto">
+            <div class="text-center mb-4">
+                <h1 class="display-5">Dashboard</h1>
+                <p class="lead text-muted">Zentraler Einstieg in alle Module</p>
+            </div>
+
+            {% if widgets_top %}
+            <div class="card mt-4" style="background: #f7f9fc; border: 1px solid #e6eef7;">
+                <div class="card-header" style="background: #eef3f9;">Plugins</div>
+                <div class="card-body">
+                    {% regroup widgets_top by row as top_rows %}
+                    {% for row in top_rows %}
+                    <div class="row g-3 mb-3">
+                        {% include "partials/plugin_widgets_list.html" with widgets=row.list force_full=False %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row g-3 justify-content-center mt-4">
+                {% if app_toggles.approvals %}
+                <div class="col-md-4">
+                    <a class="btn btn-primary btn-lg w-100" href="{% url 'approvals:list' %}">
+                        <i class="fas fa-check-circle"></i> Approvals
+                    </a>
+                </div>
+                {% endif %}
+                {# Classroom button hidden per request #}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-secondary btn-lg w-100" href="/admin-dashboard/">
+                        <i class="fas fa-cog"></i> Admin Dashboard
+                    </a>
+                </div>
+                {% if app_toggles.helpdesk %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/helpdesk/">
+                        <i class="fas fa-ticket-alt"></i> Helpdesk
+                    </a>
+                </div>
+                {% endif %}
+                {% if app_toggles.cloudstorage %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/cloudstorage/core/">
+                        <i class="fas fa-cloud"></i> Cloud Storage
+                    </a>
+                </div>
+                {% endif %}
+                {% if app_toggles.crm and crm_can_view %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/crm/">
+                        <i class="fas fa-briefcase"></i> CRM
+                    </a>
+                </div>
+                {% endif %}
+                {% if app_toggles.contracts %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/contracts/">
+                        <i class="fas fa-file-contract"></i> Verträge
+                    </a>
+                </div>
+                {% endif %}
+                {% if app_toggles.marketing %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/marketing/">
+                        <i class="fas fa-bullhorn"></i> Marketing
+                    </a>
+                </div>
+                {% endif %}
+                {% if app_toggles.erp and erp_can_view %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/erp/">
+                        <i class="fas fa-industry"></i> ERP
+                    </a>
+                </div>
+                {% endif %}
+                {% if app_toggles.personnel %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/personnel/instructors/">
+                        <i class="fas fa-user-tie"></i> Personal
+                    </a>
+                </div>
+                {% endif %}
+                {% if app_toggles.fibu %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/fibu/journal/">
+                        <i class="fas fa-calculator"></i> FiBu
+                    </a>
+                </div>
+                {% endif %}
+                {% if app_toggles.projects %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/projects/">
+                        <i class="fas fa-project-diagram"></i> Projekte
+                    </a>
+                </div>
+                {% endif %}
+                {% if app_toggles.workflows %}
+                <div class="col-md-4">
+                    <a class="btn btn-outline-primary btn-lg w-100" href="/workflows/">
+                        <i class="fas fa-random"></i> Workflows
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">Dashboard Hilfe (Kurz)</div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        Dieses Dashboard ist der Einstieg in alle Module. Wichtige Workflows:
+                    </p>
+                    <ul class="mb-3">
+                        <li>Helpdesk: Tickets erstellen, bearbeiten und zuweisen.</li>
+                        <li>CRM: Leads/Accounts pflegen und Chancen verfolgen.</li>
+                        <li>Vertr?ge: Dokumente verwalten und KI-Analyse nutzen.</li>
+                        <li>Marketing: Content planen, freigeben und KPIs beobachten.</li>
+                        <li>ERP: Produkte, Auftr?ge, Wareneingang, Preise.</li>
+                        <li>Cloud: Dateien, Ordner und Versionen verwalten.</li>
+                    </ul>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-outline-secondary" href="/user-guide/">Benutzerhandbuch</a>
+                        <a class="btn btn-outline-secondary" href="/cloudstorage/core/help/">Cloud Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/cloudstorage/core/help/developer/">Plugin Doku</a>
+                        <a class="btn btn-outline-secondary" href="/crm/help/">CRM Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/contracts/help/">Vertr?ge Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/marketing/help/">Marketing Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/erp/help/">ERP Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/erp/pricing-help/">ERP Pricing Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/projects/help/">Projekte Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/workflows/help/">Workflows Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/personnel/help/">Personal Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/personnel/instructors/">Personal</a>
+                        <a class="btn btn-outline-secondary" href="/fibu/help/">FiBu Hilfe</a>
+                        <a class="btn btn-outline-secondary" href="/fibu/journal/">FiBu</a>
+                    </div>
+                </div>
+            </div>
+
+            {% if widgets_left or widgets_center or widgets_right %}
+            <div class="row g-3 mt-4">
+                {% if widgets_left %}
+                <div class="col-lg-3">
+                    <div class="card h-100" style="background: #f7f9fc; border: 1px solid #e6eef7;">
+                        <div class="card-header" style="background: #eef3f9;">Plugins</div>
+                        <div class="card-body">
+                            {% regroup widgets_left by row as left_rows %}
+                            {% for row in left_rows %}
+                            <div class="row g-3 mb-3">
+                                {% include "partials/plugin_widgets_list.html" with widgets=row.list force_full=False %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if widgets_center %}
+                <div class="col-12">
+                    <div class="card h-100" style="background: #f7f9fc; border: 1px solid #e6eef7;">
+                        <div class="card-header" style="background: #eef3f9;">Plugins</div>
+                        <div class="card-body">
+                    {% regroup widgets_center by row as center_rows %}
+                    {% for row in center_rows %}
+                    <div class="row g-3 mb-3">
+                        {% include "partials/plugin_widgets_list.html" with widgets=row.list force_full=False %}
+                    </div>
+                    {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if widgets_right %}
+                <div class="col-lg-3">
+                    <div class="card h-100" style="background: #f7f9fc; border: 1px solid #e6eef7;">
+                        <div class="card-header" style="background: #eef3f9;">Plugins</div>
+                        <div class="card-body">
+                            {% regroup widgets_right by row as right_rows %}
+                            {% for row in right_rows %}
+                            <div class="row g-3 mb-3">
+                                {% include "partials/plugin_widgets_list.html" with widgets=row.list force_full=False %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if widgets_bottom %}
+            <div class="card mt-4" style="background: #f7f9fc; border: 1px solid #e6eef7;">
+                <div class="card-header" style="background: #eef3f9;">Plugins</div>
+                <div class="card-body">
+                    {% regroup widgets_bottom by row as bottom_rows %}
+                    {% for row in bottom_rows %}
+                    <div class="row g-3 mb-3">
+                        {% include "partials/plugin_widgets_list.html" with widgets=row.list force_full=False %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}ERP Pricing Hilfe{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">ERP Pricing Hilfe</h2>
+            <div class="text-muted">Preislogik, Anbieter, Debug & Best Practices</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/erp/help/">Zurueck</a>
+            <a class="btn btn-outline-primary" href="/admin-dashboard/">Admin-Dashboard</a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card mb-3">
+                <div class="card-header">Preislogik (Standard)</div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Netto-Einkaufspreis (EK) wird im Wareneingang gesetzt.</li>
+                        <li>Mindesmarge + Unterbietungs-Range werden angewendet.</li>
+                        <li>Bei Konkurrenzpreis wird ein Zielpreis darunter berechnet.</li>
+                        <li>Rundung auf 0,05 (Netto und Brutto).</li>
+                        <li>Brutto = Netto + MwSt.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Provider</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Manuell</strong>: Kein Abruf, Preis wird manuell gepflegt.</li>
+                        <li><strong>Custom API</strong>: Empfohlen. Stabil und rechtlich sauber.</li>
+                        <li><strong>Geizhals</strong>: Kann blocken; nur wenn TOS/Robots erlaubt.</li>
+                    </ul>
+                </div>
+            </div>
+
+            
+            <div class="card mb-3">
+                <div class="card-header">Beispiel-Berechnungen</div>
+                <div class="card-body">
+                    <p class="mb-2">Beispiele mit Standardwerten (Mindestmarge 20%, Unterbieten 3-10%, MwSt 19%, Rundung 0,05):</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>EK Netto</th>
+                                    <th>Konkurrenz Netto</th>
+                                    <th>Ziel Netto</th>
+                                    <th>Ziel Brutto</th>
+                                    <th>Hinweis</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>100,00</td>
+                                    <td>-</td>
+                                    <td>120,00</td>
+                                    <td>142,80</td>
+                                    <td>Nur Mindestmarge</td>
+                                </tr>
+                                <tr>
+                                    <td>100,00</td>
+                                    <td>150,00</td>
+                                    <td>138,50</td>
+                                    <td>164,80</td>
+                                    <td>Konkurrenzpreis unterboten (? 6,5%)</td>
+                                </tr>
+                                <tr>
+                                    <td>100,00</td>
+                                    <td>110,00</td>
+                                    <td>120,00</td>
+                                    <td>142,80</td>
+                                    <td>Unterbieten waere zu niedrig, Mindestmarge greift</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-muted small">
+                        Rundung erfolgt auf 0,05 (z.B. 138,47 => 138,50).
+                    </div>
+                </div>
+            </div>
+<div class="card mb-3">
+                <div class="card-header">Custom API Setup</div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Service starten: <code>tools/competitor_api/README.md</code></li>
+                        <li>Provider = <strong>Custom API</strong></li>
+                        <li>URL: <code>http://127.0.0.1:8010/price</code></li>
+                        <li>API-Key setzen (Authorization: Bearer)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Debug</div>
+                <div class="card-body">
+                    <p class="mb-2">Letzter Abruf inkl. Quelle und HTML-Auszug:</p>
+                    <a class="btn btn-outline-secondary" href="/erp/competitor-debug/">Konkurrenz-Debug oeffnen</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card mb-3">
+                <div class="card-header">Best Practices</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Unterbietung klein halten (3–10%).</li>
+                        <li>Mindestmarge je Branche definieren.</li>
+                        <li>Wareneingang immer mit EK pflegen.</li>
+                        <li>Debug nutzen, wenn Preise fehlen.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Beispiel-Request</div>
+                <div class="card-body">
+                    <pre class="bg-light p-3 rounded"><code>GET /price?q=Kynast%20Raeucherofen
+Authorization: Bearer &lt;API_KEY&gt;
+</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

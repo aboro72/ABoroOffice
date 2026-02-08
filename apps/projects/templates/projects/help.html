@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Projekte Hilfe{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-3">
+        <h2 class="mb-1">Projektmanagement Hilfe</h2>
+        <div class="text-muted">Kanban, Gantt, WIP, Exporte und Integrationen.</div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Schnellstart</div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Projekt anlegen.</li>
+                        <li>Tasks + Meilensteine erstellen.</li>
+                        <li>Kanban für tägliche Arbeit nutzen.</li>
+                        <li>Gantt für Planung/Reporting nutzen.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Gantt vs. Kanban</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Kanban</strong>: Statusfluss (To Do -> In Progress -> Done).</li>
+                        <li><strong>Gantt</strong>: Zeitachsen, Meilensteine, Verlauf.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">WIP-Limits</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Limit pro Spalte (To Do/In Progress/Blocked/Done).</li>
+                        <li>Limit pro Assignee und Team.</li>
+                        <li>Warnung + Modal-Details bei überschreitung.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Integrationen</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>ERP: Projekte entstehen automatisch aus Angeboten/Aufträgen.</li>
+                        <li>CRM: Verlinkung über Accounts/Opportunities.</li>
+                        <li>Workflows: Statuswechsel können Automationen triggern.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

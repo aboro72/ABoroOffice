@@ -1,0 +1,136 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Content Asset{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">{{ asset.title }}</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/marketing/assets/">Zurück</a>
+            <a class="btn btn-outline-primary" href="/marketing/assets/{{ asset.id }}/edit/">Bearbeiten</a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header">Content</div>
+                <div class="card-body">
+                    <div class="mb-2"><strong>Typ:</strong> {{ asset.get_asset_type_display }}</div>
+                    <div class="mb-2"><strong>Status:</strong> {{ asset.get_status_display }}</div>
+                    <div class="mb-2"><strong>Kanal:</strong> {{ asset.channel|default:"-" }}</div>
+                    <div class="mb-3"><strong>Kampagne:</strong> {{ asset.campaign.name if asset.campaign else '-' }}</div>
+                    <div class="mb-3">
+                        <strong>Briefing:</strong>
+                        <div class="bg-light p-2 rounded" style="white-space: pre-wrap;">{{ asset.brief|default:"-" }}</div>
+                    </div>
+                    <pre class="bg-light p-3 rounded" style="white-space: pre-wrap;">{{ asset.content|default:"" }}</pre>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card mb-3">
+                <div class="card-header">Workflow</div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <span class="badge bg-secondary">1</span> Briefing erstellen
+                    </div>
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="save_brief">
+                        <textarea name="brief" rows="4" class="form-control" placeholder="Zielgruppe, Tonalität, Angebot...">{{ asset.brief }}</textarea>
+                        <button class="btn btn-outline-primary w-100 mt-2">Briefing speichern</button>
+                    </form>
+
+                    <div class="mb-2">
+                        <span class="badge bg-secondary">2</span> Entwurf generieren
+                    </div>
+                    <div class="mb-3">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="apply_template">
+                            <label class="form-label">Template auswählen</label>
+                            <select name="template_key" class="form-select">
+                                <option value="">Bitte wählen</option>
+                                <option value="linkedin">LinkedIn Post</option>
+                                <option value="newsletter">Newsletter</option>
+                                <option value="blog">Blog Artikel</option>
+                                <option value="ad">Anzeige</option>
+                            </select>
+                            <button class="btn btn-outline-secondary w-100 mt-2">Template anwenden</button>
+                        </form>
+                    </div>
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="generate_content">
+                        <button class="btn btn-primary w-100">AI Entwurf erstellen</button>
+                    </form>
+
+                    <div class="mb-2">
+                        <span class="badge bg-secondary">3</span> Freigabe anfordern
+                    </div>
+                    {% if can_edit %}
+                    <form method="post" class="mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="request_approval">
+                        <button class="btn btn-outline-primary w-100">Freigabe anfordern</button>
+                    </form>
+                    {% else %}
+                    <div class="text-muted small mb-3">Keine Berechtigung, Freigabe anzufordern.</div>
+                    {% endif %}
+                    <div class="small text-muted mb-3">
+                        Prüfliste: Mindestlänge + CTA erforderlich. Fehler werden angezeigt und blockieren die Freigabe.
+                    </div>
+
+                    <div class="mb-2">
+                        <span class="badge bg-secondary">4</span> Veröffentlichen
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="publish">
+                        <button class="btn btn-success w-100">Veröffentlichen</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">Freigabe</div>
+                <div class="card-body">
+                    {% if can_approve %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="apply_approval">
+                        {{ approval_form.as_p }}
+                        <button class="btn btn-outline-secondary w-100">Review speichern</button>
+                    </form>
+                    {% else %}
+                    <div class="text-muted small">Keine Freigabe-Berechtigung.</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">Versionen / Stempel</div>
+                <div class="card-body">
+                    {% if revisions %}
+                        <ul class="list-group list-group-flush">
+                            {% for rev in revisions %}
+                            <li class="list-group-item">
+                                <div class="fw-semibold">{{ rev.get_action_display }} · {{ rev.stamped_at|date:"Y-m-d H:i" }}</div>
+                                <div class="small text-muted">
+                                    {% if rev.stamped_by %}{{ rev.stamped_by.username }}{% else %}System{% endif %}
+                                </div>
+                                {% if rev.note %}
+                                <div class="small">{{ rev.note }}</div>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="text-muted">Noch keine Freigaben/Veröffentlichungen.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

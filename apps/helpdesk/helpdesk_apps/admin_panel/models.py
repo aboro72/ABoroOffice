@@ -41,6 +41,148 @@ class SystemSettings(models.Model):
                                help_text='Name shown in navbar and browser tab')
     company_name = models.CharField(_('Company Name'), max_length=255, default='Company',
                                    help_text='Company name for branding')
+    company_address = models.CharField(
+        _('Company Address'),
+        max_length=255,
+        blank=True,
+        help_text='Street and house number for outgoing letters'
+    )
+    company_postal_code = models.CharField(
+        _('Company Postal Code'),
+        max_length=20,
+        blank=True,
+        help_text='Postal code for outgoing letters'
+    )
+    company_city = models.CharField(
+        _('Company City'),
+        max_length=100,
+        blank=True,
+        help_text='City for outgoing letters'
+    )
+    company_country = models.CharField(
+        _('Company Country'),
+        max_length=100,
+        blank=True,
+        help_text='Country for outgoing letters'
+    )
+    company_version = models.CharField(
+        _('Document Version'),
+        max_length=50,
+        default='1.0',
+        help_text='Version for exported documents and guides.'
+    )
+    company_email = models.EmailField(
+        _('Company Email'),
+        blank=True,
+        help_text='Sender email used for invoices and dunning'
+    )
+    company_bank_name = models.CharField(
+        _('Company Bank'),
+        max_length=255,
+        blank=True,
+        help_text='Bank name for payment details on invoices'
+    )
+    company_iban = models.CharField(
+        _('Company IBAN'),
+        max_length=64,
+        blank=True,
+        help_text='IBAN for payment details on invoices'
+    )
+    company_bic = models.CharField(
+        _('Company BIC'),
+        max_length=64,
+        blank=True,
+        help_text='BIC for payment details on invoices'
+    )
+    dunning_enabled = models.BooleanField(
+        _('Enable Dunning'),
+        default=True,
+        help_text='Automatisches Mahnwesen aktivieren'
+    )
+    dunning_days_level1 = models.IntegerField(
+        _('Days Overdue (Level 1)'),
+        default=14,
+        help_text='Tage nach Fälligkeit für Mahnstufe 1'
+    )
+    dunning_days_level2 = models.IntegerField(
+        _('Days Overdue (Level 2)'),
+        default=30,
+        help_text='Tage nach Fälligkeit für Mahnstufe 2'
+    )
+    dunning_days_level3 = models.IntegerField(
+        _('Days Overdue (Level 3)'),
+        default=45,
+        help_text='Tage nach Fälligkeit für Mahnstufe 3'
+    )
+    dunning_auto_send = models.BooleanField(
+        _('Auto Send Dunning Emails'),
+        default=False,
+        help_text='Mahnungsmails automatisch versenden'
+    )
+    invoice_auto_send = models.BooleanField(
+        _('Auto Send Invoice Emails'),
+        default=False,
+        help_text='Rechnungen automatisch per Scheduler versenden'
+    )
+    invoice_payment_days = models.IntegerField(
+        _('Invoice Payment Days'),
+        default=14,
+        help_text='Zahlungsziel in Tagen (für Rechnungen)'
+    )
+    invoice_email_subject_template = models.CharField(
+        _('Invoice Email Subject Template'),
+        max_length=255,
+        blank=True,
+        help_text='z.B. "Rechnung {invoice_number} von {company_name}"'
+    )
+    invoice_email_body_template = models.TextField(
+        _('Invoice Email Body Template'),
+        blank=True,
+        help_text='Platzhalter: {invoice_number}, {amount}, {due_date}, {customer_name}, {company_name}'
+    )
+    dunning_email_subject_template = models.CharField(
+        _('Dunning Email Subject Template'),
+        max_length=255,
+        blank=True,
+        help_text='z.B. "Mahnung {dunning_number} zu Rechnung {invoice_number}"'
+    )
+    dunning_email_body_template = models.TextField(
+        _('Dunning Email Body Template'),
+        blank=True,
+        help_text='Platzhalter: {dunning_number}, {invoice_number}, {amount}, {due_date}, {customer_name}, {company_name}'
+    )
+    scheduler_enabled = models.BooleanField(
+        _('Scheduler Enabled'),
+        default=False,
+        help_text='Aktiviert den Zeitplan für Rechnungen und Mahnungen'
+    )
+    scheduler_mode = models.CharField(
+        _('Scheduler Mode'),
+        max_length=20,
+        choices=[('daily', 'Daily Time'), ('interval', 'Interval Minutes')],
+        default='daily'
+    )
+    scheduler_daily_time = models.TimeField(
+        _('Scheduler Daily Time'),
+        null=True,
+        blank=True,
+        help_text='z.B. 08:00'
+    )
+    scheduler_interval_minutes = models.IntegerField(
+        _('Scheduler Interval Minutes'),
+        default=60,
+        help_text='z.B. alle 60 Minuten'
+    )
+    scheduler_last_run = models.DateTimeField(
+        _('Scheduler Last Run'),
+        null=True,
+        blank=True
+    )
+    email_log_auto_archive_days = models.IntegerField(
+        _('Email Log Auto Archive Days'),
+        default=30,
+        help_text='E-Mails älter als X Tage automatisch archivieren'
+    )
     site_url = models.URLField(_('Site URL'), default='http://localhost:8000',
                               help_text='Base URL for email links and redirects')
 
@@ -230,6 +372,200 @@ class SystemSettings(models.Model):
         help_text='Enable/disable modules globally'
     )
 
+    # Dashboard layout (global)
+    plugin_dashboard_position = models.CharField(
+        _('Plugin-Bereich Position'),
+        max_length=20,
+        choices=[
+            ('top', 'Oben'),
+            ('bottom', 'Unten'),
+            ('left', 'Links'),
+            ('right', 'Rechts'),
+            ('center', 'Mitte'),
+        ],
+        default='bottom',
+        help_text='Position des Plugin-Bereichs im Haupt-Dashboard'
+    )
+
+    # CRM Lead-Fallback Settings
+    crm_fallback_enabled = models.BooleanField(
+        _('CRM Fallback aktiviert'),
+        default=False,
+        help_text='Nutze Such-APIs als Notfall-Fallback, wenn die Primärquelle 0 Treffer liefert'
+    )
+    crm_fallback_provider_order = models.JSONField(
+        _('CRM Fallback Provider (Reihenfolge)'),
+        default=list,
+        blank=True,
+        help_text='Beispiel: ["serpapi", "dataforseo", "bing"]'
+    )
+    crm_serpapi_key = models.CharField(
+        _('SerpAPI Key'),
+        max_length=255,
+        blank=True,
+        help_text='API Key für SerpAPI (Google Search)'
+    )
+    crm_dataforseo_login = models.CharField(
+        _('DataForSEO Login'),
+        max_length=255,
+        blank=True,
+        help_text='Login (E-Mail) für DataForSEO'
+    )
+    crm_dataforseo_password = models.CharField(
+        _('DataForSEO Password'),
+        max_length=255,
+        blank=True,
+        help_text='Passwort für DataForSEO'
+    )
+    crm_bing_api_key = models.CharField(
+        _('Bing Search API Key'),
+        max_length=255,
+        blank=True,
+        help_text='API Key für Microsoft Bing Web Search'
+    )
+
+    # CRM Enrichment API Settings (optional)
+    crm_enrichment_enabled = models.BooleanField(
+        _('CRM Enrichment aktiviert'),
+        default=False,
+        help_text='Optionale Enrichment-APIs für E-Mail/Domain-Daten aktivieren'
+    )
+    crm_enrichment_provider_order = models.JSONField(
+        _('CRM Enrichment Provider (Reihenfolge)'),
+        default=list,
+        blank=True,
+        help_text='Beispiel: ["hunter", "dropcontact", "clearbit"]'
+    )
+    crm_hunter_api_key = models.CharField(
+        _('Hunter API Key'),
+        max_length=255,
+        blank=True,
+        help_text='API Key für Hunter.io'
+    )
+    crm_dropcontact_api_key = models.CharField(
+        _('Dropcontact API Key'),
+        max_length=255,
+        blank=True,
+        help_text='API Key für Dropcontact'
+    )
+    crm_clearbit_api_key = models.CharField(
+        _('Clearbit API Key'),
+        max_length=255,
+        blank=True,
+        help_text='API Key für Clearbit'
+    )
+
+    # Marketing Permissions (group-based)
+    marketing_view_groups = models.JSONField(
+        _('Marketing View Groups'),
+        default=list,
+        blank=True,
+        help_text='Gruppen mit Leserechten (z.B. ["Orga","Manager"])'
+    )
+    marketing_edit_groups = models.JSONField(
+        _('Marketing Edit Groups'),
+        default=list,
+        blank=True,
+        help_text='Gruppen mit Schreibrechten (z.B. ["Manager"])'
+    )
+    marketing_approve_groups = models.JSONField(
+        _('Marketing Approve Groups'),
+        default=list,
+        blank=True,
+        help_text='Gruppen mit Freigaberechten (z.B. ["Orga","Manager"])'
+    )
+
+    # ERP Permissions (group-based)
+    erp_view_groups = models.JSONField(
+        _('ERP View Groups'),
+        default=list,
+        blank=True,
+        help_text='Gruppen mit Leserechten (z.B. ["Orga","Manager"])'
+    )
+    erp_edit_groups = models.JSONField(
+        _('ERP Edit Groups'),
+        default=list,
+        blank=True,
+        help_text='Gruppen mit Schreibrechten (z.B. ["Manager"])'
+    )
+    erp_min_margin_pct = models.DecimalField(
+        _('ERP Mindestmarge %'),
+        max_digits=6,
+        decimal_places=2,
+        default=20,
+        help_text='Mindestaufschlag in Prozent'
+    )
+    erp_undercut_min_pct = models.DecimalField(
+        _('ERP Unterbieten Min %'),
+        max_digits=6,
+        decimal_places=2,
+        default=3,
+        help_text='Minimaler Unterbietungsabstand in Prozent'
+    )
+    erp_undercut_max_pct = models.DecimalField(
+        _('ERP Unterbieten Max %'),
+        max_digits=6,
+        decimal_places=2,
+        default=10,
+        help_text='Maximaler Unterbietungsabstand in Prozent'
+    )
+    erp_competitor_scrape_enabled = models.BooleanField(
+        _('ERP Konkurrenz-Scraper aktiv'),
+        default=False
+    )
+    erp_competitor_provider = models.CharField(
+        _('ERP Konkurrenz-Provider'),
+        max_length=50,
+        blank=True,
+        default=''
+    )
+    erp_competitor_api_url = models.URLField(
+        _('ERP Konkurrenz API URL'),
+        blank=True,
+        default=''
+    )
+    erp_competitor_api_key = models.CharField(
+        _('ERP Konkurrenz API Key'),
+        max_length=200,
+        blank=True,
+        default=''
+    )
+    erp_competitor_accept_terms = models.BooleanField(
+        _('ERP Konkurrenz-Provider TOS bestaetigt'),
+        default=False
+    )
+
+    # Bedrock Settings
+    bedrock_enabled = models.BooleanField(
+        _('Bedrock aktiviert'),
+        default=False,
+        help_text='Amazon Bedrock für KI-Funktionen aktivieren'
+    )
+    bedrock_api_key = models.CharField(
+        _('Bedrock API Key'),
+        max_length=255,
+        blank=True,
+        help_text='Bearer Token für Bedrock API'
+    )
+    bedrock_region = models.CharField(
+        _('Bedrock Region'),
+        max_length=50,
+        default='eu-central-1'
+    )
+    bedrock_model_id = models.CharField(
+        _('Bedrock Model ID'),
+        max_length=200,
+        default='anthropic.claude-3-5-sonnet-20240620-v1:0'
+    )
+    bedrock_max_tokens = models.IntegerField(
+        _('Bedrock Max Tokens'),
+        default=600
+    )
+    bedrock_temperature = models.FloatField(
+        _('Bedrock Temperature'),
+        default=0.2
+    )
+
     class Meta:
         verbose_name = _('System Settings')
         verbose_name_plural = _('System Settings')
@@ -401,6 +737,19 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.action} - {self.created_at}"
+
+
+class EmailLog(models.Model):
+    subject = models.CharField(max_length=255, blank=True)
+    from_email = models.CharField(max_length=255, blank=True)
+    to_emails = models.TextField(blank=True)
+    body = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    source = models.CharField(max_length=100, blank=True, default='system')
+    archived = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.created_at:%Y-%m-%d %H:%M} {self.subject}"
 
 
 class CustomField(models.Model):

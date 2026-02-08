@@ -1,0 +1,51 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Mahnung{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-1">Mahnung {{ notice.number }}</h2>
+            <div class="text-muted">Rechnung {{ notice.invoice.number }}</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/erp/dunning/">Zurück</a>
+            <form method="post">
+                {% csrf_token %}
+                <button class="btn btn-primary" name="send_email" type="submit">E-Mail senden</button>
+            </form>
+            <form method="post">
+                {% csrf_token %}
+                <button class="btn btn-outline-secondary" name="download_letter" type="submit">PDF herunterladen</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3"><strong>Status:</strong> {{ notice.get_status_display }}</div>
+                <div class="col-md-3"><strong>Stufe:</strong> {{ notice.level }}</div>
+                <div class="col-md-3"><strong>Fällig:</strong> {{ notice.due_date|default:"-" }}</div>
+                <div class="col-md-3"><strong>Gesendet:</strong> {{ notice.sent_at|default:"-" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">E-Mail</div>
+        <div class="card-body">
+            <div class="mb-2"><strong>Betreff:</strong> {{ notice.email_subject }}</div>
+            <pre class="bg-light p-3 rounded">{{ notice.email_body }}</pre>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Brieftext</div>
+        <div class="card-body">
+            <pre class="bg-light p-3 rounded">{{ notice.letter_text }}</pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

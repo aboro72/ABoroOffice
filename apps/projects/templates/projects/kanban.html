@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Kanban Board</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/projects/">Zurück</a>
+            <a class="btn btn-outline-secondary" href="/projects/gantt/">Gantt</a>
+        </div>
+    </div>
+
+    <form method="get" class="mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Projekt filtern</label>
+                <select name="project" class="form-select">
+                    <option value="">Alle Projekte</option>
+                    {% for p in projects %}
+                    <option value="{{ p.id }}" {% if selected_project == p.id %}selected{% endif %}>{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Swimlanes</label>
+                <select name="lane" class="form-select">
+                    <option value="none" {% if selected_lane == 'none' %}selected{% endif %}>Keine</option>
+                    <option value="project" {% if selected_lane == 'project' %}selected{% endif %}>Projekt</option>
+                    <option value="assignee" {% if selected_lane == 'assignee' %}selected{% endif %}>Assignee</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Assignee filtern</label>
+                <select name="assignee" class="form-select">
+                    <option value="">Alle</option>
+                    {% for uid, uname in assignees %}
+                    <option value="{{ uid }}" {% if selected_assignee == uid %}selected{% endif %}>{{ uname }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 text-muted small">
+                {% if project_limits.wip_limit_assignee %}
+                Assignee WIP: {{ project_limits.wip_limit_assignee }}
+                {% endif %}
+                {% if project_limits.wip_limit_team %}
+                <div>Team WIP: {{ project_limits.wip_limit_team }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">Anwenden</button>
+            </div>
+        </div>
+    </form>
+
+    {% if lanes %}
+      {% for lane in lanes %}
+      <div class="mb-3">
+        <div class="fw-bold mb-2">{{ lane.title }}</div>
+        <div class="row g-3" id="kanban-board">
+            {% for key, title, items, limit in lane.columns %}
+            <div class="col-md-3">
+                <div class="card h-100" data-status="{{ key }}">
+                    <div class="card-header d-flex justify-content-between">
+                        <span>{{ title }}</span>
+                        {% if limit %}
+                        <button type="button"
+                              class="badge border-0 {% if items|length >= limit %}bg-danger{% elif items|length >= limit|add:'-1' %}bg-warning text-dark{% else %}bg-success{% endif %}"
+                              title="WIP Limit {{ limit }} ? Aktuell {{ items|length }}"
+                              data-bs-toggle="modal"
+                              data-bs-target="#wipModal"
+                              data-wip-title="{{ title }}"
+                              data-wip-limit="{{ limit }}"
+                              data-wip-current="{{ items|length }}">
+                          WIP {{ items|length }}/{{ limit }}{% if items|length >= limit %} ?{% endif %}
+                      </button>
+                        {% endif %}
+                        <span class="badge bg-secondary">{{ items|length }}</span>
+                    </div>
+                    <div class="card-body kanban-column" data-status="{{ key }}">
+                        {% for t in items %}
+                        <div class="card mb-2 kanban-item" draggable="{{ can_edit|yesno:'true,false' }}" data-task="{{ t.id }}">
+                            <div class="card-body p-2">
+                                <div class="fw-bold">{{ t.title }}</div>
+                                <div class="text-muted small">{{ t.project.name }}</div>
+                                <div class="text-muted small">Fällig: {{ t.due_date|default:"-" }}</div>
+                                <a class="stretched-link" href="/projects/tasks/{{ t.id }}/"></a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-muted">Keine Tasks.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="row g-3" id="kanban-board">
+          {% for key, title, items, limit in columns %}
+          <div class="col-md-3">
+              <div class="card h-100" data-status="{{ key }}">
+                  <div class="card-header d-flex justify-content-between">
+                      <span>{{ title }}</span>
+                      {% if limit %}
+                      <button type="button"
+                              class="badge border-0 {% if items|length >= limit %}bg-danger{% elif items|length >= limit|add:'-1' %}bg-warning text-dark{% else %}bg-success{% endif %}"
+                              title="WIP Limit {{ limit }} ? Aktuell {{ items|length }}"
+                              data-bs-toggle="modal"
+                              data-bs-target="#wipModal"
+                              data-wip-title="{{ title }}"
+                              data-wip-limit="{{ limit }}"
+                              data-wip-current="{{ items|length }}">
+                          WIP {{ items|length }}/{{ limit }}{% if items|length >= limit %} ?{% endif %}
+                      </button>
+                      {% endif %}
+                      <span class="badge bg-secondary">{{ items|length }}</span>
+                  </div>
+                  <div class="card-body kanban-column" data-status="{{ key }}">
+                      {% for t in items %}
+                      <div class="card mb-2 kanban-item" draggable="{{ can_edit|yesno:'true,false' }}" data-task="{{ t.id }}">
+                          <div class="card-body p-2">
+                              <div class="fw-bold">{{ t.title }}</div>
+                              <div class="text-muted small">{{ t.project.name }}</div>
+                              <div class="text-muted small">Fällig: {{ t.due_date|default:"-" }}</div>
+                              <a class="stretched-link" href="/projects/tasks/{{ t.id }}/"></a>
+                          </div>
+                      </div>
+                      {% empty %}
+                      <div class="text-muted">Keine Tasks.</div>
+                      {% endfor %}
+                  </div>
+              </div>
+          </div>
+          {% endfor %}
+      </div>
+    {% endif %}
+</div>
+<div class="modal fade" id="wipModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">WIP Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="fw-bold mb-2" id="wipTitle">Spalte</div>
+                <div>Limit: <span id="wipLimit">-</span></div>
+                <div>Aktuell: <span id="wipCurrent">-</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  (function() {
+    const canEdit = {{ can_edit|yesno:"true,false" }};
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    const csrftoken = getCookie('csrftoken');
+    const items = document.querySelectorAll('.kanban-item');
+    const columns = document.querySelectorAll('.kanban-column');
+    if (!canEdit) {
+      return;
+    }
+    items.forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', item.dataset.task);
+      });
+    });
+    columns.forEach(col => {
+      col.addEventListener('dragover', (e) => e.preventDefault());
+      col.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const taskId = e.dataTransfer.getData('text/plain');
+        const status = col.dataset.status;
+        fetch(`/projects/tasks/${taskId}/status/`, {
+          method: 'POST',
+          headers: {'X-CSRFToken': csrftoken, 'Content-Type': 'application/x-www-form-urlencoded'},
+          body: `status=${encodeURIComponent(status)}`
+        }).then(r => r.json()).then(data => {
+          if (data.ok) {
+            const card = document.querySelector(`.kanban-item[data-task="${taskId}"]`);
+            col.appendChild(card);
+          } else if (data.error) {
+            const inline = document.createElement('div');
+            inline.className = 'alert alert-warning mt-2';
+            inline.textContent = data.error;
+            col.prepend(inline);
+            setTimeout(() => inline.remove(), 3500);
+          }
+        });
+      });
+    });
+
+    const wipModal = document.getElementById("wipModal");
+    if (wipModal) {
+      wipModal.addEventListener("show.bs.modal", function (event) {
+        const btn = event.relatedTarget;
+        if (!btn) return;
+        const title = btn.getAttribute("data-wip-title") || "Spalte";
+        const limit = btn.getAttribute("data-wip-limit") || "-";
+        const current = btn.getAttribute("data-wip-current") || "-";
+        wipModal.querySelector("#wipTitle").textContent = title;
+        wipModal.querySelector("#wipLimit").textContent = limit;
+        wipModal.querySelector("#wipCurrent").textContent = current;
+      });
+    }
+  })();
+</script>
+{% endblock %}

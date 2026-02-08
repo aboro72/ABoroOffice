@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}ERP Hilfe{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h2 class="mb-0">ERP Hilfe</h2>
+            <div class="text-muted">Angebot -> Auftrag -> Rechnung -> Mahnung.</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/erp/pricing-help/">Pricing Hilfe</a>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">Workflow Angebot bis Rechnung</div>
+        <div class="card-body">
+            <ol class="mb-0">
+                <li>Angebot erstellen.</li>
+                <li>Angebot annehmen -> Auftrag erzeugen.</li>
+                <li>Auftragsbestätigung wird erstellt.</li>
+                <li>Auftrag ausführen -> Rechnung erzeugen.</li>
+                <li>Mahnwesen bei Verzug.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Nummern & Audit</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Eindeutige Nummern für Angebot/Auftrag/Rechnung/Mahnung.</li>
+                        <li>Änderungen werden protokolliert.</li>
+                        <li>Suche in Angeboten/Aufträgen/Rechnungen/Mahnungen.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">E-Mail & PDF</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>PDF-Ausgabe mit Logo/Absender.</li>
+                        <li>E-Mail-Vorlagen im Admin-Dashboard.</li>
+                        <li>Scheduler für Rechnungs-/Mahnlauf.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Wareneingang & Preise</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>EK-Preis + MwSt -> Preisvorschlag.</li>
+                        <li>Konkurrenzpreis optional (Provider/Custom API).</li>
+                        <li>Rundung auf 0,05.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Kurse & Personal</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Kurse mit Veranstaltungsnummer.</li>
+                        <li>Dozenten/Skills aus Personalverwaltung.</li>
+                        <li>Mobile Klassenräume als Produkt.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">Integrationen</div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li>CRM -> Angebotserstellung</li>
+                <li>FiBu -> Auto-Postings (Rechnung/Waren)</li>
+                <li>Projekte -> automatisch aus Auftrag</li>
+                <li>Workflows -> Trigger für Rechnung/Mahnung</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -202,3 +202,11 @@ A ready-to-zip template is available at:
 - `plugins/templates/hello_widget/`
 
 You can zip the folder and upload it via the Admin Settings page.
+
+## Demo Template Download
+A downloadable demo template (ZIP) is available:
+- `static/plugin-templates/demo_widget.zip`
+
+This template includes:
+- Settings schema example (title + city)
+- Widget rendering with settings

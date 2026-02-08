@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Benutzerhandbuch{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">ABoroOffice -> Benutzerhandbuch (Kurz)</h2>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="/dashboard/">Zurück</a>
+      <a class="btn btn-outline-secondary" href="/user-guide/pdf/">PDF Download</a>
+      <a class="btn btn-outline-secondary" href="/help-manual/pdf/">Hilfe-Handbuch PDF</a>
+      <a class="btn btn-outline-secondary" href="/user-guide/html/">HTML Export</a>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">Überblick</div>
+    <div class="card-body">
+      <p class="mb-2">ABoroOffice bündelt CRM, ERP, Verträge, Marketing, Helpdesk, Projekte, Workflows, Personal und FiBu.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

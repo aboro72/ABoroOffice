@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Bedrock Test{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 900px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Bedrock Test</h2>
+        <a class="btn btn-outline-secondary" href="/admin-dashboard/">Zurück</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Prompt</label>
+                    <textarea name="prompt" class="form-control" rows="5" placeholder="Schreibe eine kurze Zusammenfassung..." required>{{ prompt }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Senden</button>
+            </form>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+    {% if response_text %}
+    <div class="card mt-3">
+        <div class="card-header">Antwort</div>
+        <div class="card-body" style="white-space: pre-wrap;">{{ response_text }}</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

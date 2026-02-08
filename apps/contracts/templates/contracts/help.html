@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Verträge Hilfe{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-3">
+        <h2 class="mb-1">Vertragsverwaltung Hilfe</h2>
+        <div class="text-muted">Versionierung, Analyse, Freigabe und API.</div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Schnellstart</div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Vertrag anlegen.</li>
+                        <li>Dokument hochladen.</li>
+                        <li>KI-Analyse starten.</li>
+                        <li>Versionen verwalten.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Hinweise</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Notizen als Basis für Verhandlungen.</li>
+                        <li>Audit-Sicherheit durch Versionierung.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

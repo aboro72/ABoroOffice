@@ -1,0 +1,137 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Vertrag Details{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    {% include "contracts/_nav.html" %}
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="fw-bold">{{ contract.title }}</div>
+            <div class="d-flex gap-2">
+                <form method="post" action="{% url 'contracts:contract_analyze' contract.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-primary" type="submit">KI Analyse</button>
+                </form>
+                <form method="post" action="{% url 'contracts:contract_export_analysis' contract.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-secondary" type="submit">Analyse exportieren</button>
+                </form>
+                <a class="btn btn-outline-secondary" href="{% url 'contracts:contract_edit' contract.id %}">Bearbeiten</a>
+                <a class="btn btn-primary" href="{% url 'contracts:contract_version_create' contract.id %}">Version hinzufügen</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="small text-muted">Gegenpartei</div>
+                    <div class="fw-semibold">{{ contract.counterparty|default:"-" }}</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="small text-muted">Status</div>
+                    <div class="fw-semibold">{{ contract.get_status_display }}</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="small text-muted">Wert (EUR)</div>
+                    <div class="fw-semibold">{{ contract.value_eur }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="small text-muted">Start</div>
+                    <div>{{ contract.start_date|date:"Y-m-d"|default:"-" }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="small text-muted">Ende</div>
+                    <div>{{ contract.end_date|date:"Y-m-d"|default:"-" }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="small text-muted">Verlängerung</div>
+                    <div>{{ contract.renewal_date|date:"Y-m-d"|default:"-" }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="small text-muted">Notizen</div>
+                    <div>{{ contract.notes|default:"-" }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="small text-muted">Datei</div>
+                    {% if contract.file %}
+                        <a href="{{ contract.file.url }}" target="_blank" rel="noopener">{{ contract.file.name }}</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">Versionen</div>
+        <div class="card-body">
+            {% if contract.versions.all %}
+                <ul class="list-group">
+                    {% for version in contract.versions.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-semibold">{{ version.label }}</div>
+                            <div class="text-muted small">{{ version.uploaded_at|date:"Y-m-d H:i" }}</div>
+                            {% if version.summary %}
+                                <div class="small">{{ version.summary }}</div>
+                            {% endif %}
+                        </div>
+                        {% if version.file %}
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ version.file.url }}" target="_blank" rel="noopener">Download</a>
+                        {% else %}
+                            <span class="text-muted">Keine Datei</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-muted">Keine Versionen vorhanden.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">KI Analyse</div>
+        <div class="card-body">
+            {% if contract.ai_last_analyzed %}
+                <div class="text-muted small mb-3">Letzte Analyse: {{ contract.ai_last_analyzed|date:"Y-m-d H:i" }}</div>
+            {% endif %}
+            {% if contract.ai_summary %}
+                <h6>Zusammenfassung</h6>
+                <p>{{ contract.ai_summary }}</p>
+            {% endif %}
+            {% if contract.ai_risks %}
+                <h6>Risiken</h6>
+                <ul>
+                    {% for item in contract.ai_risks %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if contract.ai_checklist %}
+                <h6>Checkliste</h6>
+                <ul>
+                    {% for item in contract.ai_checklist %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if contract.ai_key_dates %}
+                <h6>Wichtige Termine</h6>
+                <ul>
+                    {% for item in contract.ai_key_dates %}
+                        <li>
+                            {{ item.label }}{% if item.date %} ({{ item.date }}){% endif %}{% if item.note %} – {{ item.note }}{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if not contract.ai_summary and not contract.ai_risks and not contract.ai_checklist and not contract.ai_key_dates %}
+                <div class="text-muted">Noch keine KI Analyse vorhanden.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

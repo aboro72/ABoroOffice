@@ -5,7 +5,10 @@ class HelloWidgetProvider(DashboardWidgetProvider):
     widget_id = 'hello_widget'
     widget_name = 'Hello Widget'
     widget_icon = 'bi-emoji-smile'
-    widget_size = 'medium'
+    widget_size = 'small'
+
+    def get_css_classes(self) -> str:
+        return 'col-md-3'
     widget_order = 20
 
     def get_context(self, request):

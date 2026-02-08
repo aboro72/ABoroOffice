@@ -1,0 +1,48 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Marketing{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Marketing</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/marketing/campaigns/">Kampagnen</a>
+            <a class="btn btn-outline-secondary" href="/marketing/assets/">Content</a>
+            <a class="btn btn-outline-secondary" href="/marketing/ideas/">Ideen</a>
+            <a class="btn btn-outline-secondary" href="/marketing/calendar/">Kalender</a>
+            <a class="btn btn-outline-secondary" href="/marketing/help/">Hilfe</a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">Content Generator</div>
+                <div class="card-body">
+                    <p class="text-muted">Erstelle Social Posts, Blog-Entwürfe und Newsletter in Sekunden.</p>
+                    <a class="btn btn-primary w-100" href="/marketing/assets/create/">Neuer Content</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">Kampagnenplaner</div>
+                <div class="card-body">
+                    <p class="text-muted">Plane Kampagnen, Termine und Status in einer Übersicht.</p>
+                    <a class="btn btn-outline-primary w-100" href="/marketing/campaigns/create/">Neue Kampagne</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">Ideen & Briefings</div>
+                <div class="card-body">
+                    <p class="text-muted">Lass dir Ideen generieren oder erfasse eigene Briefings.</p>
+                    <a class="btn btn-outline-primary w-100" href="/marketing/ideas/">Ideen ansehen</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

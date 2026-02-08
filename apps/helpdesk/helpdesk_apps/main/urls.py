@@ -5,6 +5,7 @@ app_name = 'main'
 
 urlpatterns = [
     path('', views.DashboardView.as_view(), name='dashboard'),
+    path('help/', views.HelpdeskHelpView.as_view(), name='help'),
     path('settings/', views.admin_settings, name='admin_settings'),
     path('license/', views.manage_license, name='manage_license'),
     path('users/', views.user_management, name='user_management'),

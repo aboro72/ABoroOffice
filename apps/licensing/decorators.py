@@ -7,6 +7,7 @@ import logging
 from functools import wraps
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.views.generic import View
@@ -32,7 +33,7 @@ def license_required(feature):
         def wrapper(request, *args, **kwargs):
             # Check if user is authenticated
             if not request.user.is_authenticated:
-                return redirect('login')
+                return redirect(f"{settings.LOGIN_URL}?next={request.path}")
 
             # Check if feature is accessible
             if not request.user.can_access_feature(feature):
@@ -91,7 +92,7 @@ class LicenseRequiredMixin:
             logger.warning(
                 f"Unauthenticated access attempt to {self.required_feature}"
             )
-            return redirect(f'/admin/login/?next={request.path}')
+            return redirect(f"{settings.LOGIN_URL}?next={request.path}")
 
         # Check if feature is specified
         if not self.required_feature:
@@ -140,7 +141,7 @@ class ApproverRequiredMixin:
         # Check if user is authenticated
         if not request.user.is_authenticated:
             logger.warning(f"Unauthenticated access attempt to approval action")
-            return redirect(f'/admin/login/?next={request.path}')
+            return redirect(f"{settings.LOGIN_URL}?next={request.path}")
 
         # Check if user is approver
         if not request.user.is_approver and not request.user.is_staff:

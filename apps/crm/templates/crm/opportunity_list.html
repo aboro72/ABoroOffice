@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}CRM - Opportunities{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    {% include "crm/_nav.html" %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Opportunities</h2>
+        <div class="d-flex gap-2">
+            {% if can_edit %}
+            <a class="btn btn-primary" href="{% url 'crm:opportunity_create' %}">Neu</a>
+            {% endif %}
+            <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_board' %}">Pipeline</a>
+            <a class="btn btn-outline-secondary" href="/admin/crm/opportunity/">Admin öffnen</a>
+        </div>
+    </div>
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-md-6">
+            <input name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Suchen (Name)">
+        </div>
+        <div class="col-md-4">
+            <select name="stage" class="form-select">
+                <option value="">Stage (alle)</option>
+                <option value="prospect" {% if request.GET.stage == 'prospect' %}selected{% endif %}>Prospect</option>
+                <option value="qualified" {% if request.GET.stage == 'qualified' %}selected{% endif %}>Qualified</option>
+                <option value="proposal" {% if request.GET.stage == 'proposal' %}selected{% endif %}>Proposal</option>
+                <option value="negotiation" {% if request.GET.stage == 'negotiation' %}selected{% endif %}>Negotiation</option>
+                <option value="won" {% if request.GET.stage == 'won' %}selected{% endif %}>Won</option>
+                <option value="lost" {% if request.GET.stage == 'lost' %}selected{% endif %}>Lost</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Filtern</button>
+        </div>
+    </form>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Account</th>
+                        <th>Stage</th>
+                        <th>Amount</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for opportunity in opportunities %}
+                    <tr>
+                        <td><a href="{% url 'crm:opportunity_detail' opportunity.id %}">{{ opportunity.name }}</a></td>
+                        <td>{{ opportunity.account.name }}</td>
+                        <td>{{ opportunity.get_stage_display }}</td>
+                        <td>{{ opportunity.amount }}</td>
+                        <td class="text-end">
+                            {% if can_edit %}
+                            <a class="btn btn-sm btn-outline-primary" href="{% url 'crm:opportunity_edit' opportunity.id %}">Bearbeiten</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Keine Opportunities vorhanden.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -29,6 +29,16 @@
             </div>
         </div>
         {% endif %}
+        {% if app_toggles.contracts %}
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted mb-2">Verträge</h6>
+                    <a class="btn btn-primary w-100" href="/contracts/">Öffnen</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         {% if app_toggles.cloudstorage %}
         <div class="col-md-3">
             <div class="card h-100">
@@ -60,6 +70,7 @@
                     <a class="btn btn-outline-secondary" href="/cloudstorage/core/settings/">Cloude Settings</a>
                     <a class="btn btn-outline-secondary" href="/cloudstorage/core/landing/">Cloude Landing</a>
                     {% endif %}
+                    <a class="btn btn-outline-secondary" href="/bedrock-test/">Bedrock Test</a>
                     <a class="btn btn-outline-secondary" href="/admin/auth/user/">Benutzer</a>
                 </div>
             </div>
@@ -83,6 +94,513 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">CRM Quellen</div>
+                <div class="card-body d-grid gap-2">
+                    <a class="btn btn-outline-secondary" href="/crm/sources/">Lead-Quellen verwalten</a>
+                    <a class="btn btn-outline-secondary" href="/crm/staging/">Lead-Staging</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">CRM Fallback (Notfall)</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-12 form-check">
+                            {{ crm_fallback_form.crm_fallback_enabled }}
+                            <label class="form-check-label" for="{{ crm_fallback_form.crm_fallback_enabled.id_for_label }}">
+                                {{ crm_fallback_form.crm_fallback_enabled.label }}
+                            </label>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ crm_fallback_form.crm_fallback_provider_order.label }}</label>
+                            {{ crm_fallback_form.crm_fallback_provider_order }}
+                            {% if crm_fallback_form.crm_fallback_provider_order.help_text %}
+                                <small class="text-muted">{{ crm_fallback_form.crm_fallback_provider_order.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ crm_fallback_form.crm_serpapi_key.label }}</label>
+                            {{ crm_fallback_form.crm_serpapi_key }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ crm_fallback_form.crm_dataforseo_login.label }}</label>
+                            {{ crm_fallback_form.crm_dataforseo_login }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ crm_fallback_form.crm_dataforseo_password.label }}</label>
+                            {{ crm_fallback_form.crm_dataforseo_password }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ crm_fallback_form.crm_bing_api_key.label }}</label>
+                            {{ crm_fallback_form.crm_bing_api_key }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_crm_fallback" class="btn btn-primary w-100">
+                                CRM Fallback speichern
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        Wird nur verwendet, wenn die Primärquelle keine Treffer liefert.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">CRM Enrichment APIs (optional)</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-12 form-check">
+                            {{ crm_enrichment_form.crm_enrichment_enabled }}
+                            <label class="form-check-label" for="{{ crm_enrichment_form.crm_enrichment_enabled.id_for_label }}">
+                                {{ crm_enrichment_form.crm_enrichment_enabled.label }}
+                            </label>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ crm_enrichment_form.crm_enrichment_provider_order.label }}</label>
+                            {{ crm_enrichment_form.crm_enrichment_provider_order }}
+                            {% if crm_enrichment_form.crm_enrichment_provider_order.help_text %}
+                                <small class="text-muted">{{ crm_enrichment_form.crm_enrichment_provider_order.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ crm_enrichment_form.crm_hunter_api_key.label }}</label>
+                            {{ crm_enrichment_form.crm_hunter_api_key }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ crm_enrichment_form.crm_dropcontact_api_key.label }}</label>
+                            {{ crm_enrichment_form.crm_dropcontact_api_key }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ crm_enrichment_form.crm_clearbit_api_key.label }}</label>
+                            {{ crm_enrichment_form.crm_clearbit_api_key }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_crm_enrichment" class="btn btn-primary w-100">
+                                CRM Enrichment speichern
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        Optional für spätere E-Mail/Domain-Anreicherung. Aktuell nicht aktiv genutzt.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">Mahnwesen (global)</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-12 form-check">
+                            {{ dunning_form.dunning_enabled }}
+                            <label class="form-check-label" for="{{ dunning_form.dunning_enabled.id_for_label }}">
+                                {{ dunning_form.dunning_enabled.label }}
+                            </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ dunning_form.dunning_days_level1.label }}</label>
+                            {{ dunning_form.dunning_days_level1 }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ dunning_form.dunning_days_level2.label }}</label>
+                            {{ dunning_form.dunning_days_level2 }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ dunning_form.dunning_days_level3.label }}</label>
+                            {{ dunning_form.dunning_days_level3 }}
+                        </div>
+                        <div class="col-12 form-check">
+                            {{ dunning_form.dunning_auto_send }}
+                            <label class="form-check-label" for="{{ dunning_form.dunning_auto_send.id_for_label }}">
+                                {{ dunning_form.dunning_auto_send.label }}
+                            </label>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_dunning" class="btn btn-primary w-100">
+                                Mahnwesen speichern
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        Automatische Ausführung per Cron/Task (siehe Anleitung).
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">Rechnungsversand (global)</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-12 form-check">
+                            {{ invoice_form.invoice_auto_send }}
+                            <label class="form-check-label" for="{{ invoice_form.invoice_auto_send.id_for_label }}">
+                                {{ invoice_form.invoice_auto_send.label }}
+                            </label>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ invoice_form.invoice_payment_days.label }}</label>
+                            {{ invoice_form.invoice_payment_days }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ invoice_form.invoice_email_subject_template.label }}</label>
+                            {{ invoice_form.invoice_email_subject_template }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ invoice_form.invoice_email_body_template.label }}</label>
+                            {{ invoice_form.invoice_email_body_template }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ invoice_form.dunning_email_subject_template.label }}</label>
+                            {{ invoice_form.dunning_email_subject_template }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ invoice_form.dunning_email_body_template.label }}</label>
+                            {{ invoice_form.dunning_email_body_template }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_invoice_settings" class="btn btn-primary w-100">
+                                Rechnungsversand speichern
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        Automatischer Versand per Scheduler (siehe ERP Hilfe).
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">E-Mail Vorschau</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-12">
+                            <button type="submit" name="preview_email_templates" class="btn btn-outline-primary w-100">
+                                Vorschau aktualisieren
+                            </button>
+                        </div>
+                    </form>
+                    {% if email_preview %}
+                        <div class="mt-3">
+                            <div class="mb-3">
+                                <div class="fw-bold">Rechnung – Betreff</div>
+                                <pre class="bg-light p-2 rounded mb-0">{{ email_preview.invoice_subject }}</pre>
+                            </div>
+                            <div class="mb-3">
+                                <div class="fw-bold">Rechnung – Text</div>
+                                <pre class="bg-light p-2 rounded mb-0">{{ email_preview.invoice_body }}</pre>
+                            </div>
+                            <div class="mb-3">
+                                <div class="fw-bold">Mahnung – Betreff</div>
+                                <pre class="bg-light p-2 rounded mb-0">{{ email_preview.dunning_subject }}</pre>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Mahnung – Text</div>
+                                <pre class="bg-light p-2 rounded mb-0">{{ email_preview.dunning_body }}</pre>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">E-Mail Testversand</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-md-6">
+                            <label class="form-label">Ziel-E-Mail</label>
+                            <input type="email" name="test_email_to" class="form-control" placeholder="name@domain.de" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Typ</label>
+                            <select name="test_email_type" class="form-select">
+                                <option value="invoice">Rechnung</option>
+                                <option value="dunning">Mahnung</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="send_test_email" class="btn btn-outline-primary w-100">
+                                Test-E-Mail senden
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        Verwendet die aktuellen Vorlagen & Platzhalter.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">E-Mail Log (Entwicklung)</div>
+                <div class="card-body">
+                    <form method="post" class="row g-2 mb-3">
+                        {% csrf_token %}
+                        <div class="col-md-4">
+                            <label class="form-label">{{ email_log_settings_form.email_log_auto_archive_days.label }}</label>
+                            {{ email_log_settings_form.email_log_auto_archive_days }}
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <button type="submit" name="save_email_log_settings" class="btn btn-outline-secondary">
+                                Einstellungen speichern
+                            </button>
+                        </div>
+                    </form>
+                    <form method="get" class="row g-2 mb-3">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="email_to" placeholder="Empfänger enthält" value="{{ email_filter.email_to }}">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="email_subject" placeholder="Betreff enthält" value="{{ email_filter.email_subject }}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" name="email_body" placeholder="Body enthält" value="{{ email_filter.email_body }}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" class="form-control" name="email_start" value="{{ email_filter.email_start }}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" class="form-control" name="email_end" value="{{ email_filter.email_end }}">
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" name="email_sort">
+                                <option value="-created_at" {% if email_filter.email_sort == '-created_at' %}selected{% endif %}>Neueste zuerst</option>
+                                <option value="created_at" {% if email_filter.email_sort == 'created_at' %}selected{% endif %}>Älteste zuerst</option>
+                                <option value="subject" {% if email_filter.email_sort == 'subject' %}selected{% endif %}>Betreff A-Z</option>
+                                <option value="-subject" {% if email_filter.email_sort == '-subject' %}selected{% endif %}>Betreff Z-A</option>
+                                <option value="to_emails" {% if email_filter.email_sort == 'to_emails' %}selected{% endif %}>Empfänger A-Z</option>
+                                <option value="-to_emails" {% if email_filter.email_sort == '-to_emails' %}selected{% endif %}>Empfänger Z-A</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <button type="submit" class="btn btn-outline-secondary">Filtern</button>
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit" name="email_log_export" value="1" class="btn btn-outline-primary flex-fill">
+                                Export (CSV)
+                            </button>
+                            <button type="submit" name="email_log_export" value="pdf" class="btn btn-outline-primary flex-fill">
+                                Export (PDF)
+                            </button>
+                            <button type="submit" name="email_log_export" value="xlsx" class="btn btn-outline-primary flex-fill">
+                                Export (XLSX)
+                            </button>
+                            <button type="submit" name="email_log_archive" value="1" class="btn btn-outline-danger flex-fill">
+                                Archivieren (Filter)
+                            </button>
+                        </div>
+                    </form>
+                    {% if email_logs %}
+                        <div class="list-group">
+                            {% for mail in email_logs %}
+                                <div class="list-group-item">
+                                    <div class="fw-bold">{{ mail.subject|default:"(ohne Betreff)" }}</div>
+                                    <div class="small text-muted">{{ mail.created_at }} · {{ mail.to_emails }}</div>
+                                    <pre class="bg-light p-2 rounded mb-0 mt-2">{{ mail.body }}</pre>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="text-muted small">
+                                Seite {{ email_page.number }} / {{ email_page.paginator.num_pages }}
+                            </div>
+                            <div class="btn-group">
+                                {% if email_page.has_previous %}
+                                    <a class="btn btn-outline-secondary btn-sm" href="?email_page={{ email_page.previous_page_number }}&email_to={{ email_filter.email_to }}&email_subject={{ email_filter.email_subject }}&email_start={{ email_filter.email_start }}&email_end={{ email_filter.email_end }}&email_sort={{ email_filter.email_sort }}">Zurück</a>
+                                {% endif %}
+                                {% if email_page.has_next %}
+                                    <a class="btn btn-outline-secondary btn-sm" href="?email_page={{ email_page.next_page_number }}&email_to={{ email_filter.email_to }}&email_subject={{ email_filter.email_subject }}&email_start={{ email_filter.email_start }}&email_end={{ email_filter.email_end }}&email_sort={{ email_filter.email_sort }}">Weiter</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-muted">Noch keine E-Mails vorhanden.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">E-Mail Archiv</div>
+                <div class="card-body">
+                    <form method="post" class="row g-2 mb-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="email_to" value="{{ email_filter.email_to }}">
+                        <input type="hidden" name="email_subject" value="{{ email_filter.email_subject }}">
+                        <input type="hidden" name="email_body" value="{{ email_filter.email_body }}">
+                        <input type="hidden" name="email_start" value="{{ email_filter.email_start }}">
+                        <input type="hidden" name="email_end" value="{{ email_filter.email_end }}">
+                        <div class="col-12 d-grid">
+                            <button type="submit" name="restore_archived_filtered" class="btn btn-outline-primary">
+                                Gefiltertes Archiv wiederherstellen
+                            </button>
+                        </div>
+                        <div class="col-12 d-grid">
+                            <button type="submit" name="restore_archived_all" value="1" class="btn btn-outline-secondary">
+                                Archiv komplett wiederherstellen
+                            </button>
+                        </div>
+                    </form>
+                    {% if email_archived_logs %}
+                        <div class="small text-muted mb-2">
+                            Archiv: {{ email_archived_stats.count }} Einträge
+                            {% if email_archived_stats.oldest %} · Älteste: {{ email_archived_stats.oldest }}{% endif %}
+                            {% if email_archived_stats.newest %} · Neueste: {{ email_archived_stats.newest }}{% endif %}
+                        </div>
+                        <form method="get" class="mb-2 d-flex gap-2">
+                            <input type="hidden" name="email_log_export_archived" value="1">
+                            <button class="btn btn-outline-primary btn-sm" type="submit" name="email_log_export" value="1">Archiv Export CSV</button>
+                            <button class="btn btn-outline-primary btn-sm" type="submit" name="email_log_export" value="pdf">Archiv Export PDF</button>
+                            <button class="btn btn-outline-primary btn-sm" type="submit" name="email_log_export" value="xlsx">Archiv Export XLSX</button>
+                        </form>
+                        <div class="list-group">
+                            {% for mail in email_archived_logs %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="fw-bold">{{ mail.subject|default:"(ohne Betreff)" }}</div>
+                                            <div class="small text-muted">{{ mail.created_at }} · {{ mail.to_emails }}</div>
+                                        </div>
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" name="restore_email_log" value="{{ mail.id }}" class="btn btn-sm btn-outline-secondary">
+                                                Restore
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <pre class="bg-light p-2 rounded mb-0 mt-2">{{ mail.body }}</pre>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-muted">Archiv ist leer.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">Zeitplan (global)</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-12 form-check">
+                            {{ scheduler_form.scheduler_enabled }}
+                            <label class="form-check-label" for="{{ scheduler_form.scheduler_enabled.id_for_label }}">
+                                {{ scheduler_form.scheduler_enabled.label }}
+                            </label>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ scheduler_form.scheduler_mode.label }}</label>
+                            {{ scheduler_form.scheduler_mode }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ scheduler_form.scheduler_daily_time.label }}</label>
+                            {{ scheduler_form.scheduler_daily_time }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ scheduler_form.scheduler_interval_minutes.label }}</label>
+                            {{ scheduler_form.scheduler_interval_minutes }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_scheduler_settings" class="btn btn-primary w-100">
+                                Zeitplan speichern
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        Wird durch <code>python manage.py run_scheduled</code> ausgelöst (Cron/Task Scheduler).
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">Bedrock (KI)</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-12 form-check">
+                            {{ bedrock_form.bedrock_enabled }}
+                            <label class="form-check-label" for="{{ bedrock_form.bedrock_enabled.id_for_label }}">
+                                {{ bedrock_form.bedrock_enabled.label }}
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ bedrock_form.bedrock_api_key.label }}</label>
+                            {{ bedrock_form.bedrock_api_key }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ bedrock_form.bedrock_region.label }}</label>
+                            {{ bedrock_form.bedrock_region }}
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">{{ bedrock_form.bedrock_model_id.label }}</label>
+                            {{ bedrock_form.bedrock_model_id }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">{{ bedrock_form.bedrock_max_tokens.label }}</label>
+                            {{ bedrock_form.bedrock_max_tokens }}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">{{ bedrock_form.bedrock_temperature.label }}</label>
+                            {{ bedrock_form.bedrock_temperature }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_bedrock" class="btn btn-primary w-100">
+                                Bedrock speichern
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        Wird für Vertragsanalyse und weitere KI-Features verwendet.
+                    </small>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-3 mb-4">
@@ -99,6 +617,48 @@
                         <div class="mb-3">
                             <label class="form-label">{{ branding_form.company_name.label }}</label>
                             {{ branding_form.company_name }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ branding_form.company_version.label }}</label>
+                            {{ branding_form.company_version }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ branding_form.company_address.label }}</label>
+                            {{ branding_form.company_address }}
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ branding_form.company_postal_code.label }}</label>
+                                {{ branding_form.company_postal_code }}
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">{{ branding_form.company_city.label }}</label>
+                                {{ branding_form.company_city }}
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ branding_form.company_country.label }}</label>
+                                {{ branding_form.company_country }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ branding_form.company_email.label }}</label>
+                                {{ branding_form.company_email }}
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ branding_form.company_bank_name.label }}</label>
+                                {{ branding_form.company_bank_name }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ branding_form.company_iban.label }}</label>
+                                {{ branding_form.company_iban }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ branding_form.company_bic.label }}</label>
+                                {{ branding_form.company_bic }}
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">{{ branding_form.site_url.label }}</label>
@@ -198,6 +758,54 @@
                                 {{ app_toggles_form.classroom.label }}
                             </label>
                         </div>
+                        <div class="col-md-3 form-check">
+                            {{ app_toggles_form.crm }}
+                            <label class="form-check-label" for="{{ app_toggles_form.crm.id_for_label }}">
+                                {{ app_toggles_form.crm.label }}
+                            </label>
+                        </div>
+                        <div class="col-md-3 form-check">
+                            {{ app_toggles_form.contracts }}
+                            <label class="form-check-label" for="{{ app_toggles_form.contracts.id_for_label }}">
+                                {{ app_toggles_form.contracts.label }}
+                            </label>
+                        </div>
+                        <div class="col-md-3 form-check">
+                            {{ app_toggles_form.marketing }}
+                            <label class="form-check-label" for="{{ app_toggles_form.marketing.id_for_label }}">
+                                {{ app_toggles_form.marketing.label }}
+                            </label>
+                        </div>
+                        <div class="col-md-3 form-check">
+                            {{ app_toggles_form.erp }}
+                            <label class="form-check-label" for="{{ app_toggles_form.erp.id_for_label }}">
+                                {{ app_toggles_form.erp.label }}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            {{ app_toggles_form.personnel }}
+                            <label class="form-check-label" for="{{ app_toggles_form.personnel.id_for_label }}">
+                                {{ app_toggles_form.personnel.label }}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            {{ app_toggles_form.fibu }}
+                            <label class="form-check-label" for="{{ app_toggles_form.fibu.id_for_label }}">
+                                {{ app_toggles_form.fibu.label }}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            {{ app_toggles_form.projects }}
+                            <label class="form-check-label" for="{{ app_toggles_form.projects.id_for_label }}">
+                                {{ app_toggles_form.projects.label }}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            {{ app_toggles_form.workflows }}
+                            <label class="form-check-label" for="{{ app_toggles_form.workflows.id_for_label }}">
+                                {{ app_toggles_form.workflows.label }}
+                            </label>
+                        </div>
                         <div class="col-12">
                             <button type="submit" name="save_app_toggles" class="btn btn-primary w-100">
                                 App Toggles speichern
@@ -207,6 +815,198 @@
                     <small class="text-muted d-block mt-2">
                         Deaktivierte Apps werden ausgeblendet und gesperrt.
                     </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">Dashboard Layout</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3 align-items-end">
+                        {% csrf_token %}
+                        <div class="col-md-6">
+                            <label class="form-label">{{ dashboard_form.plugin_dashboard_position.label }}</label>
+                            {{ dashboard_form.plugin_dashboard_position }}
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" name="save_dashboard" class="btn btn-primary w-100">
+                                Dashboard speichern
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        Position des Plugin-Bereichs im Haupt-Dashboard.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">Marketing Rollen</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-md-4">
+                            <label class="form-label">{{ marketing_roles_form.marketing_view_groups.label }}</label>
+                            {{ marketing_roles_form.marketing_view_groups }}
+                            {% if marketing_roles_form.marketing_view_groups.help_text %}
+                                <small class="text-muted">{{ marketing_roles_form.marketing_view_groups.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ marketing_roles_form.marketing_edit_groups.label }}</label>
+                            {{ marketing_roles_form.marketing_edit_groups }}
+                            {% if marketing_roles_form.marketing_edit_groups.help_text %}
+                                <small class="text-muted">{{ marketing_roles_form.marketing_edit_groups.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ marketing_roles_form.marketing_approve_groups.label }}</label>
+                            {{ marketing_roles_form.marketing_approve_groups }}
+                            {% if marketing_roles_form.marketing_approve_groups.help_text %}
+                                <small class="text-muted">{{ marketing_roles_form.marketing_approve_groups.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_marketing_roles" class="btn btn-primary w-100">
+                                Marketing Rollen speichern
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">ERP Rollen</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-md-6">
+                            <label class="form-label">{{ erp_roles_form.erp_view_groups.label }}</label>
+                            {{ erp_roles_form.erp_view_groups }}
+                            {% if erp_roles_form.erp_view_groups.help_text %}
+                                <small class="text-muted">{{ erp_roles_form.erp_view_groups.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ erp_roles_form.erp_edit_groups.label }}</label>
+                            {{ erp_roles_form.erp_edit_groups }}
+                            {% if erp_roles_form.erp_edit_groups.help_text %}
+                                <small class="text-muted">{{ erp_roles_form.erp_edit_groups.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_erp_roles" class="btn btn-primary w-100">
+                                ERP Rollen speichern
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">ERP Preislogik</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-md-4">
+                            <label class="form-label">{{ erp_pricing_form.erp_min_margin_pct.label }}</label>
+                            {{ erp_pricing_form.erp_min_margin_pct }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ erp_pricing_form.erp_undercut_min_pct.label }}</label>
+                            {{ erp_pricing_form.erp_undercut_min_pct }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ erp_pricing_form.erp_undercut_max_pct.label }}</label>
+                            {{ erp_pricing_form.erp_undercut_max_pct }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_erp_pricing" class="btn btn-primary w-100">
+                                ERP Preislogik speichern
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">ERP Konkurrenz-Provider</div>
+                <div class="card-body">
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        <div class="col-md-4">
+                            <label class="form-label">Scraper aktiv</label>
+                            <div class="form-check">
+                                {{ erp_competitor_form.erp_competitor_scrape_enabled }}
+                                <label class="form-check-label" for="{{ erp_competitor_form.erp_competitor_scrape_enabled.id_for_label }}">
+                                    Aktivieren
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ erp_competitor_form.erp_competitor_provider.label }}</label>
+                            {{ erp_competitor_form.erp_competitor_provider }}
+                            <small class="text-muted">Manuell, Geizhals oder Custom API (Geizhals: max 60/h)</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">TOS bestaetigt</label>
+                            <div class="form-check">
+                                {{ erp_competitor_form.erp_competitor_accept_terms }}
+                                <label class="form-check-label" for="{{ erp_competitor_form.erp_competitor_accept_terms.id_for_label }}">
+                                    Nutzungsbedingungen akzeptiert
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ erp_competitor_form.erp_competitor_api_url.label }}</label>
+                            {{ erp_competitor_form.erp_competitor_api_url }}
+                            <small class="text-muted">Nur fuer Provider "Custom API"</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ erp_competitor_form.erp_competitor_api_key.label }}</label>
+                            {{ erp_competitor_form.erp_competitor_api_key }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" name="save_erp_competitor" class="btn btn-primary w-100">
+                                Konkurrenz-Provider speichern
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">ERP Plugin Hub</div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        Zentrales Plugin-System fuer ERP (z.B. Kasse/POS, Handwerk, Retail, Education).
+                    </p>
+                    <a class="btn btn-outline-primary w-100" href="/erp/plugins/">
+                        ERP Plugins oeffnen
+                    </a>
                 </div>
             </div>
         </div>
@@ -268,6 +1068,7 @@
                                                 <th>Version</th>
                                                 <th>Typ</th>
                                                 <th>Status</th>
+                                                <th>Dashboard</th>
                                                 <th>Aktionen</th>
                                             </tr>
                                         </thead>
@@ -297,9 +1098,28 @@
                                                         {% endif %}
                                                     </td>
                                                     <td>
+                                                        <form method="post" class="d-flex gap-2 align-items-center">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="plugin_id" value="{{ plugin.id }}">
+                                                            <select name="dashboard_position" class="form-select form-select-sm">
+                                                                <option value="inherit" {% if plugin.dashboard_position == 'inherit' %}selected{% endif %}>Global</option>
+                                                                <option value="top" {% if plugin.dashboard_position == 'top' %}selected{% endif %}>Oben</option>
+                                                                <option value="bottom" {% if plugin.dashboard_position == 'bottom' %}selected{% endif %}>Unten</option>
+                                                                <option value="left" {% if plugin.dashboard_position == 'left' %}selected{% endif %}>Links</option>
+                                                                <option value="center" {% if plugin.dashboard_position == 'center' %}selected{% endif %}>Mitte</option>
+                                                                <option value="right" {% if plugin.dashboard_position == 'right' %}selected{% endif %}>Rechts</option>
+                                                            </select>
+                                                            <input type="number" name="dashboard_row" class="form-control form-control-sm" style="width: 80px;" min="1" value="{{ plugin.dashboard_row }}">
+                                                            <button type="submit" name="save_plugin_position" class="btn btn-sm btn-outline-primary">
+                                                                Speichern
+                                                            </button>
+                                                        </form>
+                                                        <small class="text-muted">Reihe</small>
+                                                    </td>
+                                                    <td>
                                                         {% if plugin.has_settings %}
                                                             <a href="/cloudstorage/api/plugins/{{ plugin.id }}/settings/" class="btn btn-sm btn-outline-secondary me-1">
-                                                                <i class="bi bi-gear"></i>
+                                                                Bearbeiten
                                                             </a>
                                                         {% endif %}
                                                         {% if plugin.enabled %}

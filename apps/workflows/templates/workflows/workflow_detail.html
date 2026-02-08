@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}Workflow{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">{{ workflow.name }}</h2>
+    <a class="btn btn-outline-secondary" href="/workflows/workflows/">Zurück</a>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card mb-3">
+        <div class="card-header">Schritte</div>
+        <div class="card-body">
+          {% for s in steps %}
+            <div class="border-bottom py-2">
+              <div class="fw-bold">{{ s.name }}</div>
+              <div class="text-muted">{{ s.action_type }} · Reihenfolge {{ s.order }}</div>
+            </div>
+          {% empty %}
+            <div class="text-muted">Keine Schritte.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header">Trigger Bedingungen</div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <label class="form-label">Filter (JSON)</label>
+            <textarea class="form-control" name="trigger_filters" rows="3" placeholder='{"status":"won"}'>{{ workflow.trigger_filters|default_if_none:"" }}</textarea>
+            <div class="text-muted small mt-1">Beispiele: <code>{"status":"won"}</code> · <code>{"stage":["proposal","negotiation"]}</code></div>
+            <div class="mt-2">
+              <label class="form-label">Vorlage anwenden</label>
+              <select class="form-select" id="filterPreset" data-trigger="{{ workflow.trigger_type }}">
+                <option value="">– auswählen –</option>
+              </select>
+            </div>
+            <div class="mt-3 border rounded p-2">
+              <div class="fw-bold mb-2">Filter Builder</div>
+              <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                  <label class="form-label">Feld</label>
+                  <select class="form-select" id="builderField">
+                    {% for key, label in filter_builder_fields %}
+                    <option value="{{ key }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Operator</label>
+                  <select class="form-select" id="builderOp">
+                    {% for key, label in filter_builder_ops %}
+                    <option value="{{ key }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label">Wert</label>
+                  <input class="form-control" id="builderValue" placeholder="z.B. won oder proposal,negotiation">
+                </div>
+                <div class="col-md-3">
+                  <button class="btn btn-outline-secondary w-100" type="button" id="builderApply">Übernehmen</button>
+                </div>
+              </div>
+              <div class="text-muted small mt-2">Bei Operator <code>in</code> Werte mit Komma trennen.</div>
+            </div>
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn btn-outline-primary" name="validate_filters" type="submit">JSON prüfen</button>
+              <button class="btn btn-primary" name="save_filters" type="submit">Speichern</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header">Builder (Quick Steps)</div>
+        <div class="card-body">
+          <form method="post" class="row g-2">
+            {% csrf_token %}
+            <div class="col-md-6">
+              <input class="form-control" name="step_name" placeholder="Schritt-Name">
+            </div>
+            <div class="col-md-4">
+              <select class="form-select" name="step_type">
+                <option value="email">Email</option>
+                <option value="webhook">Webhook</option>
+                <option value="erp_invoice_email">ERP Rechnung Mail</option>
+                <option value="erp_dunning_email">ERP Mahnung Mail</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-outline-primary w-100" name="add_step_template" type="submit">Hinzufügen</button>
+            </div>
+            <div class="col-12">
+              <div class="text-muted small">Webhook nutzt config: <code>{"url":"https://..."}</code>. ERP Steps nutzen invoice_id/dunning_id.</div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Schritt hinzufügen</div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {{ step_form.as_p }}
+            <button class="btn btn-primary" name="add_step" type="submit">Speichern</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card mb-3">
+        <div class="card-header">Ausführungen</div>
+        <div class="card-body">
+          {% for e in executions %}
+            <div class="border-bottom py-2">
+              <div class="fw-bold">{{ e.status }}</div>
+              <div class="text-muted">{{ e.started_at }}</div>
+              {% if e.message %}
+              <div class="text-muted small" style="white-space: pre-wrap;">{{ e.message }}</div>
+              {% endif %}
+            </div>
+          {% empty %}
+            <div class="text-muted">Keine Ausführungen.</div>
+          {% endfor %}
+        </div>
+      </div>
+      <form method="post" class="card p-3">
+        {% csrf_token %}
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label">Invoice ID (optional)</label>
+            <input class="form-control" type="number" name="invoice_id">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Dunning ID (optional)</label>
+            <input class="form-control" type="number" name="dunning_id">
+          </div>
+        </div>
+        <button class="btn btn-outline-primary mt-3" name="run_workflow" type="submit">Workflow ausführen</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  (function() {
+    const preset = document.getElementById('filterPreset');
+    const area = document.querySelector('textarea[name="trigger_filters"]');
+    const builderField = document.getElementById('builderField');
+    const builderOp = document.getElementById('builderOp');
+    const builderValue = document.getElementById('builderValue');
+    const builderApply = document.getElementById('builderApply');
+    const presetsByTrigger = {
+      invoice_issued: [
+        ['{"status":"issued"}', 'Invoice: Issued'],
+        ['{"status":"sent"}', 'Invoice: Sent'],
+      ],
+      dunning_created: [
+        ['{"status":"sent"}', 'Dunning: Sent'],
+        ['{"level":2}', 'Dunning: Level 2'],
+      ],
+      erp_order_status: [
+        ['{"status":"confirmed"}', 'Order: Confirmed'],
+        ['{"status":"invoiced"}', 'Order: Invoiced'],
+      ],
+      crm_lead_status: [
+        ['{"status":"qualified"}', 'Lead: Qualified'],
+        ['{"status":"lost"}', 'Lead: Lost'],
+      ],
+      crm_opportunity_stage: [
+        ['{"stage":"proposal"}', 'Opportunity: Proposal'],
+        ['{"stage":["proposal","negotiation"]}', 'Opportunity: Proposal/Negotiation'],
+        ['{"stage":"won"}', 'Opportunity: Won'],
+      ],
+      marketing_asset_status: [
+        ['{"status":"approved"}', 'Marketing: Approved'],
+        ['{"status":"published"}', 'Marketing: Published'],
+      ],
+    };
+    if (preset && area) {
+      const trigger = preset.dataset.trigger || 'manual';
+      const list = presetsByTrigger[trigger] || [];
+      list.forEach(([val, label]) => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = label;
+        preset.appendChild(opt);
+      });
+      preset.addEventListener('change', () => {
+        if (preset.value) {
+          area.value = preset.value;
+        }
+      });
+    }
+    if (builderApply && area) {
+      builderApply.addEventListener('click', () => {
+        const field = builderField.value;
+        const op = builderOp.value;
+        const raw = builderValue.value || '';
+        let obj = {};
+        try { obj = JSON.parse(area.value || '{}'); } catch (e) { obj = {}; }
+        if (op === 'in') {
+          obj[field] = raw.split(',').map(v => v.trim()).filter(Boolean);
+        } else {
+          obj[field] = raw.trim();
+        }
+        area.value = JSON.stringify(obj, null, 2);
+      });
+    }
+  })();
+</script>
+{% endblock %}

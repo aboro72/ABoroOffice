@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Projekte{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">Projektmanagement</h2>
+      <div class="text-muted">Projekte, Aufgaben, Meilensteine</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="/projects/projects/">Projekte</a>
+      <a class="btn btn-outline-secondary" href="/projects/tasks/">Aufgaben</a>
+      <a class="btn btn-outline-secondary" href="/projects/kanban/">Kanban</a>
+      <a class="btn btn-outline-secondary" href="/projects/gantt/">Gantt</a>
+      <a class="btn btn-outline-secondary" href="/projects/projects/create/">Neues Projekt</a>
+      <a class="btn btn-outline-secondary" href="/projects/help/">Hilfe</a>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="text-muted">Projekte</div>
+          <div class="fs-4">{{ project_count }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="text-muted">Aktive Projekte</div>
+          <div class="fs-4">{{ active_projects }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="text-muted">Aufgaben</div>
+          <div class="fs-4">{{ task_count }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

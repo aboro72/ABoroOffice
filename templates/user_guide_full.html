@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Benutzerhandbuch (HTML Export){% endblock %}
+{% block content %}
+<div class="container py-4" id="doc">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">ABoroOffice -> Benutzerhandbuch (HTML)</h2>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="/user-guide/">Zurück</a>
+      <a class="btn btn-outline-secondary" href="/user-guide/pdf/">PDF</a>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header">Module & Verknüpfungen</div>
+    <div class="card-body">
+      <ul>
+        <li><strong>CRM</strong> -> übergabe an ERP-Angebote</li>
+        <li><strong>ERP</strong> -> Rechnung/Mahnung, Projekte aus Aufträgen</li>
+        <li><strong>Projekte</strong> -> Kanban + Gantt</li>
+        <li><strong>Workflows</strong> -> Trigger aus CRM/ERP/Marketing</li>
+        <li><strong>Marketing</strong> -> Content-Freigaben</li>
+        <li><strong>Personal</strong> -> Zeit/Payroll</li>
+        <li><strong>FiBu</strong> -> Konten/Kostenstellen</li>
+        <li><strong>Verträge</strong> -> KI-Auswertung</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

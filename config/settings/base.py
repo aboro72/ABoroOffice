@@ -13,12 +13,66 @@ APPS_DIR = BASE_DIR / 'apps'
 # SECURITY: Secret key should be in .env in production
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 
-# Database default
-DATABASES = {
-    'default': {
+def build_database_config(default_engine='sqlite'):
+    engine = os.getenv('DB_ENGINE', default_engine).lower()
+
+    if engine in ('sqlite', 'sqlite3'):
+        return {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+
+    if engine in ('postgres', 'postgresql'):
+        return {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME', 'aboro_office'),
+            'USER': os.getenv('DB_USER', 'aboro'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+            'ATOMIC_REQUESTS': True,
+            'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '600')),
+        }
+
+    if engine in ('mysql', 'mariadb'):
+        return {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv('DB_NAME', 'aboro_db'),
+            'USER': os.getenv('DB_USER', 'aboro_user'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '3306'),
+            'ATOMIC_REQUESTS': True,
+            'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '600')),
+            'OPTIONS': {
+                'charset': os.getenv('DB_CHARSET', 'utf8mb4'),
+            },
+        }
+
+    if engine in ('mssql', 'sqlserver'):
+        return {
+            'ENGINE': 'mssql',
+            'NAME': os.getenv('DB_NAME', 'aboro_office'),
+            'USER': os.getenv('DB_USER', 'aboro'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '1433'),
+            'ATOMIC_REQUESTS': True,
+            'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '600')),
+            'OPTIONS': {
+                'driver': os.getenv('MSSQL_DRIVER', 'ODBC Driver 18 for SQL Server'),
+            },
+        }
+
+    return {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+
+
+# Database default
+DATABASES = {
+    'default': build_database_config(),
 }
 
 # Authentication
@@ -43,6 +97,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Auth redirects
 LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_URL = '/cloudstorage/accounts/login/'
 
 # Installed apps
 INSTALLED_APPS = [
@@ -81,6 +136,17 @@ INSTALLED_APPS = [
     'apps.cloude.cloude_apps.sharing.apps.SharingConfig',
     'apps.cloude.cloude_apps.plugins.apps.PluginsConfig',
     'apps.cloude.cloude_apps.api.apps.ApiConfig',
+
+    # CRM (Business)
+    'apps.crm.apps.CrmConfig',
+    # Contracts (Business)
+    'apps.contracts.apps.ContractsConfig',
+    'apps.marketing.apps.MarketingConfig',
+    'apps.erp.apps.ErpConfig',
+    'apps.personnel.apps.PersonnelConfig',
+    'apps.fibu.apps.FibuConfig',
+    'apps.projects.apps.ProjectsConfig',
+    'apps.workflows.apps.WorkflowsConfig',
 
     # Third-party apps (to be added as phases progress)
     'rest_framework',
@@ -263,6 +329,14 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
+
+# AWS Bedrock (API Key or IAM)
+BEDROCK_ENABLED = os.getenv('BEDROCK_ENABLED', 'false').lower() == 'true'
+BEDROCK_API_KEY = os.getenv('BEDROCK_API_KEY', '')
+BEDROCK_REGION = os.getenv('BEDROCK_REGION', 'eu-central-1')
+BEDROCK_MODEL_ID = os.getenv('BEDROCK_MODEL_ID', 'anthropic.claude-3-5-sonnet-20240620-v1:0')
+BEDROCK_MAX_TOKENS = int(os.getenv('BEDROCK_MAX_TOKENS', '1024'))
+BEDROCK_TEMPERATURE = float(os.getenv('BEDROCK_TEMPERATURE', '0.7'))
 
 # Branding defaults
 APP_NAME = os.getenv('APP_NAME', 'ABoroOffice')

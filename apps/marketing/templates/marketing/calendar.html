@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Marketing Kalender{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">Content Kalender</h2>
+            <div class="text-muted small">
+                Zeitraum: {{ calendar_start }} bis {{ calendar_end }}
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/marketing/">Zurück</a>
+            <a class="btn btn-primary" href="/marketing/assets/create/">Neuer Content</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Geplante Inhalte</div>
+        <div class="card-body">
+            {% if calendar_groups %}
+                {% for date, items in calendar_groups %}
+                <div class="mb-4">
+                    <div class="fw-bold mb-2">{{ date }}</div>
+                    <div class="list-group">
+                        {% for asset in items %}
+                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                           href="/marketing/assets/{{ asset.id }}/">
+                            <div>
+                                <div class="fw-semibold">{{ asset.title }}</div>
+                                <div class="small text-muted">
+                                    {{ asset.get_asset_type_display }} · {{ asset.channel|default:"-" }} · {{ asset.get_status_display }}
+                                </div>
+                            </div>
+                            <div class="text-muted small">{{ asset.scheduled_at|date:"H:i" }}</div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-muted">Keine geplanten Inhalte im Zeitraum.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

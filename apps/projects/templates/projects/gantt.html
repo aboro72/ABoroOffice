@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Gantt Übersicht</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/projects/">Zurück</a>
+            <a class="btn btn-outline-secondary" href="/projects/kanban/">Kanban</a>
+        </div>
+    </div>
+
+    <form method="get" class="mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Projekt filtern</label>
+                <select name="project" class="form-select">
+                    <option value="">Alle Projekte</option>
+                    {% for p in projects %}
+                    <option value="{{ p.id }}" {% if selected_project == p.id %}selected{% endif %}>{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">Anwenden</button>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Zoom</label>
+                <select name="zoom" class="form-select">
+                    <option value="month" {% if selected_zoom == 'month' %}selected{% endif %}>Monat</option>
+                    <option value="week" {% if selected_zoom == 'week' %}selected{% endif %}>Woche</option>
+                    <option value="day" {% if selected_zoom == 'day' %}selected{% endif %}>Tag</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-end text-muted small">
+                Zeitraum: {{ min_date }} – {{ max_date }}
+            </div>
+        </div>
+    </form>
+
+    <div class="d-flex justify-content-end mb-2">
+        <a class="btn btn-outline-secondary" href="/projects/gantt/export/?{% if selected_project %}project={{ selected_project }}&{% endif %}zoom={{ selected_zoom }}">Export CSV</a>
+        <a class="btn btn-outline-secondary" href="/projects/gantt/export/?format=pdf&{% if selected_project %}project={{ selected_project }}&{% endif %}zoom={{ selected_zoom }}">Export PDF</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Projekt-Zeitleiste</div>
+        <div class="card-body">
+            {% for row in project_rows %}
+            <div class="mb-2">
+                <div class="d-flex justify-content-between">
+                    <div><strong>{{ row.project.name }}</strong></div>
+                    <div class="text-muted small">{{ row.start }} → {{ row.end }}</div>
+                </div>
+                <div class="position-relative bg-light rounded" style="height: 14px;">
+                    {% for t in ticks %}
+                    <div style="position:absolute; left: {{ t.left }}%; top:0; bottom:0; width:1px; background:#e6e6e6;"></div>
+                    {% endfor %}
+                    <div class="bg-success rounded" style="position:absolute; height:14px; left: {{ row.left_pct }}%; width: {{ row.width_pct }}%;"></div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-muted">Keine Projekt-Zeitleiste.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">Tasks & Meilensteine</div>
+        <div class="card-body">
+            {% for row in gantt_rows %}
+            <div class="mb-2">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        {% if row.kind == 'milestone' %}
+                        <strong>▲ {{ row.item.title }}</strong>
+                        <span class="text-muted">({{ row.item.project.name }})</span>
+                        {% else %}
+                        <strong>{{ row.item.title }}</strong>
+                        <span class="text-muted">({{ row.item.project.name }})</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-muted small">{{ row.start }} → {{ row.end }}</div>
+                </div>
+                <div class="position-relative bg-light rounded" style="height: 14px;">
+                    {% for t in ticks %}
+                    <div style="position:absolute; left: {{ t.left }}%; top:0; bottom:0; width:1px; background:#e6e6e6;"></div>
+                    {% endfor %}
+                    {% if row.kind == 'milestone' %}
+                    <div class="bg-warning rounded" style="position:absolute; height:14px; left: {{ row.left_pct }}%; width: 6px;"></div>
+                    {% else %}
+                    <div class="bg-primary rounded" style="position:absolute; height:14px; left: {{ row.left_pct }}%; width: {{ row.width_pct }}%;"></div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-muted">Keine Tasks mit Datum.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -69,6 +69,21 @@ export AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY"
 export AWS_REGION="us-east-1"
 ```
 
+#### Option C: Bedrock API Key (Development)
+
+You can generate a Bedrock API key and configure it via environment variables:
+```bash
+# Windows (PowerShell)
+$env:BEDROCK_API_KEY = "YOUR_BEDROCK_API_KEY"
+$env:BEDROCK_REGION = "eu-central-1"
+
+# Linux/Mac (Bash)
+export BEDROCK_API_KEY="YOUR_BEDROCK_API_KEY"
+export BEDROCK_REGION="eu-central-1"
+```
+
+This project maps `BEDROCK_API_KEY` to the environment variable used by the AWS SDK.
+
 #### Option C: Django Settings
 
 ```python

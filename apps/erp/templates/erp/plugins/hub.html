@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}ERP Plugin Hub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">ERP Plugin Hub</h2>
+            <div class="text-muted">POS / Kasse / Touch‑Apps & Integrationen</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/erp/">Zurück</a>
+            <a class="btn btn-outline-primary" href="/admin-dashboard/">Plugin System</a>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">POS / Kassen‑Plugins</div>
+        <div class="card-body">
+            <p class="text-muted mb-0">
+                Diese Plugins nutzen die ERP API, z.B. Touch‑Kassen für Tablets/Handys.
+            </p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Installierte Plugins</div>
+        <div class="card-body">
+            {% if plugins %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Version</th>
+                            <th>Status</th>
+                            <th>Beschreibung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in plugins %}
+                        <tr>
+                            <td>{{ p.name }}</td>
+                            <td>{{ p.version }}</td>
+                            <td>{{ p.status }}</td>
+                            <td>{{ p.description|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-muted">Keine Plugins installiert.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

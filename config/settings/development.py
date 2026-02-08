@@ -26,7 +26,7 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:*', 'http://127.0.0.1:*']
 SESSION_COOKIE_SECURE = False
 
 # Email backend for development
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'apps.core.email_backend.DBConsoleEmailBackend'
 
 # Logging for development (more verbose)
 LOGGING['loggers']['django']['level'] = 'DEBUG'  # noqa: F405
@@ -36,13 +36,7 @@ LOGGING['loggers']['apps']['level'] = 'DEBUG'  # noqa: F405
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Database configuration for development
-# Default SQLite is fine, but PostgreSQL is recommended
-DATABASES = {  # noqa: F405
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # noqa: F405
-    }
-}
+# Uses settings from base.py (supports DB_ENGINE override)
 
 # Cache - local memory is fine for development
 CACHES = {  # noqa: F405

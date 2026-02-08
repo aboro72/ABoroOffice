@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Buchung{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Buchung {{ entry.id }}</h2>
+        <a class="btn btn-outline-secondary" href="/fibu/journal/">Zurueck</a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div><strong>Datum:</strong> {{ entry.date }}</div>
+            <div><strong>Referenz:</strong> {{ entry.reference|default:"-" }}</div>
+            <div><strong>Beschreibung:</strong> {{ entry.description|default:"-" }}</div>
+            <div><strong>Soll:</strong> {{ entry.total_debit }}</div>
+            <div><strong>Haben:</strong> {{ entry.total_credit }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Buchungszeilen</div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Konto</th>
+                        <th>Kostenstelle</th>
+                        <th>Kostenart</th>
+                        <th>Partner</th>
+                        <th>Soll</th>
+                        <th>Haben</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in lines %}
+                    <tr>
+                        <td>{{ l.account }}</td>
+                        <td>{{ l.cost_center|default:"-" }}</td>
+                        <td>{{ l.cost_type|default:"-" }}</td>
+                        <td>{{ l.partner|default:"-" }}</td>
+                        <td>{{ l.debit }}</td>
+                        <td>{{ l.credit }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted py-3">Keine Zeilen.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

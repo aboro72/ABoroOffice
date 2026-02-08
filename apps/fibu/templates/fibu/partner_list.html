@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Debitoren & Kreditoren{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Debitoren & Kreditoren</h2>
+        <div class="d-flex gap-2">
+            <form class="d-flex" method="get">
+                <input class="form-control form-control-sm" name="q" placeholder="Suche Nr./Name/USt" value="{{ request.GET.q|default:'' }}">
+            </form>
+            <a class="btn btn-primary" href="/fibu/partners/create/">Neu</a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nr.</th>
+                        <th>Name</th>
+                        <th>Typ</th>
+                        <th>USt-ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in partners %}
+                    <tr>
+                        <td>{{ p.partner_number|default:"-" }}</td>
+                        <td>{{ p.name }}</td>
+                        <td>{{ p.get_partner_type_display }}</td>
+                        <td>{{ p.vat_id|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center text-muted py-3">Keine Partner.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

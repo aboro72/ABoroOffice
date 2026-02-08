@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Workflows{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-0">Workflow-Automation</h2>
+      <div class="text-muted">Automatisierte Abl?ufe</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="/workflows/workflows/">Workflows</a>
+      <a class="btn btn-outline-secondary" href="/workflows/workflows/create/">Neuer Workflow</a>
+      <a class="btn btn-outline-secondary" href="/workflows/help/">Hilfe</a>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="text-muted">Workflows</div>
+          <div class="fs-4">{{ workflow_count }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="text-muted">Aktive Workflows</div>
+          <div class="fs-4">{{ active_workflows }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="text-muted">Ausf?hrungen</div>
+          <div class="fs-4">{{ execution_count }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

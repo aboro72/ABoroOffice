@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Aufgaben{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Aufgaben</h2>
+    <a class="btn btn-primary" href="/projects/tasks/create/">Neue Aufgabe</a>
+  </div>
+  <div class="list-group">
+    {% for t in tasks %}
+      <a class="list-group-item list-group-item-action" href="/projects/tasks/{{ t.id }}/">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="fw-bold">{{ t.title }}</div>
+            <div class="text-muted">{{ t.project.name }} ? {{ t.status }}</div>
+          </div>
+          <div class="text-muted">{{ t.due_date|default:"-" }}</div>
+        </div>
+      </a>
+    {% empty %}
+      <div class="text-muted">Keine Aufgaben.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -54,6 +54,47 @@
     {% endif %}
 </div>
 
+{% if user.role != 'customer' %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Bereich</label>
+                <select name="department" class="form-select">
+                    <option value="">Alle</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                        {{ dept.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Queue</label>
+                <select name="queue" class="form-select">
+                    <option value="">Alle</option>
+                    {% for q in queues %}
+                    <option value="{{ q.id }}" {% if request.GET.queue == q.id|stringformat:"s" %}selected{% endif %}>
+                        {{ q.department.name }} / {{ q.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Ansicht</label>
+                <select name="scope" class="form-select">
+                    <option value="">Alle</option>
+                    <option value="mine" {% if request.GET.scope == 'mine' %}selected{% endif %}>Meine Bereiche</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100">Filtern</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
 {% if tickets %}
 <div class="card">
     <div class="table-wrapper">
@@ -68,6 +109,8 @@
                 {% if user.role != 'customer' %}
                 <th>Erstellt von</th>
                 <th>Zugewiesen an</th>
+                <th>Bereich</th>
+                <th>Queue</th>
                 <th>Klassenraum</th>
                 {% endif %}
                 <th>Erstellt am</th>
@@ -119,6 +162,8 @@
                         <span style="color: #868e96;">Nicht zugewiesen</span>
                     {% endif %}
                 </td>
+                <td>{% if ticket.department %}{{ ticket.department.name }}{% else %}-{% endif %}</td>
+                <td>{% if ticket.queue %}{{ ticket.queue.name }}{% else %}-{% endif %}</td>
                 <td>
                     {% if ticket.mobile_classroom %}
                         {{ ticket.mobile_classroom.name }}

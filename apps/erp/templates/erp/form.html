@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}ERP Form{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header">{{ form_title }}</div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary">Speichern</button>
+                    <a class="btn btn-outline-secondary" href="/erp/">Abbrechen</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Ideen{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Content Ideen</h2>
+        <a class="btn btn-outline-primary" href="/marketing/ideas/create/">Neue Idee</a>
+    </div>
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <label class="form-label">Thema</label>
+                <input type="text" name="topic" class="form-control" placeholder="z.B. IT Beratung, Cloud Migration">
+                <button class="btn btn-primary mt-2">Ideen generieren</button>
+            </form>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Titel</th>
+                        <th>Zielgruppe</th>
+                        <th>Erstellt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for idea in ideas %}
+                    <tr>
+                        <td>{{ idea.title }}</td>
+                        <td>{{ idea.target_audience|default:"-" }}</td>
+                        <td>{{ idea.created_at|date:"Y-m-d" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted py-4">Keine Ideen.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

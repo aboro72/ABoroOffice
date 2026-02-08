@@ -9,6 +9,21 @@ import base64
 # Mobile classroom models removed - not needed for this project
 
 
+PRIORITY_CHOICES = [
+    ('low', _('Low')),
+    ('medium', _('Medium')),
+    ('high', _('High')),
+    ('critical', _('Critical')),
+]
+
+SUPPORT_LEVEL_CHOICES = [
+    ('level_1', _('Level 1 - First Line Support')),
+    ('level_2', _('Level 2 - Technical Support')),
+    ('level_3', _('Level 3 - Expert Support')),
+    ('level_4', _('Level 4 - Senior Expert')),
+]
+
+
 class Category(models.Model):
     """Ticket categories for organization"""
 
@@ -43,6 +58,117 @@ class Category(models.Model):
         }
 
 
+class SupportDepartment(models.Model):
+    name = models.CharField(_('name'), max_length=100, unique=True)
+    description = models.TextField(_('description'), blank=True)
+    is_active = models.BooleanField(_('active'), default=True)
+    notify_groups = models.ManyToManyField(
+        'auth.Group',
+        blank=True,
+        related_name='helpdesk_departments',
+        help_text='Groups that should receive notifications for this department.',
+    )
+    created_at = models.DateTimeField(_('created at'), default=timezone.now)
+
+    class Meta:
+        verbose_name = _('support department')
+        verbose_name_plural = _('support departments')
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class SupportQueue(models.Model):
+    name = models.CharField(_('name'), max_length=100)
+    department = models.ForeignKey(
+        SupportDepartment,
+        on_delete=models.CASCADE,
+        related_name='queues',
+        verbose_name=_('department'),
+    )
+    description = models.TextField(_('description'), blank=True)
+    is_active = models.BooleanField(_('active'), default=True)
+    default_support_level = models.CharField(
+        _('default support level'),
+        max_length=10,
+        choices=SUPPORT_LEVEL_CHOICES,
+        default='level_1',
+    )
+    notify_groups = models.ManyToManyField(
+        'auth.Group',
+        blank=True,
+        related_name='helpdesk_queues',
+        help_text='Groups that should receive notifications for this queue.',
+    )
+    created_at = models.DateTimeField(_('created at'), default=timezone.now)
+
+    class Meta:
+        verbose_name = _('support queue')
+        verbose_name_plural = _('support queues')
+        unique_together = ('department', 'name')
+        ordering = ['department__name', 'name']
+
+    def __str__(self):
+        return f"{self.department.name} / {self.name}"
+
+
+class TicketRoutingRule(models.Model):
+    name = models.CharField(_('name'), max_length=120)
+    is_active = models.BooleanField(_('active'), default=True)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='routing_rules',
+        verbose_name=_('category'),
+    )
+    contains_text = models.CharField(
+        _('contains text'),
+        max_length=120,
+        blank=True,
+        help_text='Simple keyword match against title/description.',
+    )
+    department = models.ForeignKey(
+        SupportDepartment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='routing_rules',
+        verbose_name=_('department'),
+    )
+    queue = models.ForeignKey(
+        SupportQueue,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='routing_rules',
+        verbose_name=_('queue'),
+    )
+    priority = models.CharField(
+        _('priority'),
+        max_length=20,
+        choices=PRIORITY_CHOICES,
+        blank=True,
+    )
+    support_level = models.CharField(
+        _('support level'),
+        max_length=10,
+        choices=SUPPORT_LEVEL_CHOICES,
+        blank=True,
+    )
+    created_at = models.DateTimeField(_('created at'), default=timezone.now)
+
+    class Meta:
+        verbose_name = _('ticket routing rule')
+        verbose_name_plural = _('ticket routing rules')
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class Ticket(models.Model):
     """Main ticket model"""
 
@@ -54,19 +180,8 @@ class Ticket(models.Model):
         ('closed', _('Closed')),
     ]
 
-    PRIORITY_CHOICES = [
-        ('low', _('Low')),
-        ('medium', _('Medium')),
-        ('high', _('High')),
-        ('critical', _('Critical')),
-    ]
-
-    SUPPORT_LEVEL_CHOICES = [
-        ('level_1', _('Level 1 - First Line Support')),
-        ('level_2', _('Level 2 - Technical Support')),
-        ('level_3', _('Level 3 - Expert Support')),
-        ('level_4', _('Level 4 - Senior Expert')),
-    ]
+    PRIORITY_CHOICES = PRIORITY_CHOICES
+    SUPPORT_LEVEL_CHOICES = SUPPORT_LEVEL_CHOICES
 
     # Basic information
     ticket_number = models.CharField(_('ticket number'), max_length=20, unique=True,
@@ -92,6 +207,24 @@ class Ticket(models.Model):
                                 related_name='tickets',
                                 verbose_name=_('category'),
                                 db_index=True)
+    department = models.ForeignKey(
+        SupportDepartment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='tickets',
+        verbose_name=_('department'),
+        db_index=True,
+    )
+    queue = models.ForeignKey(
+        SupportQueue,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='tickets',
+        verbose_name=_('queue'),
+        db_index=True,
+    )
     # Mobile classroom field removed - not needed
 
     # Status and priority
@@ -277,6 +410,8 @@ class Ticket(models.Model):
             'creator': self.created_by.to_dict() if self.created_by else None,
             'assignee': self.assigned_to.to_dict() if self.assigned_to else None,
             'category': self.category.name if self.category else None,
+            'department': self.department.name if self.department else None,
+            'queue': self.queue.name if self.queue else None,
             # Mobile classroom references removed
             'sla_due_date': self.sla_due_date.isoformat() if self.sla_due_date else None,
             'sla_breached': self.sla_breached

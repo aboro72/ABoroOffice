@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Kompetenzen{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Kompetenzen</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="/personnel/instructors/">Dozenten</a>
+            <a class="btn btn-primary" href="/personnel/skills/create/">Neu</a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Beschreibung</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in skills %}
+                    <tr>
+                        <td>{{ s.name }}</td>
+                        <td>{{ s.description|default:"-" }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary" href="/personnel/skills/{{ s.id }}/edit/">Bearbeiten</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted py-3">Keine Kompetenzen.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -6,12 +6,12 @@ Mounted under /cloudstorage/.
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
-from django.views.generic import RedirectView
+from apps.cloude.cloude_apps.core import views as core_views
 
 
 urlpatterns = [
-    # Home -> login
-    path('', RedirectView.as_view(url='/cloudstorage/accounts/login/', permanent=False), name='cloude-home'),
+    # Home -> core dashboard (will redirect to login if not authenticated)
+    path('', core_views.dashboard, name='cloude-home'),
 
     # Accounts
     path('accounts/', include('apps.cloude.cloude_apps.accounts.urls', namespace='accounts')),

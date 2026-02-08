@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Wareneingang{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Wareneingang</h2>
+        <a class="btn btn-primary" href="/erp/stock/receipts/create/">Neu</a>
+    </div>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nr.</th>
+                        <th>Lieferant</th>
+                        <th>Datum</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in receipts %}
+                    <tr>
+                        <td><a href="/erp/stock/receipts/{{ r.id }}/">#{{ r.id }}</a></td>
+                        <td>{{ r.supplier_name|default:"-" }}</td>
+                        <td>{{ r.receipt_date }}</td>
+                        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/erp/stock/receipts/{{ r.id }}/">Details</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center text-muted py-3">Keine Wareneingaenge.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

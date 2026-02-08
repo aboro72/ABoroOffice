@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Marketing Hilfe{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-3">
+        <h2 class="mb-0">Marketing Hilfe</h2>
+        <div class="text-muted">Content-Workflow, Templates, Freigaben und KPIs.</div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">Workflow</div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Briefing schreiben.</li>
+                        <li>KI-Entwurf erzeugen.</li>
+                        <li>Freigabe anfordern.</li>
+                        <li>Veröffentlichen.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">KPIs</div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Impressions, Clicks, Conversions</li>
+                        <li>CSV-Import + Trend-Ansicht</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

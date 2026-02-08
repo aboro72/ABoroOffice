@@ -1,0 +1,13 @@
+{% for widget in widgets %}
+<div class="{% if force_full|default:False %}col-12{% else %}col-12 col-md-6 col-lg-4{% endif %}">
+    <div class="card h-100">
+        <div class="card-header">
+            <span class="me-2"><i class="{{ widget.icon }}"></i></span>
+            {{ widget.name }}
+        </div>
+        <div class="card-body">
+            {% include widget.template with widget_context=widget.context %}
+        </div>
+    </div>
+</div>
+{% endfor %}
