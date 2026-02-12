@@ -1,88 +1,85 @@
-{% extends "base.html" %}
+{% extends "erp/_list_base.html" %}
 
 {% block title %}Kurse{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Kurse</h2>
-        <a class="btn btn-primary" href="/erp/courses/create/">Neu</a>
+{% block app_breadcrumb %}Kurse{% endblock %}
+{% block list_heading %}Kurse{% endblock %}
+{% block list_actions %}
+    <a class="btn btn-primary" href="/erp/courses/create/">Neu</a>
+{% endblock %}
+
+{% block list_filters %}
+<form method="get" class="row g-2 align-items-end">
+    <div class="col-md-3">
+        <label class="form-label">Status</label>
+        <select class="form-select" name="status">
+            <option value="">Alle</option>
+            {% for key, label in status_choices %}
+            <option value="{{ key }}" {% if filters.status == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
     </div>
-    <div class="card mb-3">
-        <div class="card-body">
-            <form method="get" class="row g-2 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" name="status">
-                        <option value="">Alle</option>
-                        {% for key, label in status_choices %}
-                        <option value="{{ key }}" {% if filters.status == key %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Kunde</label>
-                    <select class="form-select" name="customer">
-                        <option value="">Alle</option>
-                        {% for c in customers %}
-                        <option value="{{ c.id }}" {% if filters.customer == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Dozent</label>
-                    <select class="form-select" name="instructor">
-                        <option value="">Alle</option>
-                        {% for i in instructors %}
-                        <option value="{{ i.id }}" {% if filters.instructor == i.id|stringformat:"s" %}selected{% endif %}>{{ i.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2 d-grid">
-                    <button class="btn btn-outline-primary" type="submit">Filtern</button>
-                </div>
-            </form>
-        </div>
+    <div class="col-md-4">
+        <label class="form-label">Kunde</label>
+        <select class="form-select" name="customer">
+            <option value="">Alle</option>
+            {% for c in customers %}
+            <option value="{{ c.id }}" {% if filters.customer == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
     </div>
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Event</th>
-                        <th>Titel</th>
-                        <th>Kunde</th>
-                        <th>Dozent</th>
-                        <th>Status</th>
-                        <th>Preis Netto</th>
-                        <th>Preis Brutto</th>
-                        <th>Start</th>
-                        <th>Ende</th>
-                        <th>Kapazitaet</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for c in courses %}
-                    <tr>
-                        <td>{{ c.event_number|default:"-" }}</td>
-                        <td><a href="/erp/courses/{{ c.id }}/">{{ c.title }}</a></td>
-                        <td>{{ c.customer|default:"-" }}</td>
-                        <td>{{ c.instructor|default:"-" }}</td>
-                        <td>{{ c.get_status_display }}</td>
-                        <td>{{ c.price_net }}</td>
-                        <td>{{ c.price_gross }}</td>
-                        <td>{{ c.start_date|default:"-" }}</td>
-                        <td>{{ c.end_date|default:"-" }}</td>
-                        <td>{{ c.capacity }}</td>
-                        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/erp/courses/{{ c.id }}/edit/">Bearbeiten</a></td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="11" class="text-center text-muted py-3">Keine Kurse.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="col-md-3">
+        <label class="form-label">Dozent</label>
+        <select class="form-select" name="instructor">
+            <option value="">Alle</option>
+            {% for i in instructors %}
+            <option value="{{ i.id }}" {% if filters.instructor == i.id|stringformat:"s" %}selected{% endif %}>{{ i.name }}</option>
+            {% endfor %}
+        </select>
     </div>
+    <div class="col-md-2 d-grid">
+        <button class="btn btn-outline-primary" type="submit">Filtern</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block list_content %}
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Event</th>
+                <th>Titel</th>
+                <th>Kunde</th>
+                <th>Dozent</th>
+                <th>Status</th>
+                <th>Preis Netto</th>
+                <th>Preis Brutto</th>
+                <th>Start</th>
+                <th>Ende</th>
+                <th>Kapazitaet</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in courses %}
+            <tr>
+                <td>{{ c.event_number|default:"-" }}</td>
+                <td><a href="/erp/courses/{{ c.id }}/">{{ c.title }}</a></td>
+                <td>{{ c.customer|default:"-" }}</td>
+                <td>{{ c.instructor|default:"-" }}</td>
+                <td>{{ c.get_status_display }}</td>
+                <td>{{ c.price_net }}</td>
+                <td>{{ c.price_gross }}</td>
+                <td>{{ c.start_date|default:"-" }}</td>
+                <td>{{ c.end_date|default:"-" }}</td>
+                <td>{{ c.capacity }}</td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/erp/courses/{{ c.id }}/edit/">Bearbeiten</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="11" class="text-center text-muted py-3">Keine Kurse.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

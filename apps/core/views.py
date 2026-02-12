@@ -7,7 +7,8 @@ from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from urllib.parse import urlencode
 from django.core.paginator import Paginator
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -33,6 +34,30 @@ from apps.core.forms import (
     ErpCompetitorForm,
 )
 from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings, EmailLog
+from apps.crm.permissions import can_view_crm
+from apps.erp.permissions import can_view_erp
+
+
+def quick_search(request):
+    q = (request.GET.get('q') or '').strip()
+    scope = (request.GET.get('scope') or '').strip()
+    if not q:
+        return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
+
+    def _redirect(path):
+        params = urlencode({'q': q})
+        return HttpResponseRedirect(f"{path}?{params}")
+
+    if scope == 'crm' and can_view_crm(request.user):
+        return _redirect('/crm/leads/')
+    if scope == 'erp' and can_view_erp(request.user):
+        return _redirect('/erp/customers/')
+
+    if can_view_crm(request.user):
+        return _redirect('/crm/leads/')
+    if can_view_erp(request.user):
+        return _redirect('/erp/customers/')
+    return redirect('/dashboard/')
 
 
 class HomeView(TemplateView):

@@ -1,17 +1,12 @@
-{% extends "base.html" %}
+﻿{% extends "erp/_app_base.html" %}
 {% block title %}ERP Pricing Hilfe{% endblock %}
-{% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="mb-0">ERP Pricing Hilfe</h2>
-            <div class="text-muted">Preislogik, Anbieter, Debug & Best Practices</div>
-        </div>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary" href="/erp/help/">Zurueck</a>
-            <a class="btn btn-outline-primary" href="/admin-dashboard/">Admin-Dashboard</a>
-        </div>
-    </div>
+{% block app_breadcrumb %}ERP Pricing Hilfe{% endblock %}
+{% block app_actions %}
+    <a class="btn btn-outline-secondary" href="/erp/help/">Zurück</a>
+    <a class="btn btn-outline-primary" href="/admin-dashboard/">Admin-Dashboard</a>
+{% endblock %}
+
+{% block app_content %}
 
     <div class="row g-3">
         <div class="col-lg-7">
@@ -101,7 +96,7 @@
                 <div class="card-header">Debug</div>
                 <div class="card-body">
                     <p class="mb-2">Letzter Abruf inkl. Quelle und HTML-Auszug:</p>
-                    <a class="btn btn-outline-secondary" href="/erp/competitor-debug/">Konkurrenz-Debug oeffnen</a>
+                    <a class="btn btn-outline-secondary" href="/erp/competitor-debug/">Konkurrenz-Debug öffnen</a>
                 </div>
             </div>
         </div>
@@ -111,7 +106,7 @@
                 <div class="card-header">Best Practices</div>
                 <div class="card-body">
                     <ul class="mb-0">
-                        <li>Unterbietung klein halten (3–10%).</li>
+                        <li>Unterbietung klein halten (3-10%).</li>
                         <li>Mindestmarge je Branche definieren.</li>
                         <li>Wareneingang immer mit EK pflegen.</li>
                         <li>Debug nutzen, wenn Preise fehlen.</li>
@@ -129,5 +124,8 @@ Authorization: Bearer &lt;API_KEY&gt;
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
+
+
+
+

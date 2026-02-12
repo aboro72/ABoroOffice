@@ -80,18 +80,29 @@ class AccountListView(CrmViewMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        qs = Account.objects.all().order_by('-updated_at')
+        qs = Account.objects.all()
         q = self.request.GET.get('q', '').strip()
         status = self.request.GET.get('status', '').strip()
+        sort = self.request.GET.get('sort', '-updated_at').strip()
         if q:
             qs = qs.filter(name__icontains=q)
         if status:
             qs = qs.filter(status=status)
-        return qs
+        allowed_sorts = {'name', '-name', 'updated_at', '-updated_at'}
+        if sort not in allowed_sorts:
+            sort = '-updated_at'
+        return qs.order_by(sort)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['can_edit'] = can_edit_crm(self.request.user)
+        context['list_sort_options'] = [
+            ('-updated_at', 'Neueste zuerst'),
+            ('updated_at', 'Älteste zuerst'),
+            ('name', 'Name A-Z'),
+            ('-name', 'Name Z-A'),
+        ]
+        context['current_sort'] = self.request.GET.get('sort', '-updated_at')
         return context
 
 
@@ -156,18 +167,31 @@ class LeadListView(CrmViewMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        qs = Lead.objects.all().order_by('-updated_at')
+        qs = Lead.objects.all()
         q = self.request.GET.get('q', '').strip()
         status = self.request.GET.get('status', '').strip()
+        sort = self.request.GET.get('sort', '-updated_at').strip()
         if q:
             qs = qs.filter(name__icontains=q)
         if status:
             qs = qs.filter(status=status)
-        return qs
+        allowed_sorts = {'name', '-name', 'updated_at', '-updated_at', 'score', '-score'}
+        if sort not in allowed_sorts:
+            sort = '-updated_at'
+        return qs.order_by(sort)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['can_edit'] = can_edit_crm(self.request.user)
+        context['list_sort_options'] = [
+            ('-updated_at', 'Neueste zuerst'),
+            ('updated_at', 'Älteste zuerst'),
+            ('name', 'Name A-Z'),
+            ('-name', 'Name Z-A'),
+            ('-score', 'Score hoch'),
+            ('score', 'Score niedrig'),
+        ]
+        context['current_sort'] = self.request.GET.get('sort', '-updated_at')
         return context
 
 
@@ -364,18 +388,32 @@ class OpportunityListView(CrmViewMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        qs = Opportunity.objects.select_related('account').all().order_by('-updated_at')
+        qs = Opportunity.objects.select_related('account').all()
         q = self.request.GET.get('q', '').strip()
         stage = self.request.GET.get('stage', '').strip()
+        sort = self.request.GET.get('sort', '-updated_at').strip()
         if q:
             qs = qs.filter(name__icontains=q)
         if stage:
             qs = qs.filter(stage=stage)
-        return qs
+        allowed_sorts = {'name', '-name', 'updated_at', '-updated_at', 'amount', '-amount'}
+        if sort not in allowed_sorts:
+            sort = '-updated_at'
+        return qs.order_by(sort)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['can_edit'] = can_edit_crm(self.request.user)
+        context['opportunity_stage_choices'] = Opportunity.STAGE_CHOICES
+        context['list_sort_options'] = [
+            ('-updated_at', 'Neueste zuerst'),
+            ('updated_at', 'Älteste zuerst'),
+            ('name', 'Name A-Z'),
+            ('-name', 'Name Z-A'),
+            ('-amount', 'Betrag hoch'),
+            ('amount', 'Betrag niedrig'),
+        ]
+        context['current_sort'] = self.request.GET.get('sort', '-updated_at')
         return context
 
 

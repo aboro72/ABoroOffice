@@ -1,47 +1,45 @@
-{% extends "base.html" %}
+﻿{% extends "crm/_app_base.html" %}
 
 {% block title %}CRM - Formular{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    {% include "crm/_nav.html" %}
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">{{ form_title|default:"Formular" }}</h5>
-        </div>
-        <div class="card-body">
-            {% if form.instance and form.instance.raw_data %}
-                {% with website=form.instance.raw_data.website|default:form.instance.raw_data.source_url %}
-                    {% if website %}
-                        <div class="mb-3">
-                            <label class="form-label">Website (Quelle)</label>
-                            <div>
-                                <a href="{{ website }}" target="_blank" rel="noopener">{{ website }}</a>
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endwith %}
-            {% endif %}
-            <form method="post">
-                {% csrf_token %}
-                {% for field in form %}
-                <div class="mb-3">
-                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                    <div class="form-text">{{ field.help_text }}</div>
-                    {% endif %}
-                    {% if field.errors %}
-                    <div class="text-danger small">{{ field.errors|striptags }}</div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary" type="submit">Speichern</button>
-                    <a class="btn btn-outline-secondary" href="javascript:history.back()">Zurueck</a>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+{% block app_breadcrumb %}{{ form_title|default:"Formular" }}{% endblock %}
+{% block app_actions %}
+    <a class="btn btn-outline-secondary" href="javascript:history.back()">Zurück</a>
 {% endblock %}
+
+{% block app_content %}
+{% if form.instance and form.instance.raw_data %}
+    {% with website=form.instance.raw_data.website|default:form.instance.raw_data.source_url %}
+        {% if website %}
+            <div class="mb-3">
+                <label class="form-label">Website (Quelle)</label>
+                <div>
+                    <a href="{{ website }}" target="_blank" rel="noopener">{{ website }}</a>
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="mb-3">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+        <div class="form-text">{{ field.help_text }}</div>
+        {% endif %}
+        {% if field.errors %}
+        <div class="text-danger small">{{ field.errors|striptags }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Speichern</button>
+        <a class="btn btn-outline-secondary" href="javascript:history.back()">Abbrechen</a>
+    </div>
+</form>
+{% endblock %}
+
+
+

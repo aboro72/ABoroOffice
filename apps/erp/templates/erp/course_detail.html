@@ -1,19 +1,14 @@
-{% extends "base.html" %}
+﻿{% extends "erp/_app_base.html" %}
 
 {% block title %}Kurs{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="mb-0">{{ course.event_number }} – {{ course.title }}</h2>
-            <div class="text-muted">Kursdetails und Preisaufschluesselung</div>
-        </div>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary" href="/erp/courses/">Zurueck</a>
-            <a class="btn btn-primary" href="/erp/courses/{{ course.id }}/edit/">Bearbeiten</a>
-        </div>
-    </div>
+{% block app_breadcrumb %}{{ course.event_number }} - {{ course.title }}{% endblock %}
+{% block app_actions %}
+    <a class="btn btn-outline-secondary" href="/erp/courses/">Zurück</a>
+    <a class="btn btn-primary" href="/erp/courses/{{ course.id }}/edit/">Bearbeiten</a>
+{% endblock %}
+
+{% block app_content %}
 
     <div class="row g-3">
         <div class="col-lg-7">
@@ -52,7 +47,7 @@
 
         <div class="col-lg-5">
             <div class="card mb-3">
-                <div class="card-header">Preisaufschluesselung</div>
+                <div class="card-header">Preisaufschlüsselung</div>
                 <div class="card-body">
                     <div><strong>Dozententage:</strong> {{ pricing.days }}</div>
                     <div><strong>Tagessatz:</strong> {{ pricing.instructor_daily }}</div>
@@ -75,5 +70,8 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
+
+
+
+

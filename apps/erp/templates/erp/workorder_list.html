@@ -1,40 +1,44 @@
-{% extends "base.html" %}
+{% extends "erp/_list_base.html" %}
 
-{% block title %}Aufträge{% endblock %}
+{% block title %}Work Orders{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Work Orders</h2>
-        <a class="btn btn-primary" href="/erp/workorders/create/">Neu</a>
-    </div>
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Titel</th>
-                        <th>Kunde</th>
-                        <th>Status</th>
-                        <th>Geplant</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for w in workorders %}
-                    <tr>
-                        <td>{{ w.title }}</td>
-                        <td>{{ w.customer.name if w.customer else '-' }}</td>
-                        <td>{{ w.get_status_display }}</td>
-                        <td>{{ w.scheduled_for|date:"Y-m-d H:i"|default:"-" }}</td>
-                        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/erp/workorders/{{ w.id }}/edit/">Bearbeiten</a></td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="5" class="text-center text-muted py-3">Keine Aufträge.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+{% block app_breadcrumb %}Work Orders{% endblock %}
+{% block list_heading %}Work Orders{% endblock %}
+{% block list_actions %}
+    <a class="btn btn-primary" href="/erp/workorders/create/">Neu</a>
+{% endblock %}
+
+{% block list_filters %}
+<form class="d-flex" method="get">
+    <input class="form-control" name="q" placeholder="Suche Titel/Kunde" value="{{ request.GET.q|default:'' }}">
+</form>
+{% endblock %}
+
+{% block list_content %}
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Titel</th>
+                <th>Kunde</th>
+                <th>Status</th>
+                <th>Fällig</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for w in workorders %}
+            <tr>
+                <td>{{ w.title }}</td>
+                <td>{{ w.customer|default:"-" }}</td>
+                <td>{{ w.get_status_display }}</td>
+                <td>{{ w.due_date|date:"Y-m-d"|default:"-" }}</td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/erp/workorders/{{ w.id }}/edit/">Bearbeiten</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-3">Keine Work Orders.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

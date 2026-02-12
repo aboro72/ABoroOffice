@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    :root {
+        --odoo-bg: #f4f6f8;
+        --odoo-sidebar: #1f2a37;
+        --odoo-sidebar-text: #e5e7eb;
+        --odoo-sidebar-muted: #9aa4b2;
+        --odoo-accent: #875a7b;
+    }
+
+    .odoo-shell {
+        display: flex;
+        min-height: calc(100vh - 140px);
+        background: var(--odoo-bg);
+    }
+
+    .odoo-sidebar {
+        width: 240px;
+        background: var(--odoo-sidebar);
+        color: var(--odoo-sidebar-text);
+        padding: 18px 14px;
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+        height: 100%;
+    }
+
+    .odoo-sidebar .app-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        margin-bottom: 12px;
+        color: #fff;
+    }
+
+    .odoo-sidebar .app-subtitle {
+        font-size: 0.8rem;
+        color: var(--odoo-sidebar-muted);
+        margin-bottom: 16px;
+    }
+
+    .odoo-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .odoo-menu a {
+        color: var(--odoo-sidebar-text);
+        text-decoration: none;
+        padding: 8px 10px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+    }
+
+    .odoo-menu a:hover,
+    .odoo-menu a.active {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+    }
+
+    .odoo-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 18px 22px 30px;
+    }
+
+    .odoo-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+    }
+
+    .odoo-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .odoo-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .odoo-topbar-search {
+        flex: 1;
+        max-width: 420px;
+    }
+
+    .odoo-topbar-search .form-control {
+        border-radius: 999px;
+        padding-left: 14px;
+    }
+
+    .odoo-topbar-search .btn {
+        border-radius: 999px;
+    }
+
+    .odoo-switcher .dropdown-menu {
+        min-width: 220px;
+    }
+
+    .odoo-switcher .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .odoo-subbar {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+    }
+
+    .odoo-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .odoo-list-header h2 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .odoo-kanban {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+    }
+
+    .odoo-kanban-column {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        min-height: 240px;
+    }
+
+    .odoo-kanban-column-header {
+        padding: 10px 12px;
+        font-weight: 600;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+        text-align: center;
+    }
+
+    .odoo-kanban-column-body {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .odoo-kanban-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #fff;
+        position: relative;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .odoo-content {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 18px;
+    }
+
+    .odoo-content .table thead th {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #6b7280;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="odoo-shell">
+    <aside class="odoo-sidebar">
+        <div class="app-title">{% block app_title %}{% endblock %}</div>
+        <div class="app-subtitle">{% block app_subtitle %}{% endblock %}</div>
+        <nav class="odoo-menu">
+            {% block app_sidebar %}{% endblock %}
+        </nav>
+    </aside>
+    <section class="odoo-main">
+        <div class="odoo-topbar">
+            <div class="odoo-title">{% block app_breadcrumb %}{% endblock %}</div>
+            <form class="odoo-topbar-search" method="get" action="/search/">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="q" placeholder="Suchen..." value="{{ global_search_query|default:'' }}">
+                    {% if request.path|slice:":5" == "/crm/" %}
+                        <input type="hidden" name="scope" value="crm">
+                    {% elif request.path|slice:":5" == "/erp/" %}
+                        <input type="hidden" name="scope" value="erp">
+                    {% else %}
+                        <input type="hidden" name="scope" value="global">
+                    {% endif %}
+                    <button class="btn btn-outline-secondary" type="submit">Suchen</button>
+                </div>
+            </form>
+            <div class="odoo-actions">
+                <div class="dropdown odoo-switcher">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Apps
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% for app in app_switcher %}
+                        <li>
+                            <a class="dropdown-item" href="{{ app.url }}">
+                                <i class="{{ app.icon }}"></i> {{ app.label }}
+                            </a>
+                        </li>
+                        {% empty %}
+                        <li><span class="dropdown-item text-muted">Keine Apps</span></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% block app_actions %}{% endblock %}
+            </div>
+        </div>
+        {% block app_subbar %}{% endblock %}
+        <div class="odoo-content">
+            {% block app_content %}{% endblock %}
+        </div>
+    </section>
+</div>
+{% endblock %}

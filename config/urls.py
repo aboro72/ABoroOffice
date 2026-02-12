@@ -10,7 +10,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from django.views.generic import RedirectView
-from apps.core.views import HomeView, DashboardView, AdminDashboardView, ApiDocsView, SystemSettingsView, PluginCardsView, BedrockTestView, UserGuideView, UserGuidePdfView, UserGuideHtmlView, HelpManualPdfView
+from apps.core.views import HomeView, DashboardView, AdminDashboardView, ApiDocsView, SystemSettingsView, PluginCardsView, BedrockTestView, UserGuideView, UserGuidePdfView, UserGuideHtmlView, HelpManualPdfView, quick_search
 
 urlpatterns = [
     # Home
@@ -26,6 +26,7 @@ urlpatterns = [
     path('user-guide/pdf/', UserGuidePdfView.as_view(), name='user_guide_pdf'),
     path('user-guide/html/', UserGuideHtmlView.as_view(), name='user_guide_html'),
     path('help-manual/pdf/', HelpManualPdfView.as_view(), name='help_manual_pdf'),
+    path('search/', quick_search, name='quick_search'),
     path('login/', RedirectView.as_view(url='/cloudstorage/accounts/login/', permanent=False), name='login'),
 
     # Admin interface

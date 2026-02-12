@@ -55,13 +55,29 @@ class CustomerListView(ErpViewMixin, ListView):
     model = Customer
     template_name = 'erp/customer_list.html'
     context_object_name = 'customers'
+    paginate_by = 25
 
     def get_queryset(self):
-        qs = Customer.objects.all().order_by('-created_at')
+        qs = Customer.objects.all()
         q = self.request.GET.get('q')
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
         if q:
             qs = qs.filter(models.Q(name__icontains=q) | models.Q(email__icontains=q))
-        return qs
+        allowed_sorts = {'name', '-name', 'created_at', '-created_at'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('name', 'Name A-Z'),
+            ('-name', 'Name Z-A'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class CustomerCreateView(ErpEditMixin, CreateView):
@@ -96,13 +112,31 @@ class ProductListView(ErpViewMixin, ListView):
     model = Product
     template_name = 'erp/product_list.html'
     context_object_name = 'products'
+    paginate_by = 25
 
     def get_queryset(self):
-        qs = Product.objects.all().order_by('-created_at')
+        qs = Product.objects.all()
         q = self.request.GET.get('q')
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
         if q:
             qs = qs.filter(models.Q(name__icontains=q) | models.Q(sku__icontains=q))
-        return qs
+        allowed_sorts = {'name', '-name', 'created_at', '-created_at', 'sku', '-sku'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('name', 'Name A-Z'),
+            ('-name', 'Name Z-A'),
+            ('sku', 'SKU A-Z'),
+            ('-sku', 'SKU Z-A'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class ProductCreateView(ErpEditMixin, CreateView):
@@ -147,9 +181,26 @@ class ServiceListView(ErpViewMixin, ListView):
     model = Service
     template_name = 'erp/service_list.html'
     context_object_name = 'services'
+    paginate_by = 25
 
     def get_queryset(self):
-        return Service.objects.all().order_by('-created_at')
+        qs = Service.objects.all()
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
+        allowed_sorts = {'name', '-name', 'created_at', '-created_at'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('name', 'Name A-Z'),
+            ('-name', 'Name Z-A'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class ServiceCreateView(ErpEditMixin, CreateView):
@@ -184,26 +235,60 @@ class WorkOrderListView(ErpViewMixin, ListView):
     model = WorkOrder
     template_name = 'erp/workorder_list.html'
     context_object_name = 'workorders'
+    paginate_by = 25
 
     def get_queryset(self):
-        qs = WorkOrder.objects.select_related('customer').all().order_by('-created_at')
+        qs = WorkOrder.objects.select_related('customer').all()
         q = self.request.GET.get('q')
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
         if q:
             qs = qs.filter(models.Q(title__icontains=q) | models.Q(customer__name__icontains=q))
-        return qs
+        allowed_sorts = {'title', '-title', 'created_at', '-created_at', 'due_date', '-due_date'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('title', 'Titel A-Z'),
+            ('-title', 'Titel Z-A'),
+            ('-due_date', 'Fällig spaeter'),
+            ('due_date', 'Fällig frueher'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class QuoteListView(ErpViewMixin, ListView):
     model = Quote
     template_name = 'erp/quote_list.html'
     context_object_name = 'quotes'
+    paginate_by = 25
 
     def get_queryset(self):
-        qs = Quote.objects.select_related('customer').all().order_by('-created_at')
+        qs = Quote.objects.select_related('customer').all()
         q = self.request.GET.get('q')
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
         if q:
             qs = qs.filter(models.Q(number__icontains=q) | models.Q(customer__name__icontains=q))
-        return qs
+        allowed_sorts = {'number', '-number', 'created_at', '-created_at'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('number', 'Nummer A-Z'),
+            ('-number', 'Nummer Z-A'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class QuoteCreateView(ErpEditMixin, CreateView):
@@ -287,13 +372,29 @@ class SalesOrderListView(ErpViewMixin, ListView):
     model = SalesOrder
     template_name = 'erp/salesorder_list.html'
     context_object_name = 'orders'
+    paginate_by = 25
 
     def get_queryset(self):
-        qs = SalesOrder.objects.select_related('customer').all().order_by('-created_at')
+        qs = SalesOrder.objects.select_related('customer').all()
         q = self.request.GET.get('q')
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
         if q:
             qs = qs.filter(models.Q(order_number__icontains=q) | models.Q(customer__name__icontains=q))
-        return qs
+        allowed_sorts = {'order_number', '-order_number', 'created_at', '-created_at'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('order_number', 'Nummer A-Z'),
+            ('-order_number', 'Nummer Z-A'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class SalesOrderCreateView(ErpEditMixin, CreateView):
@@ -372,13 +473,29 @@ class InvoiceListView(ErpViewMixin, ListView):
     model = Invoice
     template_name = 'erp/invoice_list.html'
     context_object_name = 'invoices'
+    paginate_by = 25
 
     def get_queryset(self):
-        qs = Invoice.objects.select_related('order', 'order__customer').all().order_by('-created_at')
+        qs = Invoice.objects.select_related('order', 'order__customer').all()
         q = self.request.GET.get('q')
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
         if q:
             qs = qs.filter(models.Q(number__icontains=q) | models.Q(order__customer__name__icontains=q))
-        return qs
+        allowed_sorts = {'number', '-number', 'created_at', '-created_at'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('number', 'Nummer A-Z'),
+            ('-number', 'Nummer Z-A'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class InvoiceDetailView(ErpViewMixin, DetailView):
@@ -439,26 +556,60 @@ class OrderConfirmationListView(ErpViewMixin, ListView):
     model = OrderConfirmation
     template_name = 'erp/order_confirmation_list.html'
     context_object_name = 'confirmations'
+    paginate_by = 25
 
     def get_queryset(self):
-        qs = OrderConfirmation.objects.select_related('order', 'order__customer').all().order_by('-created_at')
+        qs = OrderConfirmation.objects.select_related('order', 'order__customer').all()
         q = self.request.GET.get('q')
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
         if q:
             qs = qs.filter(models.Q(number__icontains=q) | models.Q(order__customer__name__icontains=q))
-        return qs
+        allowed_sorts = {'number', '-number', 'created_at', '-created_at'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('number', 'Nummer A-Z'),
+            ('-number', 'Nummer Z-A'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class DunningListView(ErpViewMixin, ListView):
     model = DunningNotice
     template_name = 'erp/dunning_list.html'
     context_object_name = 'notices'
+    paginate_by = 25
 
     def get_queryset(self):
-        qs = DunningNotice.objects.select_related('invoice', 'invoice__order__customer').all().order_by('-created_at')
+        qs = DunningNotice.objects.select_related('invoice', 'invoice__order__customer').all()
         q = self.request.GET.get('q')
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
         if q:
             qs = qs.filter(models.Q(number__icontains=q) | models.Q(invoice__number__icontains=q))
-        return qs
+        allowed_sorts = {'number', '-number', 'created_at', '-created_at', 'level', '-level'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('number', 'Nummer A-Z'),
+            ('-number', 'Nummer Z-A'),
+            ('-level', 'Stufe hoch'),
+            ('level', 'Stufe niedrig'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class DunningDetailView(ErpViewMixin, DetailView):
@@ -501,9 +652,26 @@ class StockReceiptListView(ErpViewMixin, ListView):
     model = StockReceipt
     template_name = 'erp/stockreceipt_list.html'
     context_object_name = 'receipts'
+    paginate_by = 25
 
     def get_queryset(self):
-        return StockReceipt.objects.all().order_by('-created_at')
+        qs = StockReceipt.objects.all()
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
+        allowed_sorts = {'created_at', '-created_at', 'receipt_date', '-receipt_date'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('-receipt_date', 'Datum spaeter'),
+            ('receipt_date', 'Datum frueher'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
+        return context
 
 
 class StockReceiptCreateView(ErpEditMixin, CreateView):
@@ -588,19 +756,24 @@ class CourseListView(ErpViewMixin, ListView):
     model = Course
     template_name = 'erp/course_list.html'
     context_object_name = 'courses'
+    paginate_by = 25
 
     def get_queryset(self):
-        qs = Course.objects.all().order_by('-created_at')
+        qs = Course.objects.all()
         status = self.request.GET.get('status')
         customer = self.request.GET.get('customer')
         instructor = self.request.GET.get('instructor')
+        sort = (self.request.GET.get('sort') or '-created_at').strip()
         if status:
             qs = qs.filter(status=status)
         if customer:
             qs = qs.filter(customer_id=customer)
         if instructor:
             qs = qs.filter(instructor_id=instructor)
-        return qs
+        allowed_sorts = {'created_at', '-created_at', 'start_date', '-start_date', 'title', '-title'}
+        if sort not in allowed_sorts:
+            sort = '-created_at'
+        return qs.order_by(sort)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -612,6 +785,15 @@ class CourseListView(ErpViewMixin, ListView):
             'customer': self.request.GET.get('customer', ''),
             'instructor': self.request.GET.get('instructor', ''),
         }
+        context['list_sort_options'] = [
+            ('-created_at', 'Neueste zuerst'),
+            ('created_at', 'Älteste zuerst'),
+            ('title', 'Titel A-Z'),
+            ('-title', 'Titel Z-A'),
+            ('-start_date', 'Start spaeter'),
+            ('start_date', 'Start frueher'),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
 
 

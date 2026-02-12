@@ -1,18 +1,13 @@
-{% extends "base.html" %}
+﻿{% extends "erp/_app_base.html" %}
 
 {% block title %}Wareneingang #{{ receipt.id }}{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="mb-0">Wareneingang #{{ receipt.id }}</h2>
-            <div class="text-muted">Lieferant: {{ receipt.supplier_name|default:"-" }} · Datum: {{ receipt.receipt_date }}</div>
-        </div>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary" href="/erp/stock/receipts/">Zur Liste</a>
-        </div>
-    </div>
+{% block app_breadcrumb %}Wareneingang #{{ receipt.id }}{% endblock %}
+{% block app_actions %}
+    <a class="btn btn-outline-secondary" href="/erp/stock/receipts/">Zur Liste</a>
+{% endblock %}
+
+{% block app_content %}
 
     <div class="card mb-3">
         <div class="card-header">Positionen</div>
@@ -20,7 +15,7 @@
             {% if receipt.invoice_file %}
             <div class="mb-3">
                 <strong>Lieferantenrechnung:</strong>
-                <a href="{{ receipt.invoice_file.url }}" target="_blank">Datei öffnen</a>
+                <a href="{{ receipt.invoice_file.url }}" target="_blank">Datei Ã¶ffnen</a>
             </div>
             {% endif %}
             <div class="table-responsive mb-3">
@@ -70,5 +65,8 @@
             </form>
         </div>
     </div>
-</div>
 {% endblock %}
+
+
+
+

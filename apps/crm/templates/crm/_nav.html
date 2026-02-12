@@ -1,15 +1,12 @@
-<div class="card mb-3">
-    <div class="card-body d-flex flex-wrap gap-2">
-        <a class="btn btn-outline-primary" href="{% url 'crm:home' %}">CRM Home</a>
-        <a class="btn btn-outline-primary" href="{% url 'crm:account_list' %}">Accounts</a>
-        <a class="btn btn-outline-primary" href="{% url 'crm:lead_list' %}">Leads</a>
-        <a class="btn btn-outline-primary" href="{% url 'crm:opportunity_list' %}">Opportunities</a>
-        <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_board' %}">Pipeline</a>
-        <a class="btn btn-outline-secondary" href="{% url 'crm:help' %}">Hilfe</a>
-        {% if can_edit %}
-        <a class="btn btn-outline-secondary" href="{% url 'crm:email_template_list' %}">E-Mail Templates</a>
-        <a class="btn btn-outline-secondary" href="{% url 'crm:lead_sources' %}">Lead-Quellen</a>
-        <a class="btn btn-outline-secondary" href="{% url 'crm:lead_staging' %}">Lead-Staging</a>
-        {% endif %}
-    </div>
-</div>
+﻿<a href="{% url 'crm:home' %}"><i class="fa-solid fa-house"></i> Ãœbersicht</a>
+<a href="{% url 'crm:account_list' %}"><i class="fa-solid fa-building"></i> Accounts</a>
+<a href="{% url 'crm:lead_list' %}"><i class="fa-solid fa-user-plus"></i> Leads</a>
+<a href="{% url 'crm:opportunity_list' %}"><i class="fa-solid fa-chart-line"></i> Opportunities</a>
+<a href="{% url 'crm:opportunity_board' %}"><i class="fa-solid fa-bars-progress"></i> Pipeline</a>
+<a href="{% url 'crm:help' %}"><i class="fa-regular fa-circle-question"></i> Hilfe</a>
+{% if can_edit %}
+<a href="{% url 'crm:email_template_list' %}"><i class="fa-solid fa-envelope"></i> E-Mail Templates</a>
+<a href="{% url 'crm:lead_sources' %}"><i class="fa-solid fa-bullseye"></i> Lead-Quellen</a>
+<a href="{% url 'crm:lead_staging' %}"><i class="fa-solid fa-layer-group"></i> Lead-Staging</a>
+{% endif %}
+
