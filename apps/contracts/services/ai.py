@@ -6,9 +6,12 @@ from django.utils import timezone
 from apps.core.services.bedrock import BedrockService
 
 try:
-    from PyPDF2 import PdfReader
+    from pypdf import PdfReader
 except Exception:  # pragma: no cover
-    PdfReader = None
+    try:
+        from PyPDF2 import PdfReader
+    except Exception:
+        PdfReader = None
 
 try:
     import docx
