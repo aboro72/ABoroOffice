@@ -25,14 +25,14 @@ class InstructorListView(PersonnelBaseView, ListView):
 class InstructorCreateView(PersonnelBaseView, CreateView):
     model = Instructor
     form_class = InstructorForm
-    template_name = 'personnel/form.html'
+    template_name = 'personnel/instructor_form.html'
     success_url = '/personnel/instructors/'
 
 
 class InstructorUpdateView(PersonnelBaseView, UpdateView):
     model = Instructor
     form_class = InstructorForm
-    template_name = 'personnel/form.html'
+    template_name = 'personnel/instructor_form.html'
     success_url = '/personnel/instructors/'
 
 

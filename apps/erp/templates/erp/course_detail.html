@@ -17,7 +17,12 @@
                 <div class="card-header">{% trans "Stammdaten" %}</div>
                 <div class="card-body">
                     <div><strong>{% trans "Kunde" %}:</strong> {{ course.customer|default:"-" }}</div>
-                    <div><strong>{% trans "Externer Mitarbeiter" %}:</strong> {{ course.instructor|default:"-" }}</div>
+                    <div><strong>{% trans "Externe Mitarbeiter" %}:</strong>
+                        {% for inst in course.instructors.all %}{{ inst.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}
+                    </div>
+                    <div><strong>{% trans "Interne Mitarbeiter" %}:</strong>
+                        {% for emp in course.employees.all %}{{ emp.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}
+                    </div>
                     <div><strong>{% trans "Skill" %}:</strong> {{ course.required_skill|default:"-" }}</div>
                     <div><strong>{% trans "Status" %}:</strong> {{ course.get_status_display }}</div>
                     <div><strong>{% trans "Start" %}:</strong> {{ course.start_date|default:"-" }}</div>

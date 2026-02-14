@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from apps.personnel.models import Instructor, Employee
 from apps.erp.models import (
     Customer,
     Product,
@@ -126,6 +127,17 @@ class StockReceiptItemSerializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
+    instructors = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Instructor.objects.all(),
+        required=False,
+    )
+    employees = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Employee.objects.all(),
+        required=False,
+    )
+
     class Meta:
         model = Course
         fields = [
@@ -133,7 +145,8 @@ class CourseSerializer(serializers.ModelSerializer):
             'event_number',
             'title',
             'customer',
-            'instructor',
+            'instructors',
+            'employees',
             'required_skill',
             'work_order',
             'contract',

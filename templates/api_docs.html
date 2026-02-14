@@ -7,10 +7,10 @@
     <div class="row">
         <div class="col-lg-10 mx-auto">
             <h1 class="mb-3">API Dokumentation</h1>
-            <p class="text-muted">Zentraler Einstieg in die API-Dokumentation f?r Helpdesk und CloudStorage.</p>
+            <p class="text-muted">Zentraler Einstieg in die API-Dokumentation aller Module.</p>
 
             <div class="alert alert-info">
-                <strong>Hinweis:</strong> Diese Seite ist f?r Admins/Staff gedacht.
+                <strong>Hinweis:</strong> Diese Seite ist f&uuml;r Admins/Staff gedacht.
                 <ul class="mb-0">
                     <li><strong>Swagger UI</strong> ist interaktiv (Requests testen).</li>
                     <li><strong>ReDoc</strong> ist die lesbare Referenz-Doku.</li>
@@ -23,10 +23,10 @@
                 <div class="card-body">
                     <ol class="mb-0">
                         <li>Als Admin/Staff anmelden.</li>
-                        <li>Token erzeugen ?ber <span class="font-monospace">POST /helpdesk/api/v1/auth/login/</span> mit <span class="font-monospace">username</span> und <span class="font-monospace">password</span>.</li>
+                        <li>Token erzeugen &uuml;ber <span class="font-monospace">POST /helpdesk/api/v1/auth/login/</span> mit <span class="font-monospace">username</span> und <span class="font-monospace">password</span>.</li>
                         <li>Token verwenden: <span class="font-monospace">Authorization: Token &lt;token&gt;</span>.</li>
                         <li>Lizenzcode im Helpdesk-Admin setzen (Lizenzverwaltung), falls Features gesperrt sind.</li>
-                        <li>Swagger oder ReDoc ?ffnen und Requests testen.</li>
+                        <li>Swagger oder ReDoc &ouml;ffnen und Requests testen.</li>
                     </ol>
                 </div>
             </div>
@@ -34,7 +34,7 @@
             <div class="card mb-4">
                 <div class="card-header"><strong>Helpdesk API</strong></div>
                 <div class="card-body">
-                    <p>REST API f?r Tickets, Kategorien, Statistiken und Health Checks.</p>
+                    <p>REST API f&uuml;r Tickets, Kategorien, Statistiken und Health Checks.</p>
                     <div class="d-flex gap-2 flex-wrap">
                         <a class="btn btn-primary" href="/helpdesk/api/docs/">Swagger UI</a>
                         <a class="btn btn-outline-secondary" href="/helpdesk/api/redoc/">ReDoc</a>
@@ -49,7 +49,7 @@
             <div class="card mb-4">
                 <div class="card-header"><strong>CloudStorage API</strong></div>
                 <div class="card-body">
-                    <p>REST API f?r Dateien, Ordner, Sharing, Benachrichtigungen und Plugins.</p>
+                    <p>REST API f&uuml;r Dateien, Ordner, Sharing, Benachrichtigungen und Plugins.</p>
                     <div class="d-flex gap-2 flex-wrap">
                         <a class="btn btn-primary" href="/cloudstorage/api/docs/">Swagger UI</a>
                         <a class="btn btn-outline-secondary" href="/cloudstorage/api/redoc/">ReDoc</a>
@@ -61,8 +61,83 @@
                 </div>
             </div>
 
+            <div class="card mb-4">
+                <div class="card-header"><strong>CRM API</strong></div>
+                <div class="card-body">
+                    <p>REST API f&uuml;r Accounts, Leads, Opportunities und E-Mail-Templates.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a class="btn btn-primary" href="/crm/api/docs/">Swagger UI</a>
+                        <a class="btn btn-outline-secondary" href="/crm/api/redoc/">ReDoc</a>
+                        <a class="btn btn-outline-secondary" href="/crm/api/schema/">OpenAPI Schema</a>
+                    </div>
+                    <div class="mt-3">
+                        <code>Base URL:</code> <span class="font-monospace">/crm/api/</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><strong>ERP API</strong></div>
+                <div class="card-body">
+                    <p>REST API f&uuml;r Produkte, Kunden, Auftr&auml;ge, Angebote und Rechnungen.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a class="btn btn-primary" href="/erp/api/docs/">Swagger UI</a>
+                        <a class="btn btn-outline-secondary" href="/erp/api/redoc/">ReDoc</a>
+                        <a class="btn btn-outline-secondary" href="/erp/api/schema/">OpenAPI Schema</a>
+                    </div>
+                    <div class="mt-3">
+                        <code>Base URL:</code> <span class="font-monospace">/erp/api/</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><strong>Vertragsverwaltung API</strong></div>
+                <div class="card-body">
+                    <p>REST API f&uuml;r Vertr&auml;ge, Versionen und Vertragsanalysen.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a class="btn btn-primary" href="/contracts/api/docs/">Swagger UI</a>
+                        <a class="btn btn-outline-secondary" href="/contracts/api/redoc/">ReDoc</a>
+                        <a class="btn btn-outline-secondary" href="/contracts/api/schema/">OpenAPI Schema</a>
+                    </div>
+                    <div class="mt-3">
+                        <code>Base URL:</code> <span class="font-monospace">/contracts/api/</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><strong>Finanzbuchhaltung API</strong></div>
+                <div class="card-body">
+                    <p>REST API f&uuml;r Konten, Kostenstellen, Kostenarten, Buchungen und Gesch&auml;ftspartner.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a class="btn btn-primary" href="/fibu/api/docs/">Swagger UI</a>
+                        <a class="btn btn-outline-secondary" href="/fibu/api/redoc/">ReDoc</a>
+                        <a class="btn btn-outline-secondary" href="/fibu/api/schema/">OpenAPI Schema</a>
+                    </div>
+                    <div class="mt-3">
+                        <code>Base URL:</code> <span class="font-monospace">/fibu/api/</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><strong>Marketing API</strong></div>
+                <div class="card-body">
+                    <p>REST API f&uuml;r Kampagnen, Assets, Ideen und KPI-Auswertungen.</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a class="btn btn-primary" href="/marketing/api/docs/">Swagger UI</a>
+                        <a class="btn btn-outline-secondary" href="/marketing/api/redoc/">ReDoc</a>
+                        <a class="btn btn-outline-secondary" href="/marketing/api/schema/">OpenAPI Schema</a>
+                    </div>
+                    <div class="mt-3">
+                        <code>Base URL:</code> <span class="font-monospace">/marketing/api/</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
-                <div class="card-header"><strong>Zus?tzliche Doku</strong></div>
+                <div class="card-header"><strong>Zus&auml;tzliche Doku</strong></div>
                 <div class="card-body">
                     <ul class="mb-0">
                         <li><code>docs/API_INDEX.md</code></li>

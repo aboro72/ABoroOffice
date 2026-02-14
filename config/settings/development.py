@@ -23,6 +23,7 @@ if DEBUG_TOOLBAR_INSTALLED:
 
 # Disable security checks in development
 CSRF_TRUSTED_ORIGINS = ['http://localhost:*', 'http://127.0.0.1:*']
+MIDDLEWARE = [m for m in MIDDLEWARE if m != 'django.middleware.csrf.CsrfViewMiddleware']  # noqa: F405
 SESSION_COOKIE_SECURE = False
 
 # Email backend for development

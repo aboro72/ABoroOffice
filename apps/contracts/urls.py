@@ -48,6 +48,6 @@ if SpectacularSwaggerView is not None:
 
     urlpatterns += [
         path('api/schema/', ContractsSchemaView.as_view(urlconf='apps.contracts.api.urls'), name='contracts-schema'),
-        path('api/docs/', ContractsSwaggerView.as_view(url_name='contracts-schema'), name='contracts-swagger'),
-        path('api/redoc/', ContractsRedocView.as_view(url_name='contracts-schema'), name='contracts-redoc'),
+        path('api/docs/', ContractsSwaggerView.as_view(url_name='contracts:contracts-schema'), name='contracts-swagger'),
+        path('api/redoc/', ContractsRedocView.as_view(url_name='contracts:contracts-schema'), name='contracts-redoc'),
     ]

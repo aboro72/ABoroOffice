@@ -90,6 +90,6 @@ if SpectacularSwaggerView is not None:
 
     urlpatterns += [
         path('api/schema/', CrmSchemaView.as_view(urlconf='apps.crm.api.urls'), name='crm-schema'),
-        path('api/docs/', CrmSwaggerView.as_view(url_name='crm-schema'), name='crm-swagger'),
-        path('api/redoc/', CrmRedocView.as_view(url_name='crm-schema'), name='crm-redoc'),
+        path('api/docs/', CrmSwaggerView.as_view(url_name='crm:crm-schema'), name='crm-swagger'),
+        path('api/redoc/', CrmRedocView.as_view(url_name='crm:crm-schema'), name='crm-redoc'),
     ]

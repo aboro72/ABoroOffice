@@ -272,8 +272,20 @@ class LandingView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Collect all widgets from hooks
+        # Collect all widgets from hooks (only from enabled plugins)
         widgets = []
+
+        # Build set of enabled plugin modules
+        try:
+            from apps.cloude.cloude_apps.plugins.models import Plugin
+            enabled_modules = set()
+            for plugin in Plugin.objects.filter(enabled=True):
+                if plugin.module_name:
+                    enabled_modules.add(plugin.module_name)
+                else:
+                    enabled_modules.add(plugin.slug.replace('-', '_'))
+        except Exception:
+            enabled_modules = set()
 
         # Get widget providers from hook registry
         handlers = hook_registry.get_handlers(UI_DASHBOARD_WIDGET)
@@ -281,6 +293,11 @@ class LandingView(LoginRequiredMixin, TemplateView):
 
         for handler in handlers:
             try:
+                # Skip widgets from disabled plugins
+                module = handler.__module__
+                if enabled_modules and not any(module.startswith(m) or m in module for m in enabled_modules):
+                    continue
+
                 # Instantiate the widget provider
                 provider = handler()
 

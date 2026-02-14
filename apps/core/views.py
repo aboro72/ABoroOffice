@@ -102,25 +102,36 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             context['has_plugins'] = Plugin.objects.exists()
             position_map = {}
             row_map = {}
+            # Build set of enabled plugin module prefixes
+            enabled_modules = set()
             for plugin in context['plugins']:
                 if plugin.module_name:
                     position_map[plugin.module_name] = plugin.dashboard_position
                     row_map[plugin.module_name] = plugin.dashboard_row
+                    if plugin.enabled:
+                        enabled_modules.add(plugin.module_name)
                 else:
-                    position_map[plugin.slug.replace('-', '_')] = plugin.dashboard_position
-                    row_map[plugin.slug.replace('-', '_')] = plugin.dashboard_row
+                    slug_key = plugin.slug.replace('-', '_')
+                    position_map[slug_key] = plugin.dashboard_position
+                    row_map[slug_key] = plugin.dashboard_row
+                    if plugin.enabled:
+                        enabled_modules.add(slug_key)
             widgets = []
             handlers = hook_registry.get_handlers(UI_DASHBOARD_WIDGET)
             for handler in handlers:
                 try:
+                    # Skip widgets from disabled plugins
+                    module = handler.__module__
+                    if enabled_modules and not any(module.startswith(m) or m in module for m in enabled_modules):
+                        continue
                     provider = handler()
                     widget_data = provider.render(self.request)
                     if widget_data:
-                        widget_data['module'] = handler.__module__
+                        widget_data['module'] = module
                         # Resolve row from plugin mapping
                         row = 1
                         for mod, r in row_map.items():
-                            if handler.__module__.startswith(mod):
+                            if module.startswith(mod):
                                 row = r
                                 break
                         widget_data['row'] = row
@@ -180,24 +191,33 @@ class PluginCardsView(LoginRequiredMixin, TemplateView):
             context['has_plugins'] = Plugin.objects.exists()
             position_map = {}
             row_map = {}
+            enabled_modules = set()
             for plugin in context['plugins']:
                 if plugin.module_name:
                     position_map[plugin.module_name] = plugin.dashboard_position
                     row_map[plugin.module_name] = plugin.dashboard_row
+                    if plugin.enabled:
+                        enabled_modules.add(plugin.module_name)
                 else:
-                    position_map[plugin.slug.replace('-', '_')] = plugin.dashboard_position
-                    row_map[plugin.slug.replace('-', '_')] = plugin.dashboard_row
+                    slug_key = plugin.slug.replace('-', '_')
+                    position_map[slug_key] = plugin.dashboard_position
+                    row_map[slug_key] = plugin.dashboard_row
+                    if plugin.enabled:
+                        enabled_modules.add(slug_key)
             widgets = []
             handlers = hook_registry.get_handlers(UI_DASHBOARD_WIDGET)
             for handler in handlers:
                 try:
+                    module = handler.__module__
+                    if enabled_modules and not any(module.startswith(m) or m in module for m in enabled_modules):
+                        continue
                     provider = handler()
                     widget_data = provider.render(self.request)
                     if widget_data:
-                        widget_data['module'] = handler.__module__
+                        widget_data['module'] = module
                         row = 1
                         for mod, r in row_map.items():
-                            if handler.__module__.startswith(mod):
+                            if module.startswith(mod):
                                 row = r
                                 break
                         widget_data['row'] = row
@@ -989,6 +1009,9 @@ class ApiDocsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
 class BedrockTestView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'bedrock_test.html'
+
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
 
 
 class UserGuideView(LoginRequiredMixin, TemplateView):

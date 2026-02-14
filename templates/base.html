@@ -31,7 +31,8 @@
             {% if system_settings.border_radius %}:root { --border-radius: {{ system_settings.border_radius }}px; }{% endif %}
         {% endif %}
         body {
-            background-color: #f8f9fa;
+            background-color: {% if system_settings and system_settings.enable_dark_mode %}#1a1a2e{% else %}#f8f9fa{% endif %};
+            color: {% if system_settings and system_settings.enable_dark_mode %}#e0e0e0{% else %}#212529{% endif %};
             {% if system_settings and system_settings.font_family %}
                 {% if system_settings.font_family == 'inter' %}font-family: 'Inter', 'Segoe UI', sans-serif;{% endif %}
                 {% if system_settings.font_family == 'roboto' %}font-family: 'Roboto', 'Segoe UI', sans-serif;{% endif %}
@@ -64,13 +65,36 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: none;
             border-radius: var(--border-radius);
+            {% if system_settings and system_settings.enable_dark_mode %}
+            background-color: #2d2d44;
+            color: #e0e0e0;
+            {% endif %}
         }
         .card-header {
+            {% if system_settings and system_settings.enable_dark_mode %}
+            background-color: #252538;
+            border-bottom: 1px solid #3a3a50;
+            {% else %}
             background-color: #f8f9fa;
             border-bottom: 1px solid #dee2e6;
+            {% endif %}
             border-top-left-radius: var(--border-radius);
             border-top-right-radius: var(--border-radius);
         }
+        {% if system_settings and system_settings.enable_dark_mode %}
+        .table { color: #e0e0e0; }
+        .form-control, .form-select {
+            background-color: #1e1e2f;
+            color: #e0e0e0;
+            border-color: #3a3a50;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #252538;
+            color: #e0e0e0;
+        }
+        .text-muted { color: #9a9ab0 !important; }
+        .alert-info { background-color: #1e2a3a; border-color: #2a4a6a; color: #9ac4f5; }
+        {% endif %}
         .btn-primary {
             background: var(--primary-color);
             border-color: var(--primary-color);
@@ -121,16 +145,6 @@
                         <a class="nav-link" href="/api-docs/">{% trans "API-Dokumentation" %}</a>
                     </li>
                     {% endif %}
-                    {% if app_toggles.cloudstorage %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/cloudstorage/core/help/">{% trans "Cloud-Hilfe" %}</a>
-                    </li>
-                    {% if user.is_staff %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/cloudstorage/core/help/developer/">{% trans "Plugin-Dokumentation" %}</a>
-                    </li>
-                    {% endif %}
-                    {% endif %}
                     {% if user.is_staff %}
                     <li class="nav-item">
                         <a class="nav-link" href="/admin-dashboard/">{% trans "Admin-Dashboard" %}</a>
@@ -172,10 +186,6 @@
                 &copy; 2025 ABoroOffice |
                 {% if user.is_staff %}
                 <a href="/api-docs/" class="text-muted">{% trans "API-Dokumentation" %}</a> |
-                {% endif %}
-                {% if app_toggles.cloudstorage %}
-                <a href="/cloudstorage/core/help/" class="text-muted">{% trans "Hilfe" %}</a> |
-                <a href="/cloudstorage/core/help/developer/" class="text-muted">{% trans "Plugin-Dokumentation" %}</a>
                 {% endif %}
             </p>
         </div>

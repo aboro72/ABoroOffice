@@ -722,6 +722,31 @@
                             Theme speichern
                         </button>
                     </form>
+                    <script>
+                    (function() {
+                        const presets = {
+                            'default':      {primary: '#0066CC', secondary: '#00B366', accent: '#FF6600', danger: '#CC0000', font: 'inter', radius: 8, dark: false},
+                            'professional': {primary: '#1a3a5c', secondary: '#4a90d9', accent: '#d4a843', danger: '#c0392b', font: 'roboto', radius: 4, dark: false},
+                            'bright':       {primary: '#e65100', secondary: '#00b366', accent: '#0066cc', danger: '#cc0000', font: 'poppins', radius: 12, dark: false},
+                            'modern':       {primary: '#3f51b5', secondary: '#009688', accent: '#ff5722', danger: '#e91e63', font: 'inter', radius: 8, dark: false},
+                            'corporate':    {primary: '#0d1b2a', secondary: '#1b3a5c', accent: '#3a86c8', danger: '#b71c1c', font: 'roboto', radius: 4, dark: false},
+                            'dark':         {primary: '#1e1e2f', secondary: '#2d2d44', accent: '#5c9ded', danger: '#e74c3c', font: 'inter', radius: 8, dark: true},
+                        };
+                        const sel = document.getElementById('id_theme_variant');
+                        if (!sel) return;
+                        sel.addEventListener('change', function() {
+                            const p = presets[this.value];
+                            if (!p) return;
+                            document.getElementById('id_primary_color').value = p.primary;
+                            document.getElementById('id_secondary_color').value = p.secondary;
+                            document.getElementById('id_accent_color').value = p.accent;
+                            document.getElementById('id_danger_color').value = p.danger;
+                            document.getElementById('id_font_family').value = p.font;
+                            document.getElementById('id_border_radius').value = p.radius;
+                            document.getElementById('id_enable_dark_mode').checked = p.dark;
+                        });
+                    })();
+                    </script>
                 </div>
             </div>
         </div>

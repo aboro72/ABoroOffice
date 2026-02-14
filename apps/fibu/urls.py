@@ -52,6 +52,6 @@ if SpectacularSwaggerView is not None:
 
     urlpatterns += [
         path('api/schema/', FibuSchemaView.as_view(urlconf='apps.fibu.api.urls'), name='fibu-schema'),
-        path('api/docs/', FibuSwaggerView.as_view(url_name='fibu-schema'), name='fibu-swagger'),
-        path('api/redoc/', FibuRedocView.as_view(url_name='fibu-schema'), name='fibu-redoc'),
+        path('api/docs/', FibuSwaggerView.as_view(url_name='fibu:fibu-schema'), name='fibu-swagger'),
+        path('api/redoc/', FibuRedocView.as_view(url_name='fibu:fibu-schema'), name='fibu-redoc'),
     ]

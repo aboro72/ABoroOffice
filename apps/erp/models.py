@@ -400,7 +400,8 @@ class Course(models.Model):
     event_number = models.CharField(max_length=30, unique=True, blank=True)
     title = models.CharField(max_length=200)
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='courses')
-    instructor = models.ForeignKey('personnel.Instructor', on_delete=models.SET_NULL, null=True, blank=True)
+    instructors = models.ManyToManyField('personnel.Instructor', blank=True, related_name='courses')
+    employees = models.ManyToManyField('personnel.Employee', blank=True, related_name='courses')
     required_skill = models.ForeignKey('personnel.TeachingSkill', on_delete=models.SET_NULL, null=True, blank=True)
     work_order = models.ForeignKey(
         'WorkOrder',
@@ -461,8 +462,6 @@ class Course(models.Model):
     def save(self, *args, **kwargs):
         if not self.event_number:
             self.event_number = _next_event_number()
-        if self.instructor and not self.instructor_daily_cost:
-            self.instructor_daily_cost = self.instructor.daily_rate
         if self.mobile_classroom_required and self.mobile_classroom_product and not self.mobile_classroom_cost:
             self.mobile_classroom_cost = self.mobile_classroom_product.price
         self.recalculate_price()

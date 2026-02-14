@@ -11,14 +11,16 @@ DEBUG = False
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'aboro.office').split(',')
 
 # Security settings for production
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Disable SSL redirect in Docker (handled by nginx/load balancer)
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'
+SESSION_COOKIE_SECURE = os.getenv('SECURE_COOKIES', 'False') == 'True'
+CSRF_COOKIE_SECURE = os.getenv('SECURE_COOKIES', 'False') == 'True'
 CSRF_COOKIE_HTTPONLY = True
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
+SECURE_HSTS_PRELOAD = SECURE_HSTS_SECONDS > 0
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://192.168.178.128:8000').split(',')
 
 # Remove debug toolbar in production
 INSTALLED_APPS = [app for app in INSTALLED_APPS if app != 'debug_toolbar']  # noqa: F405
@@ -68,9 +70,9 @@ CELERY_TIMEZONE = 'Europe/Berlin'
 
 # Static and media files in production
 STATIC_URL = '/static/'
-STATIC_ROOT = os.getenv('STATIC_ROOT', '/var/www/aboro/static')
+STATIC_ROOT = os.getenv('STATIC_ROOT', '/app/staticfiles')
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.getenv('MEDIA_ROOT', '/var/www/aboro/media')
+MEDIA_ROOT = os.getenv('MEDIA_ROOT', '/app/media')
 
 # Storage configuration (S3 for large deployments)
 # AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
@@ -81,41 +83,39 @@ MEDIA_ROOT = os.getenv('MEDIA_ROOT', '/var/www/aboro/media')
 #     STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
 #     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-# Logging for production (only errors and above)
+# Logging for production (Docker-friendly: stdout/stderr)
 LOGGING = {  # noqa: F405
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'format': '{levelname} {asctime} {module} {process:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
             'style': '{',
         },
     },
     'handlers': {
-        'file': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.getenv('LOG_DIR', '/var/log/aboro') + '/aboro.log',
-            'maxBytes': 1024 * 1024 * 50,  # 50MB
-            'backupCount': 10,
-            'formatter': 'verbose',
-        },
-        'error_file': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.getenv('LOG_DIR', '/var/log/aboro') + '/aboro_error.log',
-            'maxBytes': 1024 * 1024 * 50,  # 50MB
-            'backupCount': 10,
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
     },
     'root': {
-        'handlers': ['file', 'error_file'],
-        'level': 'WARNING',
+        'handlers': ['console'],
+        'level': 'INFO',
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'error_file'],
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
             'level': 'WARNING',
             'propagate': False,
         },

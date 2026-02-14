@@ -14,7 +14,12 @@ APPS_DIR = BASE_DIR / 'apps'
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 
 def build_database_config(default_engine='sqlite'):
-    engine = os.getenv('DB_ENGINE', default_engine).lower()
+    # Support both DB_ and DATABASE_ prefixes for Docker compatibility
+    engine = os.getenv('DB_ENGINE', os.getenv('DATABASE_ENGINE', default_engine)).lower()
+
+    # Check if DATABASE_HOST is set (Docker mode)
+    if os.getenv('DATABASE_HOST'):
+        engine = 'postgresql'
 
     if engine in ('sqlite', 'sqlite3'):
         return {
@@ -25,11 +30,11 @@ def build_database_config(default_engine='sqlite'):
     if engine in ('postgres', 'postgresql'):
         return {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'aboro_office'),
-            'USER': os.getenv('DB_USER', 'aboro'),
-            'PASSWORD': os.getenv('DB_PASSWORD', ''),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+            'NAME': os.getenv('DATABASE_NAME', os.getenv('DB_NAME', 'aboro_office')),
+            'USER': os.getenv('DATABASE_USER', os.getenv('DB_USER', 'aboro')),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', os.getenv('DB_PASSWORD', '')),
+            'HOST': os.getenv('DATABASE_HOST', os.getenv('DB_HOST', 'localhost')),
+            'PORT': os.getenv('DATABASE_PORT', os.getenv('DB_PORT', '5432')),
             'ATOMIC_REQUESTS': True,
             'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '600')),
         }

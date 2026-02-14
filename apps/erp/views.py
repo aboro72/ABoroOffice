@@ -828,11 +828,11 @@ class CourseListView(ErpViewMixin, ListView):
         if customer:
             qs = qs.filter(customer_id=customer)
         if external_employee:
-            qs = qs.filter(instructor_id=external_employee)
+            qs = qs.filter(instructors__id=external_employee)
         allowed_sorts = {'created_at', '-created_at', 'start_date', '-start_date', 'title', '-title'}
         if sort not in allowed_sorts:
             sort = '-created_at'
-        return qs.order_by(sort)
+        return qs.distinct().order_by(sort)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

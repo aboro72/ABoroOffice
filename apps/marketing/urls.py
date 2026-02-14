@@ -63,6 +63,6 @@ if SpectacularSwaggerView is not None:
 
     urlpatterns += [
         path('api/schema/', MarketingSchemaView.as_view(urlconf='apps.marketing.api.urls'), name='marketing-schema'),
-        path('api/docs/', MarketingSwaggerView.as_view(url_name='marketing-schema'), name='marketing-swagger'),
-        path('api/redoc/', MarketingRedocView.as_view(url_name='marketing-schema'), name='marketing-redoc'),
+        path('api/docs/', MarketingSwaggerView.as_view(url_name='marketing:marketing-schema'), name='marketing-swagger'),
+        path('api/redoc/', MarketingRedocView.as_view(url_name='marketing:marketing-schema'), name='marketing-redoc'),
     ]

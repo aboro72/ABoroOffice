@@ -65,7 +65,7 @@ python-docx==1.2.0
 PyPDF2==3.0.1
 
 # Pydantic - Full version with Rust compilation support
-pydantic==2.5.3
+pydantic==2.10.6
 
 # Monitoring & Logging
 django-debug-toolbar==4.2.0
@@ -121,5 +121,5 @@ uwsgi==2.0.23  # UNIX only, production-grade WSGI server
 cryptography==41.0.7
 django-ratelimit==4.1.0
 
-# Report Generation (for Phase 4+)
-# reportlab - requires Python <3.9, will be added for Phase 4+ with compatible Python version
+# Report Generation
+reportlab==4.4.0

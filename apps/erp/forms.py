@@ -15,7 +15,7 @@ from .models import (
     StockReceiptItem,
     Course,
 )
-from apps.personnel.models import Instructor
+from apps.personnel.models import Instructor, Employee
 
 
 class BaseErpForm(forms.ModelForm):
@@ -159,16 +159,18 @@ class CourseForm(BaseErpForm):
         super().__init__(*args, **kwargs)
         if 'event_number' in self.fields:
             self.fields['event_number'].widget.attrs['readonly'] = True
-        if 'instructor' in self.fields and 'required_skill' in self.fields:
+        if 'instructors' in self.fields and 'required_skill' in self.fields:
             skill_id = None
             if self.data.get('required_skill'):
                 skill_id = self.data.get('required_skill')
             elif self.instance and self.instance.required_skill_id:
                 skill_id = self.instance.required_skill_id
             if skill_id:
-                self.fields['instructor'].queryset = Instructor.objects.filter(skills__id=skill_id).order_by('name')
+                self.fields['instructors'].queryset = Instructor.objects.filter(skills__id=skill_id).order_by('name')
             else:
-                self.fields['instructor'].queryset = Instructor.objects.all().order_by('name')
+                self.fields['instructors'].queryset = Instructor.objects.all().order_by('name')
+        if 'employees' in self.fields:
+            self.fields['employees'].queryset = Employee.objects.filter(is_active=True).order_by('name')
 
     class Meta:
         model = Course
@@ -177,7 +179,8 @@ class CourseForm(BaseErpForm):
             'title',
             'customer',
             'required_skill',
-            'instructor',
+            'instructors',
+            'employees',
             'work_order',
             'contract',
             'status',
@@ -198,4 +201,6 @@ class CourseForm(BaseErpForm):
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
             'description': forms.Textarea(attrs={'rows': 3}),
+            'instructors': forms.SelectMultiple(attrs={'size': 5}),
+            'employees': forms.SelectMultiple(attrs={'size': 5}),
         }

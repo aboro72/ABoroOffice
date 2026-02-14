@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header">Formular</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {% if field.name == "skills" %}
+                    <div class="d-flex gap-2 align-items-start">
+                        <div class="flex-grow-1">{{ field }}</div>
+                        <button type="button" class="btn btn-outline-success btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#quickSkillModal" title="{% trans 'Skill schnell anlegen' %}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                    {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                    {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+                </div>
+                {% endfor %}
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">{% trans "Speichern" %}</button>
+                    <a class="btn btn-outline-secondary" href="/personnel/instructors/">{% trans "Zurück" %}</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick-Create Skill Modal -->
+<div class="modal fade" id="quickSkillModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Skill schnell anlegen" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="quickSkillName">{% trans "Name" %}</label>
+                    <input type="text" class="form-control" id="quickSkillName" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="quickSkillDesc">{% trans "Beschreibung" %}</label>
+                    <textarea class="form-control" id="quickSkillDesc" rows="2"></textarea>
+                </div>
+                <div id="quickSkillError" class="text-danger small d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Abbrechen" %}</button>
+                <button type="button" class="btn btn-primary" id="quickSkillSave">{% trans "Anlegen" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('quickSkillSave').addEventListener('click', function() {
+    const name = document.getElementById('quickSkillName').value.trim();
+    const desc = document.getElementById('quickSkillDesc').value.trim();
+    const errEl = document.getElementById('quickSkillError');
+    errEl.classList.add('d-none');
+
+    if (!name) {
+        errEl.textContent = 'Name ist erforderlich.';
+        errEl.classList.remove('d-none');
+        return;
+    }
+
+    fetch('/personnel/api/skills/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({name: name, description: desc}),
+    })
+    .then(resp => {
+        if (!resp.ok) return resp.json().then(d => { throw d; });
+        return resp.json();
+    })
+    .then(data => {
+        // Add new option to the skills select and select it
+        const select = document.getElementById('{{ form.skills.id_for_label }}');
+        const option = new Option(data.name, data.id, true, true);
+        select.appendChild(option);
+
+        // Reset modal and close
+        document.getElementById('quickSkillName').value = '';
+        document.getElementById('quickSkillDesc').value = '';
+        bootstrap.Modal.getInstance(document.getElementById('quickSkillModal')).hide();
+    })
+    .catch(err => {
+        let msg = 'Fehler beim Anlegen.';
+        if (err && err.name) msg = err.name.join(', ');
+        else if (err && typeof err === 'object') msg = JSON.stringify(err);
+        errEl.textContent = msg;
+        errEl.classList.remove('d-none');
+    });
+});
+</script>
+{% endblock %}

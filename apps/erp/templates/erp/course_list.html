@@ -68,7 +68,7 @@
                 <td>{{ c.event_number|default:"-" }}</td>
                 <td><a href="/erp/courses/{{ c.id }}/">{{ c.title }}</a></td>
                 <td>{{ c.customer|default:"-" }}</td>
-                <td>{{ c.instructor|default:"-" }}</td>
+                <td>{% for inst in c.instructors.all %}{{ inst.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
                 <td>{{ c.get_status_display }}</td>
                 <td>{{ c.price_net }}</td>
                 <td>{{ c.price_gross }}</td>
