@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,9 +21,9 @@
         </div>
 
         <div class="content">
-            <p>Guten Tag,</p>
+            <p>{% trans "Guten Tag," %}</p>
 
-            <p>Sie haben eine neue Antwort zu Ihrem Support-Ticket erhalten:</p>
+            <p>{% trans "Sie haben eine neue Antwort zu Ihrem Support-Ticket erhalten:" %}</p>
 
             <div class="comment">
                 <strong>{{ author_name }}</strong> hat geantwortet:
@@ -30,7 +31,7 @@
             </div>
 
             <p>
-                <a href="{{ ticket_url }}" class="button">Ticket ansehen und antworten</a>
+                <a href="{{ ticket_url }}" class="button">{% trans "Ticket ansehen und antworten" %}</a>
             </p>
 
             <p style="margin-top: 20px;">
@@ -39,7 +40,7 @@
         </div>
 
         <div class="footer">
-            <p>Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail, sondern nutzen Sie den Link oben.</p>
+            <p>{% trans "Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail, sondern nutzen Sie den Link oben." %}</p>
         </div>
     </div>
 </body>

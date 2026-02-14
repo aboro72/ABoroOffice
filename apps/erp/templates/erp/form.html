@@ -1,10 +1,11 @@
-﻿{% extends "erp/_app_base.html" %}
+{% extends "erp/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}ERP Form{% endblock %}
 
 {% block app_breadcrumb %}{{ form_title|default:"Formular" }}{% endblock %}
 {% block app_actions %}
-    <a class="btn btn-outline-secondary" href="javascript:history.back()">Zurück</a>
+    <a class="btn btn-outline-secondary" href="javascript:history.back()">{% trans "Zurück" %}</a>
 {% endblock %}
 
 {% block app_content %}
@@ -23,8 +24,8 @@
     </div>
     {% endfor %}
     <div class="d-flex gap-2">
-        <button class="btn btn-primary">Speichern</button>
-        <a class="btn btn-outline-secondary" href="javascript:history.back()">Abbrechen</a>
+        <button class="btn btn-primary">{% trans "Speichern" %}</button>
+        <a class="btn btn-outline-secondary" href="javascript:history.back()">{% trans "Abbrechen" %}</a>
     </div>
 </form>
 {% endblock %}

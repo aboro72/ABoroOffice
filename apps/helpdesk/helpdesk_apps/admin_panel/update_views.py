@@ -5,6 +5,7 @@ Views for handling system updates in the admin panel
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
@@ -54,7 +55,7 @@ def check_updates_view(request):
 
     except Exception as e:
         logger.error(f"Error checking updates: {str(e)}")
-        messages.error(request, f"Error checking updates: {str(e)}")
+        messages.error(request, _("Fehler beim Prüfen auf Updates: %(error)s") % {"error": str(e)})
         return redirect('admin:index')
 
 
@@ -74,7 +75,7 @@ def install_updates_view(request):
             if not update_info.get('has_updates'):
                 return JsonResponse({
                     'status': 'already_up_to_date',
-                    'message': 'System is already up to date'
+                    'message': _("System ist bereits aktuell")
                 })
 
             # Create notification
@@ -85,7 +86,7 @@ def install_updates_view(request):
         if notification.installed:
             return JsonResponse({
                 'status': 'already_installed',
-                'message': 'This update has already been installed'
+                'message': _("Dieses Update wurde bereits installiert")
             })
 
         # Download and install
@@ -140,16 +141,16 @@ def force_check_updates(request):
             UpdateNotification.create_from_check(update_info)
             messages.success(
                 request,
-                f"{update_info.get('file_count', 0)} updates available!"
+                _("%(count)s Updates verfügbar!") % {"count": update_info.get('file_count', 0)}
             )
         else:
-            messages.info(request, "System is already up to date")
+            messages.info(request, _("System ist bereits aktuell"))
 
         return redirect('admin_panel:check_updates')
 
     except Exception as e:
         logger.error(f"Error forcing update check: {str(e)}")
-        messages.error(request, f"Error: {str(e)}")
+        messages.error(request, _("Fehler: %(error)s") % {"error": str(e)})
         return redirect('admin_panel:check_updates')
 
 

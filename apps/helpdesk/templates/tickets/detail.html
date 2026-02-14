@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{{ ticket.ticket_number }} - {{ app_title }}{% endblock %}
 
@@ -38,25 +39,25 @@
             {% if not ticket.assigned_to and user.role == 'support_agent' %}
             <form method="post" action="{% url 'tickets:assign' ticket.pk %}" style="margin: 0;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-sm">Mir zuweisen</button>
+                <button type="submit" class="btn btn-success btn-sm">{% trans "Mir zuweisen" %}</button>
             </form>
             {% endif %}
 
             <!-- Assign button for team leads (Level 4) -->
             {% if not ticket.assigned_to and user.role == 'support_agent' and user.support_level == 4 %}
-            <button type="button" class="btn btn-info btn-sm" onclick="document.getElementById('assignModal').style.display='block';">Agent zuweisen</button>
+            <button type="button" class="btn btn-info btn-sm" onclick="document.getElementById('assignModal').style.display='block';">{% trans "Agent zuweisen" %}</button>
             {% endif %}
 
             <!-- Escalate button for agents working on ticket -->
             {% if ticket.assigned_to == user and user.role == 'support_agent' %}
-            <a href="{% url 'tickets:escalate' ticket.pk %}" class="btn btn-warning btn-sm">Nach oben eskalieren</a>
+            <a href="{% url 'tickets:escalate' ticket.pk %}" class="btn btn-warning btn-sm">{% trans "Nach oben eskalieren" %}</a>
             {% endif %}
 
             <!-- Close button for assigned agent, team lead, or admin -->
             {% if ticket.assigned_to == user or user.role == 'admin' or user.support_level == 4 %}
             <form method="post" action="{% url 'tickets:close' ticket.pk %}" style="margin: 0;" onsubmit="return confirm('Ticket wirklich schließen? Der Verlauf wird an den Kunden gesendet.');">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Schließen</button>
+                <button type="submit" class="btn btn-danger btn-sm">{% trans "Schließen" %}</button>
             </form>
             {% endif %}
         </div>
@@ -66,12 +67,12 @@
         {% if user.role == 'support_agent' and user.support_level == 4 %}
         <div id="assignModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);">
             <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 300px; border-radius: 8px;">
-                <span style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;" onclick="document.getElementById('assignModal').style.display='none';">&times;</span>
-                <h2 style="margin-top: 0; font-size: 18px;">Agent auswählen</h2>
+                <span style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;" onclick="document.getElementById('assignModal').style.display='none';">{% trans "&times;" %}</span>
+                <h2 style="margin-top: 0; font-size: 18px;">{% trans "Agent auswählen" %}</h2>
                 <form method="post" action="{% url 'tickets:assign' ticket.pk %}" style="margin: 0;">
                     {% csrf_token %}
                     <div style="margin-bottom: 15px;">
-                        <label for="agent_id" style="display: block; margin-bottom: 5px; font-weight: 600;">Support Agent:</label>
+                        <label for="agent_id" style="display: block; margin-bottom: 5px; font-weight: 600;">{% trans "Support Agent:" %}</label>
                         <select name="agent_id" id="agent_id" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
                             <option value="">-- Agent auswählen --</option>
                             {% for agent in team_agents %}
@@ -80,8 +81,8 @@
                         </select>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <button type="submit" class="btn btn-primary" style="flex: 1;">Zuweisen</button>
-                        <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="document.getElementById('assignModal').style.display='none';">Abbrechen</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">{% trans "Zuweisen" %}</button>
+                        <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="document.getElementById('assignModal').style.display='none';">{% trans "Abbrechen" %}</button>
                     </div>
                 </form>
             </div>
@@ -92,28 +93,28 @@
 
 <!-- Ticket Info -->
 <div class="card">
-    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">Ticket-Informationen</h3>
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">{% trans "Ticket-Informationen" %}</h3>
     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Erstellt von</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Erstellt von" %}</p>
             <p style="font-weight: 500;">{{ ticket.created_by.full_name }}</p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Telefonnummer</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Telefonnummer" %}</p>
             <p style="font-weight: 500;">
                 {% if ticket.created_by.phone %}
                     <a href="tel:{{ ticket.created_by.phone }}" style="color: #667eea; text-decoration: none;">{{ ticket.created_by.phone }}</a>
                 {% else %}
-                    <span style="color: #868e96;">Nicht angegeben</span>
+                    <span style="color: #868e96;">{% trans "Nicht angegeben" %}</span>
                 {% endif %}
             </p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Erstellt am</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Erstellt am" %}</p>
             <p style="font-weight: 500;">{{ ticket.created_at|date:"d.m.Y H:i" }} Uhr</p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Zugewiesen an</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Zugewiesen an" %}</p>
             <p style="font-weight: 500;">
                 {% if ticket.assigned_to %}
                     {{ ticket.assigned_to.full_name }}
@@ -121,18 +122,18 @@
                         <span class="level-badge level-level_{{ ticket.assigned_to.support_level }}">L{{ ticket.assigned_to.support_level }}</span>
                     {% endif %}
                 {% else %}
-                    <span style="color: #868e96;">Noch nicht zugewiesen</span>
+                    <span style="color: #868e96;">{% trans "Noch nicht zugewiesen" %}</span>
                 {% endif %}
             </p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Kategorie</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Kategorie" %}</p>
             <p style="font-weight: 500;">{{ ticket.category.name|default:"Keine" }}</p>
         </div>
         <!-- Mobile classroom field removed -->
         {% if ticket.closed_at %}
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Geschlossen am</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Geschlossen am" %}</p>
             <p style="font-weight: 500;">{{ ticket.closed_at|date:"d.m.Y H:i" }} Uhr</p>
         </div>
         {% endif %}
@@ -141,7 +142,7 @@
 
 <!-- Ticket Description -->
 <div class="card">
-    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">Beschreibung</h3>
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">{% trans "Beschreibung" %}</h3>
     <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; line-height: 1.6;">
         {{ ticket.description|linebreaks }}
     </div>
@@ -149,7 +150,7 @@
 
 <!-- Comments / Chat -->
 <div class="card">
-    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px;">Kommunikation</h3>
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px;">{% trans "Kommunikation" %}</h3>
 
     {% if comments %}
     <div style="margin-bottom: 30px;">
@@ -164,7 +165,7 @@
                         {% if comment.author.role == 'customer' %}Kunde{% endif %}
                     </span>
                     {% if comment.is_internal %}
-                    <span style="background: #ffc107; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 8px; font-weight: 600;">Intern</span>
+                    <span style="background: #ffc107; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 8px; font-weight: 600;">{% trans "Intern" %}</span>
                     {% endif %}
                 </div>
                 <span style="color: #868e96; font-size: 13px;">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
@@ -176,20 +177,18 @@
         {% endfor %}
     </div>
     {% else %}
-    <p style="color: #868e96; text-align: center; padding: 30px 0;">Noch keine Kommentare vorhanden.</p>
+    <p style="color: #868e96; text-align: center; padding: 30px 0;">{% trans "Noch keine Kommentare vorhanden." %}</p>
     {% endif %}
 
     <!-- Add Comment Form -->
     {% if ticket.status != 'closed' %}
     <div style="border-top: 2px solid #f0f0f0; padding-top: 20px;">
-        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px;">Neue Nachricht hinzufügen</h4>
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px;">{% trans "Neue Nachricht hinzufügen" %}</h4>
 
         {% if user.role != 'customer' %}
         <!-- AI Suggestion Button for Agents -->
         <div style="margin-bottom: 15px;">
-            <button type="button" id="aiSuggestBtn" class="btn btn-info btn-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 8px 16px;">
-                🤖 AI-Antwortvorschlag generieren
-            </button>
+            <button type="button" id="aiSuggestBtn" class="btn btn-info btn-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 8px 16px;">{% trans "🤖 AI-Antwortvorschlag generieren" %}</button>
             <span id="aiLoadingMsg" style="display: none; margin-left: 10px; color: #667eea; font-size: 13px;">
                 <i class="fa fa-spinner fa-spin"></i> KI generiert Vorschlag...
             </span>
@@ -197,8 +196,8 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <strong style="color: #667eea;">🤖 AI-Vorschlag (<span id="aiProvider"></span>)</strong>
                     <div>
-                        <button type="button" id="aiUseBtn" class="btn btn-success btn-sm" style="padding: 4px 12px; font-size: 12px;">Verwenden</button>
-                        <button type="button" id="aiDismissBtn" class="btn btn-secondary btn-sm" style="padding: 4px 12px; font-size: 12px;">Verwerfen</button>
+                        <button type="button" id="aiUseBtn" class="btn btn-success btn-sm" style="padding: 4px 12px; font-size: 12px;">{% trans "Verwenden" %}</button>
+                        <button type="button" id="aiDismissBtn" class="btn btn-secondary btn-sm" style="padding: 4px 12px; font-size: 12px;">{% trans "Verwerfen" %}</button>
                     </div>
                 </div>
                 <div id="aiSuggestionText" style="color: #495057; line-height: 1.6; white-space: pre-wrap; font-family: inherit;"></div>
@@ -226,19 +225,17 @@
             </div>
             {% endif %}
 
-            <button type="submit" class="btn btn-primary">Nachricht senden</button>
+            <button type="submit" class="btn btn-primary">{% trans "Nachricht senden" %}</button>
         </form>
     </div>
     {% else %}
-    <div style="background: #e9ecef; padding: 15px; border-radius: 6px; text-align: center; color: #495057;">
-        Dieses Ticket ist geschlossen. Sie können keine weiteren Kommentare hinzufügen.
-    </div>
+    <div style="background: #e9ecef; padding: 15px; border-radius: 6px; text-align: center; color: #495057;">{% trans "Dieses Ticket ist geschlossen. Sie können keine weiteren Kommentare hinzufügen." %}</div>
     {% endif %}
 </div>
 
 <!-- Back Button -->
 <div style="margin-top: 20px;">
-    <a href="{% url 'tickets:list' %}" class="btn btn-secondary">← Zurück zur Übersicht</a>
+    <a href="{% url 'tickets:list' %}" class="btn btn-secondary">{% trans "← Zurück zur Übersicht" %}</a>
 </div>
 
 {% if user.role != 'customer' %}

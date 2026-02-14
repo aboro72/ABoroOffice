@@ -1,15 +1,14 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}System Einstellungen - {{ app_title }}{% endblock %}
 
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-    <h1 style="font-size: 28px; font-weight: 600; margin: 0;">System Einstellungen</h1>
+    <h1 style="font-size: 28px; font-weight: 600; margin: 0;">{% trans "System Einstellungen" %}</h1>
     <div style="display: flex; gap: 10px;">
-        <a href="{% url 'main:dashboard' %}" class="btn btn-secondary">
-            ← Zurück zum Dashboard
-        </a>
-        <a href="/api-docs/" class="btn btn-primary">API Docs</a>
+        <a href="{% url 'main:dashboard' %}" class="btn btn-secondary">{% trans "← Zurück zum Dashboard" %}</a>
+        <a href="/api-docs/" class="btn btn-primary">{% trans "API Docs" %}</a>
     </div>
 </div>
 
@@ -18,9 +17,7 @@
     
     <!-- Branding Section -->
     <div class="card" style="margin-bottom: 30px;">
-        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">
-            🎨 Branding & Erscheinungsbild
-        </h2>
+        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">{% trans "🎨 Branding & Erscheinungsbild" %}</h2>
         
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
             <div class="form-group">
@@ -61,15 +58,11 @@
     
     <!-- Email Configuration -->
     <div class="card" style="margin-bottom: 30px;">
-        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">
-            📧 E-Mail Konfiguration
-        </h2>
+        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">{% trans "📧 E-Mail Konfiguration" %}</h2>
 
         <!-- SMTP Section (Outgoing) -->
         <div style="margin-bottom: 30px;">
-            <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 15px 0; color: #495057; padding-bottom: 10px; border-bottom: 1px solid #dee2e6;">
-                📤 SMTP (Ausgehende E-Mails)
-            </h3>
+            <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 15px 0; color: #495057; padding-bottom: 10px; border-bottom: 1px solid #dee2e6;">{% trans "📤 SMTP (Ausgehende E-Mails)" %}</h3>
 
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div class="form-group">
@@ -121,9 +114,7 @@
 
         <!-- IMAP Section (Incoming) -->
         <div style="padding-top: 20px; border-top: 2px solid #dee2e6;">
-            <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 15px 0; color: #495057; padding-bottom: 10px;">
-                📥 IMAP (Eingehende E-Mails zu Tickets)
-            </h3>
+            <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 15px 0; color: #495057; padding-bottom: 10px;">{% trans "📥 IMAP (Eingehende E-Mails zu Tickets)" %}</h3>
 
             <div class="alert alert-info" style="margin-bottom: 20px;">
                 <strong>Info:</strong> Aktivieren Sie IMAP, um E-Mails automatisch zu Tickets zu konvertieren.
@@ -188,9 +179,7 @@
     
     <!-- System Features -->
     <div class="card" style="margin-bottom: 30px;">
-        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">
-            ⚙️ System Features
-        </h2>
+        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">{% trans "⚙️ System Features" %}</h2>
         
         <div class="form-group">
             <label for="{{ form.max_upload_size_mb.id_for_label }}" style="font-weight: 600; color: #495057; margin-bottom: 8px; display: block;">
@@ -202,9 +191,7 @@
     
     <!-- Live Chat Settings -->
     <div class="card" style="margin-bottom: 30px;">
-        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">
-            💬 Live Chat Einstellungen
-        </h2>
+        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">{% trans "💬 Live Chat Einstellungen" %}</h2>
         
         <div class="form-group" style="margin-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -262,14 +249,10 @@
     
     <!-- Chat Widget Integration -->
     <div class="card" style="margin-bottom: 30px;">
-        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">
-            🔗 Chat Widget Integration
-        </h2>
+        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">{% trans "🔗 Chat Widget Integration" %}</h2>
         
         <div style="margin-bottom: 20px;">
-            <p style="color: #495057; margin-bottom: 15px;">
-                Verwenden Sie den folgenden Code, um das Live Chat Widget in externe Websites einzubinden:
-            </p>
+            <p style="color: #495057; margin-bottom: 15px;">{% trans "Verwenden Sie den folgenden Code, um das Live Chat Widget in externe Websites einzubinden:" %}</p>
             
             <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
                 <strong style="color: #495057; display: block; margin-bottom: 10px;">Widget URL:</strong>
@@ -284,9 +267,7 @@
                           style="width: 100%; height: 120px; font-family: monospace; font-size: 12px; background: white; border: 1px solid #dee2e6; border-radius: 4px; padding: 12px; resize: vertical;"
                           onclick="this.select();">{{ embed_code }}</textarea>
                 <div style="margin-top: 10px;">
-                    <button type="button" onclick="copyToClipboard('iframe-code')" class="btn" style="background: #28a745; color: white; font-size: 12px; padding: 8px 16px;">
-                        📋 Code kopieren
-                    </button>
+                    <button type="button" onclick="copyToClipboard('iframe-code')" class="btn" style="background: #28a745; color: white; font-size: 12px; padding: 8px 16px;">{% trans "📋 Code kopieren" %}</button>
                     <small style="color: #868e96; margin-left: 10px;">Fügen Sie diesen Code vor dem schließenden &lt;/body&gt; Tag ein</small>
                 </div>
             </div>
@@ -297,20 +278,18 @@
                           style="width: 100%; height: 140px; font-family: monospace; font-size: 12px; background: white; border: 1px solid #dee2e6; border-radius: 4px; padding: 12px; resize: vertical;"
                           onclick="this.select();">{{ js_embed_code }}</textarea>
                 <div style="margin-top: 10px;">
-                    <button type="button" onclick="copyToClipboard('js-code')" class="btn" style="background: #17a2b8; color: white; font-size: 12px; padding: 8px 16px;">
-                        📋 Code kopieren
-                    </button>
+                    <button type="button" onclick="copyToClipboard('js-code')" class="btn" style="background: #17a2b8; color: white; font-size: 12px; padding: 8px 16px;">{% trans "📋 Code kopieren" %}</button>
                     <small style="color: #868e96; margin-left: 10px;">Lädt das Widget dynamisch nach dem Seitenaufbau</small>
                 </div>
             </div>
             
             <div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border-radius: 6px; border-left: 4px solid #2196f3;">
-                <h4 style="margin: 0 0 10px 0; color: #1976d2; font-size: 16px;">💡 Integration Tipps:</h4>
+                <h4 style="margin: 0 0 10px 0; color: #1976d2; font-size: 16px;">{% trans "💡 Integration Tipps:" %}</h4>
                 <ul style="margin: 0; padding-left: 20px; color: #495057;">
-                    <li>Das Widget wird automatisch unten rechts auf der Seite angezeigt</li>
-                    <li>Es ist responsive und funktioniert auf Desktop und Mobile</li>
-                    <li>Position und Farbe können in den Chat Einstellungen angepasst werden</li>
-                    <li>Das Widget zeigt automatisch Online/Offline Status</li>
+                    <li>{% trans "Das Widget wird automatisch unten rechts auf der Seite angezeigt" %}</li>
+                    <li>{% trans "Es ist responsive und funktioniert auf Desktop und Mobile" %}</li>
+                    <li>{% trans "Position und Farbe können in den Chat Einstellungen angepasst werden" %}</li>
+                    <li>{% trans "Das Widget zeigt automatisch Online/Offline Status" %}</li>
                     <li>{% if chat_settings.is_enabled %}✅ Chat ist derzeit <strong>aktiviert</strong>{% else %}❌ Chat ist derzeit <strong>deaktiviert</strong>{% endif %}</li>
                 </ul>
             </div>
@@ -319,19 +298,15 @@
     
     <!-- Design Theme Settings -->
 <div class="card" style="margin-bottom: 30px;">
-    <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">
-        ???? Design Theme
-    </h2>
+    <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">{% trans "???? Design Theme" %}</h2>
     <div class="alert alert-info">
-        Die Design-Themes werden jetzt zentral im <a href="/admin-dashboard/">Admin Dashboard</a> verwaltet.
+        Die Design-Themes werden jetzt zentral im <a href="/admin-dashboard/">{% trans "Admin Dashboard" %}</a> verwaltet.
     </div>
 </div>
 
 <!-- AI Settings -->
     <div class="card" style="margin-bottom: 30px;">
-        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">
-            🤖 KI Chat Support
-        </h2>
+        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 25px 0; color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 15px;">{% trans "🤖 KI Chat Support" %}</h2>
         
         <div class="form-group" style="margin-bottom: 20px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -402,16 +377,12 @@
     
     <!-- Save Button -->
     <div style="text-align: center; margin-top: 40px;">
-        <button type="submit" class="btn btn-primary" style="padding: 15px 40px; font-size: 16px; font-weight: 600;">
-            💾 Einstellungen speichern
-        </button>
+        <button type="submit" class="btn btn-primary" style="padding: 15px 40px; font-size: 16px; font-weight: 600;">{% trans "💾 Einstellungen speichern" %}</button>
     </div>
 </form>
 
 <!-- Settings update notification and auto-reload handler -->
-<div id="settings-update-notification" style="display: none; position: fixed; bottom: 20px; right: 20px; background: #28a745; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; font-weight: 600;">
-    ✅ Einstellungen aktualisiert! Seite wird neu geladen...
-</div>
+<div id="settings-update-notification" style="display: none; position: fixed; bottom: 20px; right: 20px; background: #28a745; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; font-weight: 600;">{% trans "✅ Einstellungen aktualisiert! Seite wird neu geladen..." %}</div>
 
 <script>
 // Auto-reload seite wenn Einstellungen gespeichert wurden

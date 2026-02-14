@@ -1,5 +1,7 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -150,7 +152,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:help' %}"><i class="bi bi-question-circle me-1"></i>Hilfe</a>
+                        <a class="nav-link" href="{% url 'core:help' %}"><i class="bi bi-question-circle me-1"></i>{% trans "Hilfe" %}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/cloudstorage/api/docs/">📚 API Docs</a>
@@ -164,15 +166,15 @@
                                 👤 {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="/accounts/profile/">Profil</a></li>
-                                <li><a class="dropdown-item" href="/accounts/settings/">Einstellungen</a></li>
+                                <li><a class="dropdown-item" href="/accounts/profile/">{% trans "Profil" %}</a></li>
+                                <li><a class="dropdown-item" href="/accounts/settings/">{% trans "Einstellungen" %}</a></li>
                                 {% if user.is_superuser %}
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="/settings/">⚙️ Admin Settings</a></li>
                                     <li><a class="dropdown-item" href="/admin/">🔧 Django Admin</a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="/accounts/logout/">Logout</a></li>
+                                <li><a class="dropdown-item" href="/accounts/logout/">{% trans "Logout" %}</a></li>
                             </ul>
                         </li>
                     {% else %}
@@ -207,17 +209,17 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2026 ABoro IT CloudService. Ein moderner Cloud-Storage </p>
+        <p>&copy; 2026 ABoro IT CloudService. {% trans "Ein moderner Cloud-Storage" %} </p>
         <p class="mb-2">
             <a href="{% url 'core:help' %}" class="text-white-50 text-decoration-none me-3">
                 <i class="bi bi-question-circle me-1"></i>Hilfe
             </a>
             <a href="{% url 'core:help_developer' %}" class="text-white-50 text-decoration-none">
-                <i class="bi bi-code-slash me-1"></i>Entwickler-Doku
+                <i class="bi bi-code-slash me-1"></i>{% trans "Entwickler-Dokumentation" %}
             </a>
         </p>
         <p class="mb-0 small text-white-50">
-            Entwickelt von <strong class="text-white">Andreas Borowczak</strong>
+            {% trans "Entwickelt von" %} <strong class="text-white">Andreas Borowczak</strong>
             <span class="mx-2">|</span>
             <a href="https://aboro-it.net" target="_blank" class="text-white text-decoration-none">
                 <i class="bi bi-building me-1"></i><strong>Aboro IT</strong>

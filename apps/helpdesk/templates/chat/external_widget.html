@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -35,25 +36,25 @@
     </style>
 </head>
 <body>
-    <h1>ABoro-IT Chat Widget - Externe Integration</h1>
+    <h1>{% trans "ABoro-IT Chat Widget - Externe Integration" %}</h1>
     
     <div class="info-box">
-        <h3>Widget Status</h3>
+        <h3>{% trans "Widget Status" %}</h3>
         <p>Dieses Widget wird von <strong>{{ request.get_host }}</strong> geladen.</p>
-        <p id="widget-status">Wird initialisiert...</p>
+        <p id="widget-status">{% trans "Wird initialisiert..." %}</p>
     </div>
     
     <div class="controls">
-        <h3>Widget Steuerung</h3>
-        <button onclick="AboroChat.open()">Chat öffnen</button>
-        <button onclick="AboroChat.close()">Chat schließen</button>
-        <button onclick="AboroChat.toggle()">Chat umschalten</button>
-        <button onclick="testNotifications()">Benachrichtigungen testen</button>
+        <h3>{% trans "Widget Steuerung" %}</h3>
+        <button onclick="AboroChat.open()">{% trans "Chat öffnen" %}</button>
+        <button onclick="AboroChat.close()">{% trans "Chat schließen" %}</button>
+        <button onclick="AboroChat.toggle()">{% trans "Chat umschalten" %}</button>
+        <button onclick="testNotifications()">{% trans "Benachrichtigungen testen" %}</button>
     </div>
     
     <div class="info-box">
-        <h3>Für externe Websites</h3>
-        <p>Um das Chat Widget auf Ihrer Website einzubinden, fügen Sie folgenden Code hinzu:</p>
+        <h3>{% trans "Für externe Websites" %}</h3>
+        <p>{% trans "Um das Chat Widget auf Ihrer Website einzubinden, fügen Sie folgenden Code hinzu:" %}</p>
         <pre><code>&lt;!-- ABoro-IT Chat Widget (iframe-freie Version für Firefox Kompatibilität) --&gt;
 &lt;script&gt;
     // Optional: Widget Konfiguration
@@ -68,24 +69,24 @@
 &lt;script src="{{ request.scheme }}://{{ request.get_host }}{{ helpdesk_prefix }}/chat/widget.js" defer&gt;&lt;/script&gt;
 &lt;!-- Ende Chat Widget --&gt;</code></pre>
         
-        <h4>🔥 Firefox Kompatibilität - NEUE VERSION</h4>
+        <h4>{% trans "🔥 Firefox Kompatibilität - NEUE VERSION" %}</h4>
         <p><strong>Vollständig iframe-freie Implementierung!</strong> Das Widget erstellt das Chat-Interface direkt im DOM ohne jegliche iframes. 
         Funktioniert garantiert in Firefox, Chrome, Safari und Edge ohne Cross-Origin-Probleme.</p>
         
         <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; padding: 10px; margin: 10px 0;">
             <strong>✅ Neue Features:</strong>
             <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>100% iframe-frei - keine Browser-Blockierungen</li>
-                <li>Direkte API-Kommunikation mit CORS-Support</li>
-                <li>Real-time Nachrichten ohne Polling-Probleme</li>
-                <li>Optimiert für externe Website-Integration</li>
+                <li>{% trans "100% iframe-frei - keine Browser-Blockierungen" %}</li>
+                <li>{% trans "Direkte API-Kommunikation mit CORS-Support" %}</li>
+                <li>{% trans "Real-time Nachrichten ohne Polling-Probleme" %}</li>
+                <li>{% trans "Optimiert für externe Website-Integration" %}</li>
             </ul>
         </div>
     </div>
     
     <div class="info-box">
-        <h3>Erlaubte Domains</h3>
-        <p>Aktuell sind folgende Domains für das Widget zugelassen:</p>
+        <h3>{% trans "Erlaubte Domains" %}</h3>
+        <p>{% trans "Aktuell sind folgende Domains für das Widget zugelassen:" %}</p>
         <ul>
             {% for domain in allowed_domains %}
             <li><code>{{ domain }}</code></li>
@@ -110,10 +111,10 @@
             setTimeout(() => {
                 if (window.AboroChatWidget && window.AboroChatWidget.isInitialized) {
                     document.getElementById('widget-status').innerHTML = 
-                        '<span style="color: green;">✓ Widget erfolgreich geladen</span>';
+                        '<span style="color: green;">{% trans "✓ Widget erfolgreich geladen" %}</span>';
                 } else {
                     document.getElementById('widget-status').innerHTML = 
-                        '<span style="color: red;">✗ Widget konnte nicht geladen werden</span>';
+                        '<span style="color: red;">{% trans "✗ Widget konnte nicht geladen werden" %}</span>';
                 }
             }, 2000);
         });

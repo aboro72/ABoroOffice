@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load static %}
 
 {% block title %}Support Chat Dashboard{% endblock %}
@@ -940,7 +941,7 @@ function getCookie(name) {
     <!-- Compact Header with Controls -->
     <div class="dashboard-header-compact">
         <div class="header-content">
-            <h2>💬 Support Chat Dashboard</h2>
+            <h2>{% trans "💬 Support Chat Dashboard" %}</h2>
             <div class="header-controls">
                 <button id="notification-btn" onclick="toggleNotifications()" class="control-btn-small">
                     <i class="fas fa-bell-slash"></i> Benachrichtigungen Aus
@@ -961,7 +962,7 @@ function getCookie(name) {
                 </div>
                 <div class="stat-info">
                     <div class="stat-number-compact">{{ waiting_chats.count }}</div>
-                    <div class="stat-label-compact">Wartend</div>
+                    <div class="stat-label-compact">{% trans "Wartend" %}</div>
                 </div>
             </div>
         </div>
@@ -972,7 +973,7 @@ function getCookie(name) {
                 </div>
                 <div class="stat-info">
                     <div class="stat-number-compact">{{ escalated_chats.count }}</div>
-                    <div class="stat-label-compact">Eskaliert</div>
+                    <div class="stat-label-compact">{% trans "Eskaliert" %}</div>
                 </div>
             </div>
         </div>
@@ -983,7 +984,7 @@ function getCookie(name) {
                 </div>
                 <div class="stat-info">
                     <div class="stat-number-compact">{{ active_chats.count }}</div>
-                    <div class="stat-label-compact">Meine Aktiven</div>
+                    <div class="stat-label-compact">{% trans "Meine Aktiven" %}</div>
                 </div>
             </div>
         </div>
@@ -994,7 +995,7 @@ function getCookie(name) {
                 </div>
                 <div class="stat-info">
                     <div class="stat-number-compact">{{ ai_handled_chats.count }}</div>
-                    <div class="stat-label-compact">KI-Betreut</div>
+                    <div class="stat-label-compact">{% trans "KI-Betreut" %}</div>
                 </div>
             </div>
         </div>
@@ -1062,7 +1063,7 @@ function getCookie(name) {
                             <span class="session-name-compact">{{ session.visitor_name|default:"Unbekannt" }}</span>
                             <span class="session-time-compact">{{ session.updated_at|timesince }}</span>
                         </div>
-                        <div class="session-preview-compact">Benötigt menschliche Hilfe</div>
+                        <div class="session-preview-compact">{% trans "Benötigt menschliche Hilfe" %}</div>
                         <button class="take-btn-compact urgent" data-session-id="{{ session.session_id }}">
                             <i class="fas fa-hand-paper"></i> Übernehmen
                         </button>
@@ -1087,7 +1088,7 @@ function getCookie(name) {
                             <span class="session-name-compact">{{ session.visitor_name|default:"Unbekannt" }}</span>
                             <span class="session-time-compact">{{ session.updated_at|timesince }}</span>
                         </div>
-                        <div class="session-preview-compact">KI-Assistent aktiv</div>
+                        <div class="session-preview-compact">{% trans "KI-Assistent aktiv" %}</div>
                         <button class="take-btn-compact" data-session-id="{{ session.session_id }}">
                             <i class="fas fa-hand-paper"></i> Übernehmen
                         </button>

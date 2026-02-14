@@ -1,11 +1,12 @@
-﻿{% extends "crm/_app_base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Lead{% endblock %}
 
 {% block app_breadcrumb %}{{ lead.name }}{% endblock %}
 {% block app_actions %}
     {% if can_edit %}
-    <a class="btn btn-outline-primary" href="{% url 'crm:lead_edit' lead.id %}">Bearbeiten</a>
+    <a class="btn btn-outline-primary" href="{% url 'crm:lead_edit' lead.id %}">{% trans "Bearbeiten" %}</a>
     {% endif %}
     <a class="btn btn-outline-secondary" href="{% url 'crm:lead_list' %}">Zurück</a>
 {% endblock %}
@@ -14,7 +15,7 @@
 <div class="row g-3">
     <div class="col-md-6">
         <div class="card h-100">
-            <div class="card-header">Details</div>
+            <div class="card-header">{% trans "Details" %}</div>
             <div class="card-body">
                 <div><strong>Status:</strong> {{ lead.get_status_display }}</div>
                 <div><strong>Firma:</strong> {{ lead.company|default:"-" }}</div>
@@ -165,7 +166,7 @@
 <div class="row g-3 mt-1">
     <div class="col-md-6">
         <div class="card h-100">
-            <div class="card-header">Notizen</div>
+            <div class="card-header">{% trans "Notizen" %}</div>
             <div class="card-body">
                 {% if can_edit %}
                 <form method="post" class="mb-3">

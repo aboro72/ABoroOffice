@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}
 {% if action == 'create' %}Benutzer erstellen{% else %}Benutzer bearbeiten{% endif %} - {{ app_title }}
@@ -13,9 +14,7 @@
         ✏️ Benutzer bearbeiten: {{ target_user.full_name }}
         {% endif %}
     </h1>
-    <a href="{% url 'helpdesk_accounts:user_list' %}" class="btn btn-secondary">
-        ← Zurück zur Übersicht
-    </a>
+    <a href="{% url 'helpdesk_accounts:user_list' %}" class="btn btn-secondary">{% trans "← Zurück zur Übersicht" %}</a>
 </div>
 
 <div class="card">
@@ -37,9 +36,7 @@
         
         <!-- Basic Information -->
         <div style="margin-bottom: 30px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                📋 Grundinformationen
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "📋 Grundinformationen" %}</h3>
             
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div class="form-group">
@@ -86,9 +83,7 @@
         
         <!-- Role and Permissions -->
         <div style="margin-bottom: 30px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                🔐 Rolle und Berechtigungen
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "🔐 Rolle und Berechtigungen" %}</h3>
             
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div class="form-group">
@@ -117,9 +112,7 @@
         
         <!-- Contact Information -->
         <div style="margin-bottom: 30px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                📞 Kontaktinformationen
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "📞 Kontaktinformationen" %}</h3>
             
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div class="form-group">
@@ -156,9 +149,7 @@
         
         <!-- Address Information -->
         <div style="margin-bottom: 30px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                🏠 Adressinformationen
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "🏠 Adressinformationen" %}</h3>
             
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div class="form-group">
@@ -208,9 +199,7 @@
         {% if action == 'create' %}
         <!-- Password -->
         <div style="margin-bottom: 30px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                🔒 Passwort
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "🔒 Passwort" %}</h3>
             
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div class="form-group">
@@ -253,9 +242,7 @@
         {% if action == 'edit' %}
         <!-- Status Options -->
         <div style="margin-bottom: 30px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                ⚙️ Status und Optionen
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "⚙️ Status und Optionen" %}</h3>
             
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div class="form-group">
@@ -287,9 +274,7 @@
         
         <!-- Action Buttons -->
         <div style="border-top: 1px solid #dee2e6; padding-top: 20px; display: flex; gap: 15px; justify-content: flex-end;">
-            <a href="{% url 'helpdesk_accounts:user_list' %}" class="btn btn-secondary">
-                Abbrechen
-            </a>
+            <a href="{% url 'helpdesk_accounts:user_list' %}" class="btn btn-secondary">{% trans "Abbrechen" %}</a>
             <button type="submit" class="btn btn-primary">
                 {% if action == 'create' %}
                 👤 Benutzer erstellen

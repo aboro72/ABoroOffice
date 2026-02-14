@@ -1,4 +1,5 @@
 {% extends "crm/_list_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Website gesucht{% endblock %}
 
@@ -16,17 +17,17 @@
             <div class="fw-bold">Batch-Editor</div>
             <div class="d-flex gap-2">
                 <button class="btn btn-outline-secondary btn-sm" type="submit" formaction="{% url 'crm:lead_staging_bulk_import' %}" name="action" value="enrich">Auto-enrich (mit Website)</button>
-                <button class="btn btn-primary btn-sm" type="submit">Speichern</button>
+                <button class="btn btn-primary btn-sm" type="submit">{% trans "Speichern" %}</button>
             </div>
         </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Firma</th>
+                        <th>{% trans "Firma" %}</th>
                         <th>Website</th>
                         <th>Adresse</th>
-                        <th>Status</th>
+                        <th>{% trans "Status" %}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -47,7 +48,7 @@
                         </td>
                         <td>{{ item.get_status_display }}</td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-outline-secondary" href="{% url 'crm:lead_staging_edit' item.id %}">Bearbeiten</a>
+                            <a class="btn btn-sm btn-outline-secondary" href="{% url 'crm:lead_staging_edit' item.id %}">{% trans "Bearbeiten" %}</a>
                         </td>
                     </tr>
                     {% empty %}

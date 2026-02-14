@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{{ target_user.full_name }} - Benutzerdetails - {{ app_title }}{% endblock %}
 
@@ -9,13 +10,9 @@
     </h1>
     <div style="display: flex; gap: 10px;">
         {% if can_edit %}
-        <a href="{% url 'helpdesk_accounts:user_edit' target_user.id %}" class="btn btn-primary">
-            ✏️ Bearbeiten
-        </a>
+        <a href="{% url 'helpdesk_accounts:user_edit' target_user.id %}" class="btn btn-primary">{% trans "✏️ Bearbeiten" %}</a>
         {% endif %}
-        <a href="{% url 'helpdesk_accounts:user_list' %}" class="btn btn-secondary">
-            ← Zurück zur Übersicht
-        </a>
+        <a href="{% url 'helpdesk_accounts:user_list' %}" class="btn btn-secondary">{% trans "← Zurück zur Übersicht" %}</a>
     </div>
 </div>
 
@@ -24,28 +21,26 @@
     <div>
         <!-- Basic Information -->
         <div class="card" style="margin-bottom: 20px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                📋 Grundinformationen
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "📋 Grundinformationen" %}</h3>
             
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Vorname</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Vorname" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">{{ target_user.first_name|default:"Nicht angegeben" }}</div>
                 </div>
                 
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Nachname</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Nachname" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">{{ target_user.last_name|default:"Nicht angegeben" }}</div>
                 </div>
                 
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Benutzername</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Benutzername" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">{{ target_user.username }}</div>
                 </div>
                 
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">E-Mail</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "E-Mail" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">
                         <a href="mailto:{{ target_user.email }}" style="color: #667eea; text-decoration: none;">{{ target_user.email }}</a>
                     </div>
@@ -55,13 +50,11 @@
         
         <!-- Contact Information -->
         <div class="card" style="margin-bottom: 20px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                📞 Kontaktinformationen
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "📞 Kontaktinformationen" %}</h3>
             
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Telefon</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Telefon" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">
                         {% if target_user.phone %}
                         <a href="tel:{{ target_user.phone }}" style="color: #667eea; text-decoration: none;">{{ target_user.phone }}</a>
@@ -72,12 +65,12 @@
                 </div>
                 
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Abteilung</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Abteilung" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">{{ target_user.department|default:"Nicht angegeben" }}</div>
                 </div>
                 
                 <div style="grid-column: 1 / -1;">
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Standort</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Standort" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">{{ target_user.location|default:"Nicht angegeben" }}</div>
                 </div>
             </div>
@@ -86,30 +79,28 @@
         <!-- Address Information -->
         {% if target_user.street or target_user.city or target_user.postal_code or target_user.country %}
         <div class="card" style="margin-bottom: 20px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                🏠 Adressinformationen
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "🏠 Adressinformationen" %}</h3>
             
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Straße</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Straße" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">{{ target_user.street|default:"Nicht angegeben" }}</div>
                 </div>
                 
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">PLZ</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "PLZ" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">{{ target_user.postal_code|default:"Nicht angegeben" }}</div>
                 </div>
             </div>
             
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Stadt</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Stadt" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">{{ target_user.city|default:"Nicht angegeben" }}</div>
                 </div>
                 
                 <div>
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Land</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Land" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px;">{{ target_user.country|default:"Nicht angegeben" }}</div>
                 </div>
             </div>
@@ -121,12 +112,10 @@
     <div>
         <!-- Role and Status -->
         <div class="card" style="margin-bottom: 20px;">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                🔐 Rolle und Status
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "🔐 Rolle und Status" %}</h3>
             
             <div style="margin-bottom: 20px;">
-                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Rolle</label>
+                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Rolle" %}</label>
                 <div style="margin-top: 8px;">
                     <span style="background: {% if target_user.role == 'admin' %}#dc3545{% elif target_user.role == 'support_agent' %}#28a745{% else %}#6c757d{% endif %}; color: white; padding: 6px 12px; border-radius: 12px; font-size: 14px; font-weight: 600;">
                         {{ target_user.get_role_display }}
@@ -134,7 +123,7 @@
                 </div>
                 {% if target_user.role == 'support_agent' and target_user.support_level %}
                 <div style="margin-top: 10px;">
-                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Support Level</label>
+                    <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Support Level" %}</label>
                     <div style="font-size: 16px; color: #333; margin-top: 5px; font-weight: 600;">
                         Level {{ target_user.support_level }} - {{ target_user.get_support_level_display }}
                     </div>
@@ -143,7 +132,7 @@
             </div>
             
             <div style="margin-bottom: 20px;">
-                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Status</label>
+                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Status" %}</label>
                 <div style="margin-top: 8px;">
                     <span style="background: {% if target_user.is_active %}#d4edda; color: #155724{% else %}#f8d7da; color: #721c24{% endif %}; padding: 6px 12px; border-radius: 12px; font-size: 14px; font-weight: 600;">
                         {% if target_user.is_active %}✅ Aktiv{% else %}❌ Inaktiv{% endif %}
@@ -153,16 +142,14 @@
             
             {% if target_user.force_password_change %}
             <div style="margin-bottom: 20px;">
-                <span style="background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                    🔑 Passwort-Änderung erforderlich
-                </span>
+                <span style="background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">{% trans "🔑 Passwort-Änderung erforderlich" %}</span>
             </div>
             {% endif %}
             
             <!-- Quick Actions -->
             {% if can_edit and target_user != request.user %}
             <div style="border-top: 1px solid #dee2e6; padding-top: 20px;">
-                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; display: block;">Schnellaktionen</label>
+                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; display: block;">{% trans "Schnellaktionen" %}</label>
                 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <button onclick="toggleUserStatus({{ target_user.id }})" 
@@ -173,9 +160,7 @@
                     
                     <button onclick="resetUserPassword({{ target_user.id }})" 
                             style="width: 100%; padding: 10px 15px; background: #6f42c1; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 600;"
-                            title="Neues temporäres Passwort generieren">
-                        🔑 Passwort zurücksetzen
-                    </button>
+                            title="Neues temporäres Passwort generieren">{% trans "🔑 Passwort zurücksetzen" %}</button>
                 </div>
             </div>
             {% endif %}
@@ -183,19 +168,17 @@
         
         <!-- Account Information -->
         <div class="card">
-            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">
-                📊 Kontoinformationen
-            </h3>
+            <h3 style="color: #495057; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px;">{% trans "📊 Kontoinformationen" %}</h3>
             
             <div style="margin-bottom: 15px;">
-                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Erstellt am</label>
+                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Erstellt am" %}</label>
                 <div style="font-size: 14px; color: #333; margin-top: 5px;">
                     {{ target_user.created_at|date:"d.m.Y" }} um {{ target_user.created_at|date:"H:i" }} Uhr
                 </div>
             </div>
             
             <div style="margin-bottom: 15px;">
-                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Letzte Aktualisierung</label>
+                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Letzte Aktualisierung" %}</label>
                 <div style="font-size: 14px; color: #333; margin-top: 5px;">
                     {{ target_user.updated_at|date:"d.m.Y" }} um {{ target_user.updated_at|date:"H:i" }} Uhr
                 </div>
@@ -203,17 +186,15 @@
             
             {% if target_user.last_login %}
             <div>
-                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Letzter Login</label>
+                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Letzter Login" %}</label>
                 <div style="font-size: 14px; color: #333; margin-top: 5px;">
                     {{ target_user.last_login|date:"d.m.Y" }} um {{ target_user.last_login|date:"H:i" }} Uhr
                 </div>
             </div>
             {% else %}
             <div>
-                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Letzter Login</label>
-                <div style="font-size: 14px; color: #6c757d; margin-top: 5px; font-style: italic;">
-                    Noch nie angemeldet
-                </div>
+                <label style="font-weight: 600; color: #6c757d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% trans "Letzter Login" %}</label>
+                <div style="font-size: 14px; color: #6c757d; margin-top: 5px; font-style: italic;">{% trans "Noch nie angemeldet" %}</div>
             </div>
             {% endif %}
         </div>

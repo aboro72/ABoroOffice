@@ -3,6 +3,7 @@ from io import StringIO
 from django.views.generic import ListView, CreateView, DetailView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.shortcuts import redirect
 from django.db import models
 from .models import Account, CostCenter, CostType, BusinessPartner, JournalEntry, JournalLine
@@ -54,13 +55,13 @@ class AccountImportView(FibuBaseView, TemplateView):
     def post(self, request, *args, **kwargs):
         form = AccountImportForm(request.POST, request.FILES)
         if not form.is_valid():
-            messages.error(request, 'Bitte eine CSV-Datei auswählen.')
+            messages.error(request, _("Bitte eine CSV-Datei auswählen."))
             return redirect('/fibu/accounts/import/')
 
         upload = form.cleaned_data['file']
         raw = upload.read().decode('utf-8', errors='ignore')
         if not raw.strip():
-            messages.error(request, 'Die Datei ist leer.')
+            messages.error(request, _("Die Datei ist leer."))
             return redirect('/fibu/accounts/import/')
 
         first_line = raw.splitlines()[0] if raw.splitlines() else ''
@@ -93,7 +94,7 @@ class AccountImportView(FibuBaseView, TemplateView):
 
         messages.success(
             request,
-            f'Import abgeschlossen: {created} neu, {updated} aktualisiert, {skipped} übersprungen.',
+            _("Import abgeschlossen: %(created)s neu, %(updated)s aktualisiert, %(skipped)s übersprungen.") % {"created": created, "updated": updated, "skipped": skipped},
         )
         return redirect('/fibu/accounts/')
 
@@ -213,7 +214,7 @@ class FibuSettingsView(FibuBaseView, TemplateView):
         form = FibuSettingsForm(request.POST, instance=settings_obj)
         if form.is_valid():
             form.save()
-            messages.success(request, 'FiBu-Einstellungen gespeichert.')
+            messages.success(request, _("FiBu-Einstellungen gespeichert."))
         else:
-            messages.error(request, 'Bitte prüfe die FiBu-Einstellungen.')
+            messages.error(request, _("Bitte prüfe die FiBu-Einstellungen."))
         return redirect('/fibu/settings/')

@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -110,9 +111,9 @@
 </head>
 <body>
     <div class="restriction-container">
-        <div class="icon">🔒</div>
+        <div class="icon">{% trans "🔒" %}</div>
         
-        <h1 class="title">Feature Not Available</h1>
+        <h1 class="title">{% trans "Feature Not Available" %}</h1>
         <p class="subtitle">
             The "{{ feature }}" feature is not included in your current license plan.
         </p>
@@ -129,15 +130,9 @@
         </div>
 
         <div class="action-buttons">
-            <a href="https://aboro-it.net/pricing/" class="btn btn-upgrade">
-                View Pricing Plans
-            </a>
-            <a href="mailto:sales@aboro-it.net" class="btn btn-contact">
-                Contact Sales
-            </a>
-            <a href="javascript:history.back()" class="btn btn-back">
-                Go Back
-            </a>
+            <a href="https://aboro-it.net/pricing/" class="btn btn-upgrade">{% trans "View Pricing Plans" %}</a>
+            <a href="mailto:sales@aboro-it.net" class="btn btn-contact">{% trans "Contact Sales" %}</a>
+            <a href="javascript:history.back()" class="btn btn-back">{% trans "Go Back" %}</a>
         </div>
     </div>
 </body>

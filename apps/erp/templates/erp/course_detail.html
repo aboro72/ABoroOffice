@@ -1,11 +1,12 @@
-﻿{% extends "erp/_app_base.html" %}
+{% extends "erp/_app_base.html" %}
+{% load i18n %}
 
-{% block title %}Kurs{% endblock %}
+{% block title %}Veranstaltung{% endblock %}
 
 {% block app_breadcrumb %}{{ course.event_number }} - {{ course.title }}{% endblock %}
 {% block app_actions %}
-    <a class="btn btn-outline-secondary" href="/erp/courses/">Zurück</a>
-    <a class="btn btn-primary" href="/erp/courses/{{ course.id }}/edit/">Bearbeiten</a>
+    <a class="btn btn-outline-secondary" href="/erp/courses/">{% trans "Zurück" %}</a>
+    <a class="btn btn-primary" href="/erp/courses/{{ course.id }}/edit/">{% trans "Bearbeiten" %}</a>
 {% endblock %}
 
 {% block app_content %}
@@ -13,32 +14,32 @@
     <div class="row g-3">
         <div class="col-lg-7">
             <div class="card mb-3">
-                <div class="card-header">Stammdaten</div>
+                <div class="card-header">{% trans "Stammdaten" %}</div>
                 <div class="card-body">
-                    <div><strong>Kunde:</strong> {{ course.customer|default:"-" }}</div>
-                    <div><strong>Dozent:</strong> {{ course.instructor|default:"-" }}</div>
-                    <div><strong>Skill:</strong> {{ course.required_skill|default:"-" }}</div>
-                    <div><strong>Status:</strong> {{ course.get_status_display }}</div>
-                    <div><strong>Start:</strong> {{ course.start_date|default:"-" }}</div>
-                    <div><strong>Ende:</strong> {{ course.end_date|default:"-" }}</div>
-                    <div><strong>Kapazitaet:</strong> {{ course.capacity }}</div>
-                    <div><strong>Mobiler Klassenraum:</strong>
-                        {% if course.mobile_classroom_required %}Ja{% else %}Nein{% endif %}
+                    <div><strong>{% trans "Kunde" %}:</strong> {{ course.customer|default:"-" }}</div>
+                    <div><strong>{% trans "Externer Mitarbeiter" %}:</strong> {{ course.instructor|default:"-" }}</div>
+                    <div><strong>{% trans "Skill" %}:</strong> {{ course.required_skill|default:"-" }}</div>
+                    <div><strong>{% trans "Status" %}:</strong> {{ course.get_status_display }}</div>
+                    <div><strong>{% trans "Start" %}:</strong> {{ course.start_date|default:"-" }}</div>
+                    <div><strong>{% trans "Ende" %}:</strong> {{ course.end_date|default:"-" }}</div>
+                    <div><strong>{% trans "Kapazität" %}:</strong> {{ course.capacity }}</div>
+                    <div><strong>{% trans "Mobiler Klassenraum" %}:</strong>
+                        {% if course.mobile_classroom_required %}{% trans "Ja" %}{% else %}{% trans "Nein" %}{% endif %}
                     </div>
-                    <div><strong>Klassenraum-Produkt:</strong> {{ course.mobile_classroom_product|default:"-" }}</div>
+                    <div><strong>{% trans "Klassenraum-Produkt" %}:</strong> {{ course.mobile_classroom_product|default:"-" }}</div>
                 </div>
             </div>
 
             <div class="card mb-3">
-                <div class="card-header">Verknuepfungen</div>
+                <div class="card-header">{% trans "Verknüpfungen" %}</div>
                 <div class="card-body">
-                    <div><strong>Work Order:</strong> {{ course.work_order|default:"-" }}</div>
-                    <div><strong>Vertrag:</strong> {{ course.contract|default:"-" }}</div>
+                    <div><strong>{% trans "Work Order" %}:</strong> {{ course.work_order|default:"-" }}</div>
+                    <div><strong>{% trans "Vertrag" %}:</strong> {{ course.contract|default:"-" }}</div>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-header">Beschreibung</div>
+                <div class="card-header">{% trans "Beschreibung" %}</div>
                 <div class="card-body">
                     {{ course.description|default:"-" }}
                 </div>
@@ -47,31 +48,27 @@
 
         <div class="col-lg-5">
             <div class="card mb-3">
-                <div class="card-header">Preisaufschlüsselung</div>
+                <div class="card-header">{% trans "Preisaufschlüsselung" %}</div>
                 <div class="card-body">
-                    <div><strong>Dozententage:</strong> {{ pricing.days }}</div>
-                    <div><strong>Tagessatz:</strong> {{ pricing.instructor_daily }}</div>
-                    <div><strong>Dozenten-Kosten:</strong> {{ pricing.instructor_cost }}</div>
-                    <div><strong>Spesen:</strong> {{ pricing.expenses }}</div>
-                    <div><strong>Unterkunft:</strong> {{ pricing.lodging }}</div>
-                    <div><strong>Mobiler Klassenraum:</strong> {{ pricing.mobile_cost }}</div>
+                    <div><strong>{% trans "Einsatztage" %}:</strong> {{ pricing.days }}</div>
+                    <div><strong>{% trans "Tagessatz" %}:</strong> {{ pricing.instructor_daily }}</div>
+                    <div><strong>{% trans "Ext. MA-Kosten" %}:</strong> {{ pricing.instructor_cost }}</div>
+                    <div><strong>{% trans "Spesen" %}:</strong> {{ pricing.expenses }}</div>
+                    <div><strong>{% trans "Unterkunft" %}:</strong> {{ pricing.lodging }}</div>
+                    <div><strong>{% trans "Mobiler Klassenraum" %}:</strong> {{ pricing.mobile_cost }}</div>
                     <hr>
-                    <div><strong>Zwischensumme Netto:</strong> {{ pricing.subtotal }}</div>
-                    <div><strong>MwSt:</strong> {{ pricing.vat_rate }}%</div>
-                    <div><strong>Preis Netto:</strong> {{ pricing.price_net }}</div>
-                    <div><strong>Preis Brutto:</strong> {{ pricing.price_gross }}</div>
+                    <div><strong>{% trans "Zwischensumme Netto" %}:</strong> {{ pricing.subtotal }}</div>
+                    <div><strong>{% trans "MwSt" %}:</strong> {{ pricing.vat_rate }}%</div>
+                    <div><strong>{% trans "Preis Netto" %}:</strong> {{ pricing.price_net }}</div>
+                    <div><strong>{% trans "Preis Brutto" %}:</strong> {{ pricing.price_gross }}</div>
                 </div>
             </div>
             <div class="card">
-                <div class="card-header">Hinweis</div>
+                <div class="card-header">{% trans "Hinweis" %}</div>
                 <div class="card-body text-muted small">
-                    Der Preis wird automatisch aus Tagessatz, Spesen, Unterkunft und optionalem Klassenraum berechnet.
+                    {% trans "Der Preis wird automatisch aus Tagessatz, Spesen, Unterkunft und optionalem Klassenraum berechnet." %}
                 </div>
             </div>
         </div>
     </div>
 {% endblock %}
-
-
-
-

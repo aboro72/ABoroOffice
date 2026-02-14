@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% load static %}
 
 {% block title %}Feature Not Available{% endblock %}
@@ -150,7 +151,7 @@
             <i class="fas fa-lock"></i>
         </div>
         
-        <h1 class="restriction-title">Feature Not Available</h1>
+        <h1 class="restriction-title">{% trans "Feature Not Available" %}</h1>
         <p class="restriction-subtitle">
             The feature "{{ feature_name|title }}" is not included in your current license plan.
         </p>
@@ -190,7 +191,7 @@
         {% else %}
         <div class="current-license">
             <h5><i class="fas fa-exclamation-triangle"></i> No Active License</h5>
-            <p>You are currently using the system without a valid license. Please purchase a license to access all features.</p>
+            <p>{% trans "You are currently using the system without a valid license. Please purchase a license to access all features." %}</p>
         </div>
         {% endif %}
 
@@ -200,7 +201,7 @@
             {% for suggestion in upgrade_suggestions.suggestions %}
             <div class="upgrade-card {% if forloop.first %}recommended{% endif %}">
                 {% if forloop.first %}
-                <span class="badge badge-success">Recommended</span>
+                <span class="badge badge-success">{% trans "Recommended" %}</span>
                 {% endif %}
                 
                 <h6>{{ suggestion.name }}</h6>

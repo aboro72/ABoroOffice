@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -121,14 +122,14 @@
     <div class="game-container">
         <canvas id="gameCanvas" width="600" height="800"></canvas>
         <div class="hud">
-            <div>❤️ Leben: <span id="lives">3</span></div>
-            <div>🎯 Score: <span id="score">0</span></div>
-            <div>📊 Level: <span id="level">1</span></div>
+            <div>❤️ Leben: <span id="lives">{% trans "3" %}</span></div>
+            <div>🎯 Score: <span id="score">{% trans "0" %}</span></div>
+            <div>📊 Level: <span id="level">{% trans "1" %}</span></div>
         </div>
     </div>
 
     <div id="startMenu" class="menu active">
-        <h1>🦠 VIRUS KONG 💿</h1>
+        <h1>{% trans "🦠 VIRUS KONG 💿" %}</h1>
         <div class="story">
             ⚠️ ACHTUNG! ⚠️<br>
             Ein Computer-Virus hat sich auf dem Server eingenistet!<br>
@@ -142,35 +143,35 @@
             🎯 Weiche den verseuchten CDs aus!<br>
             🏁 Erreiche die GRÜNE Plattform ganz oben!
         </p>
-        <button class="btn" onclick="startGame()">🎮 MISSION STARTEN</button>
-        <button class="btn" onclick="showHighscores()" style="background: #ffd700; color: #000;">🏆 BESTENLISTE</button>
-        <button class="btn" onclick="window.history.back()" style="background: #666;">← ZURÜCK</button>
-        <p style="font-size: 10px; margin-top: 15px; opacity: 0.5;">v1.3 - Leitern reichen jetzt hoch UND runter!</p>
+        <button class="btn" onclick="startGame()">{% trans "🎮 MISSION STARTEN" %}</button>
+        <button class="btn" onclick="showHighscores()" style="background: #ffd700; color: #000;">{% trans "🏆 BESTENLISTE" %}</button>
+        <button class="btn" onclick="window.history.back()" style="background: #666;">{% trans "← ZURÜCK" %}</button>
+        <p style="font-size: 10px; margin-top: 15px; opacity: 0.5;">{% trans "v1.3 - Leitern reichen jetzt hoch UND runter!" %}</p>
     </div>
 
     <div id="gameOverMenu" class="menu">
-        <h1>💀 INFIZIERT!</h1>
-        <p style="font-size: 24px; color: #ff6666;">Score: <span id="finalScore">0</span></p>
-        <p>Level erreicht: <span id="reachedLevel">1</span></p>
+        <h1>{% trans "💀 INFIZIERT!" %}</h1>
+        <p style="font-size: 24px; color: #ff6666;">Score: <span id="finalScore">{% trans "0" %}</span></p>
+        <p>Level erreicht: <span id="reachedLevel">{% trans "1" %}</span></p>
         <p id="rankMessage" style="color: #ffd700; font-weight: bold; margin: 10px 0;"></p>
-        <button class="btn" onclick="restartGame()">🔄 NOCHMAL</button>
-        <button class="btn" onclick="showHighscores()" style="background: #ffd700; color: #000;">🏆 SCORES</button>
-        <button class="btn" onclick="window.history.back()" style="background: #666;">← ZURÜCK</button>
+        <button class="btn" onclick="restartGame()">{% trans "🔄 NOCHMAL" %}</button>
+        <button class="btn" onclick="showHighscores()" style="background: #ffd700; color: #000;">{% trans "🏆 SCORES" %}</button>
+        <button class="btn" onclick="window.history.back()" style="background: #666;">{% trans "← ZURÜCK" %}</button>
     </div>
 
     <div id="victoryMenu" class="menu">
-        <h1>🏆 VIRUS BESIEGT!</h1>
-        <p style="font-size: 20px; color: #00ff00;">Level <span id="victoryLevel">1</span> abgeschlossen!</p>
-        <p style="color: #ffd700;">+<span id="bonusPoints">0</span> Bonus-Punkte!</p>
-        <button class="btn" onclick="nextLevel()">➡️ NÄCHSTES LEVEL</button>
+        <h1>{% trans "🏆 VIRUS BESIEGT!" %}</h1>
+        <p style="font-size: 20px; color: #00ff00;">Level <span id="victoryLevel">{% trans "1" %}</span> abgeschlossen!</p>
+        <p style="color: #ffd700;">+<span id="bonusPoints">{% trans "0" %}</span> Bonus-Punkte!</p>
+        <button class="btn" onclick="nextLevel()">{% trans "➡️ NÄCHSTES LEVEL" %}</button>
     </div>
 
     <div id="highscoreMenu" class="menu">
-        <h1>🏆 TOP VIRUS-JÄGER 🏆</h1>
+        <h1>{% trans "🏆 TOP VIRUS-JÄGER 🏆" %}</h1>
         <div id="highscoreList" style="max-height: 400px; overflow-y: auto; margin: 20px 0;">
-            <p style="color: #ff0000;">Lade Bestenliste...</p>
+            <p style="color: #ff0000;">{% trans "Lade Bestenliste..." %}</p>
         </div>
-        <button class="btn" onclick="hideHighscores()">ZURÜCK</button>
+        <button class="btn" onclick="hideHighscores()">{% trans "ZURÜCK" %}</button>
     </div>
 
     <script>
@@ -855,7 +856,7 @@
             .catch(error => {
                 console.error('Error loading highscores:', error);
                 document.getElementById('highscoreList').innerHTML =
-                    '<p style="color: #ff6666;">Fehler beim Laden</p>';
+                    '<p style="color: #ff6666;">{% trans "Fehler beim Laden" %}</p>';
             });
         }
 
@@ -868,10 +869,10 @@
             } else {
                 html = '<table style="width: 100%; color: #ff0000; font-family: \'Courier New\', monospace; font-size: 14px; border-collapse: collapse;">';
                 html += '<thead><tr style="border-bottom: 2px solid #ff0000;">';
-                html += '<th style="padding: 10px; text-align: left;">Rang</th>';
-                html += '<th style="padding: 10px; text-align: left;">Virus-Jäger</th>';
-                html += '<th style="padding: 10px; text-align: right;">Score</th>';
-                html += '<th style="padding: 10px; text-align: center;">Level</th>';
+                html += '<th style="padding: 10px; text-align: left;">{% trans "Rang" %}</th>';
+                html += '<th style="padding: 10px; text-align: left;">{% trans "Virus-Jäger" %}</th>';
+                html += '<th style="padding: 10px; text-align: right;">{% trans "Score" %}</th>';
+                html += '<th style="padding: 10px; text-align: center;">{% trans "Level" %}</th>';
                 html += '</tr></thead><tbody>';
 
                 data.scores.forEach(score => {
@@ -891,7 +892,7 @@
 
                 if (data.player_best) {
                     html += '<div style="margin-top: 20px; padding: 15px; background: rgba(255, 0, 0, 0.1); border: 2px solid #ff0000; border-radius: 8px;">';
-                    html += '<p style="color: #ffd700; font-weight: bold; margin-bottom: 5px;">👤 DEINE BESTLEISTUNG:</p>';
+                    html += '<p style="color: #ffd700; font-weight: bold; margin-bottom: 5px;">{% trans "👤 DEINE BESTLEISTUNG:" %}</p>';
                     html += `<p style="color: #ff0000;">Platz ${data.player_best.rank} | Score: ${data.player_best.score} | Level: ${data.player_best.level}</p>`;
                     html += '</div>';
                 }

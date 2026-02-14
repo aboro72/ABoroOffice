@@ -1,12 +1,13 @@
-﻿<a href="{% url 'crm:home' %}"><i class="fa-solid fa-house"></i> Ãœbersicht</a>
-<a href="{% url 'crm:account_list' %}"><i class="fa-solid fa-building"></i> Accounts</a>
-<a href="{% url 'crm:lead_list' %}"><i class="fa-solid fa-user-plus"></i> Leads</a>
-<a href="{% url 'crm:opportunity_list' %}"><i class="fa-solid fa-chart-line"></i> Opportunities</a>
-<a href="{% url 'crm:opportunity_board' %}"><i class="fa-solid fa-bars-progress"></i> Pipeline</a>
-<a href="{% url 'crm:help' %}"><i class="fa-regular fa-circle-question"></i> Hilfe</a>
+{% load i18n %}
+<a href="{% url 'crm:home' %}"><i class="fa-solid fa-house"></i> Ãœbersicht</a>
+<a href="{% url 'crm:account_list' %}"><i class="fa-solid fa-building"></i> {% trans "Accounts" %}</a>
+<a href="{% url 'crm:lead_list' %}"><i class="fa-solid fa-user-plus"></i> {% trans "Leads" %}</a>
+<a href="{% url 'crm:opportunity_list' %}"><i class="fa-solid fa-chart-line"></i> {% trans "Opportunities" %}</a>
+<a href="{% url 'crm:opportunity_board' %}"><i class="fa-solid fa-bars-progress"></i> {% trans "Pipeline" %}</a>
+<a href="{% url 'crm:help' %}"><i class="fa-regular fa-circle-question"></i> {% trans "Hilfe" %}</a>
 {% if can_edit %}
-<a href="{% url 'crm:email_template_list' %}"><i class="fa-solid fa-envelope"></i> E-Mail Templates</a>
-<a href="{% url 'crm:lead_sources' %}"><i class="fa-solid fa-bullseye"></i> Lead-Quellen</a>
-<a href="{% url 'crm:lead_staging' %}"><i class="fa-solid fa-layer-group"></i> Lead-Staging</a>
+<a href="{% url 'crm:email_template_list' %}"><i class="fa-solid fa-envelope"></i> {% trans "E-Mail-Vorlagen" %}</a>
+<a href="{% url 'crm:lead_sources' %}"><i class="fa-solid fa-bullseye"></i> {% trans "Lead-Quellen" %}</a>
+<a href="{% url 'crm:lead_staging' %}"><i class="fa-solid fa-layer-group"></i> {% trans "Lead-Staging" %}</a>
 {% endif %}
 

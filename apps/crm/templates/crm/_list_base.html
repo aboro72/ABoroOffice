@@ -1,4 +1,5 @@
-﻿{% extends "crm/_app_base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 {% load querystring %}
 
 {% block app_actions %}{% block list_actions %}{% endblock %}{% endblock %}
@@ -21,7 +22,7 @@
         <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
     </select>
-    <button class="btn btn-outline-secondary">Sortieren</button>
+    <button class="btn btn-outline-secondary">{% trans "Sortieren" %}</button>
 </form>
 {% endif %}
 {% block list_content %}{% endblock %}
@@ -41,9 +42,9 @@
             {% endif %}
         {% endfor %}
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?{% querystring request.GET page=page_obj.next_page_number %}">Weiter</a></li>
+        <li class="page-item"><a class="page-link" href="?{% querystring request.GET page=page_obj.next_page_number %}">{% trans "Weiter" %}</a></li>
         {% else %}
-        <li class="page-item disabled"><span class="page-link">Weiter</span></li>
+        <li class="page-item disabled"><span class="page-link">{% trans "Weiter" %}</span></li>
         {% endif %}
     </ul>
 </nav>
@@ -53,13 +54,13 @@
         <input type="hidden" name="{{ key }}" value="{{ value }}">
         {% endif %}
     {% endfor %}
-    <label class="text-muted small">Seite</label>
+    <label class="text-muted small">{% trans "Seite" %}</label>
     <select name="page" class="form-select form-select-sm" style="max-width: 120px;">
         {% for num in page_obj.paginator.page_range %}
         <option value="{{ num }}" {% if num == page_obj.number %}selected{% endif %}>{{ num }}</option>
         {% endfor %}
     </select>
-    <button class="btn btn-outline-secondary btn-sm">Gehe zu</button>
+    <button class="btn btn-outline-secondary btn-sm">{% trans "Gehe zu" %}</button>
 </form>
 {% endif %}
 {% endblock %}

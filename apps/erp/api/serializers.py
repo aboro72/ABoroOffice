@@ -2,11 +2,16 @@ from rest_framework import serializers
 from apps.erp.models import (
     Customer,
     Product,
+    ProductCategory,
     Service,
     WorkOrder,
     SalesOrder,
     SalesOrderItem,
     Invoice,
+    Quote,
+    QuoteItem,
+    OrderConfirmation,
+    DunningNotice,
     StockReceipt,
     StockReceiptItem,
     Course,
@@ -157,3 +162,66 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         model = Enrollment
         fields = ['id', 'course', 'customer', 'status', 'created_at']
         read_only_fields = ['created_at']
+
+
+class ProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCategory
+        fields = ['id', 'name', 'description', 'parent']
+
+
+class QuoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quote
+        fields = [
+            'id',
+            'number',
+            'customer',
+            'status',
+            'valid_until',
+            'net_amount',
+            'tax_rate',
+            'tax_amount',
+            'total_amount',
+            'notes',
+            'created_at',
+        ]
+        read_only_fields = ['created_at', 'number']
+
+
+class QuoteItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuoteItem
+        fields = ['id', 'quote', 'product', 'service', 'description', 'quantity', 'unit_price']
+
+
+class OrderConfirmationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderConfirmation
+        fields = [
+            'id',
+            'number',
+            'quote',
+            'sales_order',
+            'confirmed_at',
+            'notes',
+            'created_at',
+        ]
+        read_only_fields = ['created_at', 'number']
+
+
+class DunningNoticeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DunningNotice
+        fields = [
+            'id',
+            'number',
+            'invoice',
+            'dunning_level',
+            'dunning_fee',
+            'status',
+            'sent_at',
+            'notes',
+            'created_at',
+        ]
+        read_only_fields = ['created_at', 'number']

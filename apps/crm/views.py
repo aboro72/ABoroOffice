@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.template import Template, Context
 from django.conf import settings
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import (
@@ -97,10 +98,10 @@ class AccountListView(CrmViewMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['can_edit'] = can_edit_crm(self.request.user)
         context['list_sort_options'] = [
-            ('-updated_at', 'Neueste zuerst'),
-            ('updated_at', 'Älteste zuerst'),
-            ('name', 'Name A-Z'),
-            ('-name', 'Name Z-A'),
+            ('-updated_at', _("Neueste zuerst")),
+            ('updated_at', _("Älteste zuerst")),
+            ('name', _("Name A-Z")),
+            ('-name', _("Name Z-A")),
         ]
         context['current_sort'] = self.request.GET.get('sort', '-updated_at')
         return context
@@ -120,10 +121,10 @@ class AccountDetailView(CrmViewMixin, DetailView):
                 summary = ai.summarize_account(self.object, recent_notes=self.object.notes.all()[:3])
                 request.session['crm_ai_summary'] = summary
             except Exception as exc:
-                messages.error(request, f'AI Fehler: {exc}')
+                messages.error(request, _("AI Fehler: %(error)s") % {"error": exc})
         elif action == 'add_note':
             if not can_edit_crm(request.user):
-                messages.error(request, "Keine Berechtigung.")
+                messages.error(request, _("Keine Berechtigung."))
                 return redirect(reverse('crm:account_detail', args=[self.object.pk]))
             form = NoteForm(request.POST)
             if form.is_valid():
@@ -131,12 +132,12 @@ class AccountDetailView(CrmViewMixin, DetailView):
                 note.account = self.object
                 note.created_by = request.user
                 note.save()
-                messages.success(request, "Notiz gespeichert.")
+                messages.success(request, _("Notiz gespeichert."))
             else:
-                messages.error(request, "Notiz ist ungültig.")
+                messages.error(request, _("Notiz ist ungültig."))
         elif action == 'add_activity':
             if not can_edit_crm(request.user):
-                messages.error(request, "Keine Berechtigung.")
+                messages.error(request, _("Keine Berechtigung."))
                 return redirect(reverse('crm:account_detail', args=[self.object.pk]))
             form = ActivityForm(request.POST)
             if form.is_valid():
@@ -144,9 +145,9 @@ class AccountDetailView(CrmViewMixin, DetailView):
                 activity.account = self.object
                 activity.owner = request.user
                 activity.save()
-                messages.success(request, "Aktivität gespeichert.")
+                messages.success(request, _("Aktivität gespeichert."))
             else:
-                messages.error(request, "Aktivität ist ungültig.")
+                messages.error(request, _("Aktivität ist ungültig."))
         return redirect(reverse('crm:account_detail', args=[self.object.pk]))
 
     def get_context_data(self, **kwargs):
@@ -184,12 +185,12 @@ class LeadListView(CrmViewMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['can_edit'] = can_edit_crm(self.request.user)
         context['list_sort_options'] = [
-            ('-updated_at', 'Neueste zuerst'),
-            ('updated_at', 'Älteste zuerst'),
-            ('name', 'Name A-Z'),
-            ('-name', 'Name Z-A'),
-            ('-score', 'Score hoch'),
-            ('score', 'Score niedrig'),
+            ('-updated_at', _("Neueste zuerst")),
+            ('updated_at', _("Älteste zuerst")),
+            ('name', _("Name A-Z")),
+            ('-name', _("Name Z-A")),
+            ('-score', _("Score hoch")),
+            ('score', _("Score niedrig")),
         ]
         context['current_sort'] = self.request.GET.get('sort', '-updated_at')
         return context
@@ -230,7 +231,7 @@ class LeadDetailView(CrmViewMixin, DetailView):
                 self.object.ai_status = 'error'
                 self.object.ai_error = str(exc)
                 self.object.save(update_fields=['ai_status', 'ai_error'])
-                messages.error(request, f'AI Fehler: {exc}')
+                messages.error(request, _("AI Fehler: %(error)s") % {"error": exc})
         elif action == 'ai_followup':
             try:
                 ai = CrmAIService()
@@ -252,11 +253,11 @@ class LeadDetailView(CrmViewMixin, DetailView):
                 self.object.ai_status = 'error'
                 self.object.ai_error = str(exc)
                 self.object.save(update_fields=['ai_status', 'ai_error'])
-                messages.error(request, f'AI Fehler: {exc}')
+                messages.error(request, _("AI Fehler: %(error)s") % {"error": exc})
         elif action == 'ai_qa':
             question = request.POST.get('question', '').strip()
             if not question:
-                messages.error(request, "Bitte eine Frage eingeben.")
+                messages.error(request, _("Bitte eine Frage eingeben."))
                 return redirect(reverse('crm:lead_detail', args=[self.object.pk]))
             try:
                 ai = CrmAIService()
@@ -278,22 +279,22 @@ class LeadDetailView(CrmViewMixin, DetailView):
                 self.object.ai_status = 'error'
                 self.object.ai_error = str(exc)
                 self.object.save(update_fields=['ai_status', 'ai_error'])
-                messages.error(request, f'AI Fehler: {exc}')
+                messages.error(request, _("AI Fehler: %(error)s") % {"error": exc})
         elif action == 'enrich_lead':
             if not can_edit_crm(request.user):
-                messages.error(request, "Keine Berechtigung.")
+                messages.error(request, _("Keine Berechtigung."))
                 return redirect(reverse('crm:lead_detail', args=[self.object.pk]))
             try:
                 updated = enrich_lead_from_website(self.object)
                 if updated:
-                    messages.success(request, "Lead aus Website angereichert.")
+                    messages.success(request, _("Lead aus Website angereichert."))
                 else:
-                    messages.info(request, "Keine neuen Daten gefunden.")
+                    messages.info(request, _("Keine neuen Daten gefunden."))
             except Exception as exc:
-                messages.error(request, f"Enrich Fehler: {exc}")
+                messages.error(request, _("Enrich Fehler: %(error)s") % {"error": exc})
         elif action == 'add_note':
             if not can_edit_crm(request.user):
-                messages.error(request, "Keine Berechtigung.")
+                messages.error(request, _("Keine Berechtigung."))
                 return redirect(reverse('crm:lead_detail', args=[self.object.pk]))
             form = NoteForm(request.POST)
             if form.is_valid():
@@ -301,12 +302,12 @@ class LeadDetailView(CrmViewMixin, DetailView):
                 note.lead = self.object
                 note.created_by = request.user
                 note.save()
-                messages.success(request, "Notiz gespeichert.")
+                messages.success(request, _("Notiz gespeichert."))
             else:
-                messages.error(request, "Notiz ist ungültig.")
+                messages.error(request, _("Notiz ist ungültig."))
         elif action == 'add_activity':
             if not can_edit_crm(request.user):
-                messages.error(request, "Keine Berechtigung.")
+                messages.error(request, _("Keine Berechtigung."))
                 return redirect(reverse('crm:lead_detail', args=[self.object.pk]))
             form = ActivityForm(request.POST)
             if form.is_valid():
@@ -314,18 +315,18 @@ class LeadDetailView(CrmViewMixin, DetailView):
                 activity.lead = self.object
                 activity.owner = request.user
                 activity.save()
-                messages.success(request, "Aktivität gespeichert.")
+                messages.success(request, _("Aktivität gespeichert."))
             else:
-                messages.error(request, "Aktivität ist ungültig.")
+                messages.error(request, _("Aktivität ist ungültig."))
         elif action == 'recalc_score':
             if can_edit_crm(request.user):
                 update_lead_score(self.object, use_ai=True)
-                messages.success(request, "Lead-Score wurde aktualisiert.")
+                messages.success(request, _("Lead-Score wurde aktualisiert."))
             else:
-                messages.error(request, "Keine Berechtigung.")
+                messages.error(request, _("Keine Berechtigung."))
         elif action == 'send_email':
             if not can_edit_crm(request.user):
-                messages.error(request, "Keine Berechtigung.")
+                messages.error(request, _("Keine Berechtigung."))
                 return redirect(reverse('crm:lead_detail', args=[self.object.pk]))
             form = EmailSendForm(request.POST)
             if form.is_valid():
@@ -348,7 +349,7 @@ class LeadDetailView(CrmViewMixin, DetailView):
                         created_by=request.user,
                         status='sent',
                     )
-                    messages.success(request, "E-Mail gesendet.")
+                    messages.success(request, _("E-Mail gesendet."))
                 except Exception as exc:
                     EmailLog.objects.create(
                         template=template_obj,
@@ -360,9 +361,9 @@ class LeadDetailView(CrmViewMixin, DetailView):
                         status='failed',
                         error_message=str(exc),
                     )
-                    messages.error(request, f"E-Mail Fehler: {exc}")
+                    messages.error(request, _("E-Mail Fehler: %(error)s") % {"error": exc})
             else:
-                messages.error(request, "E-Mail-Formular ist ungueltig.")
+                messages.error(request, _("E-Mail-Formular ist ungültig."))
         return redirect(reverse('crm:lead_detail', args=[self.object.pk]))
 
     def get_context_data(self, **kwargs):
@@ -406,12 +407,12 @@ class OpportunityListView(CrmViewMixin, ListView):
         context['can_edit'] = can_edit_crm(self.request.user)
         context['opportunity_stage_choices'] = Opportunity.STAGE_CHOICES
         context['list_sort_options'] = [
-            ('-updated_at', 'Neueste zuerst'),
-            ('updated_at', 'Älteste zuerst'),
-            ('name', 'Name A-Z'),
-            ('-name', 'Name Z-A'),
-            ('-amount', 'Betrag hoch'),
-            ('amount', 'Betrag niedrig'),
+            ('-updated_at', _("Neueste zuerst")),
+            ('updated_at', _("Älteste zuerst")),
+            ('name', _("Name A-Z")),
+            ('-name', _("Name Z-A")),
+            ('-amount', _("Betrag hoch")),
+            ('amount', _("Betrag niedrig")),
         ]
         context['current_sort'] = self.request.GET.get('sort', '-updated_at')
         return context
@@ -431,10 +432,10 @@ class OpportunityDetailView(CrmViewMixin, DetailView):
                 draft = ai.draft_opportunity_email(self.object)
                 request.session['crm_ai_email'] = draft
             except Exception as exc:
-                messages.error(request, f'AI Fehler: {exc}')
+                messages.error(request, _("AI Fehler: %(error)s") % {"error": exc})
         elif action == 'send_email':
             if not can_edit_crm(request.user):
-                messages.error(request, "Keine Berechtigung.")
+                messages.error(request, _("Keine Berechtigung."))
                 return redirect(reverse('crm:opportunity_detail', args=[self.object.pk]))
             form = EmailSendForm(request.POST)
             if form.is_valid():
@@ -458,7 +459,7 @@ class OpportunityDetailView(CrmViewMixin, DetailView):
                         created_by=request.user,
                         status='sent',
                     )
-                    messages.success(request, "E-Mail gesendet.")
+                    messages.success(request, _("E-Mail gesendet."))
                 except Exception as exc:
                     EmailLog.objects.create(
                         template=template_obj,
@@ -470,7 +471,7 @@ class OpportunityDetailView(CrmViewMixin, DetailView):
                         status='failed',
                         error_message=str(exc),
                     )
-                    messages.error(request, f"E-Mail Fehler: {exc}")
+                    messages.error(request, _("E-Mail Fehler: %(error)s") % {"error": exc})
         return redirect(reverse('crm:opportunity_detail', args=[self.object.pk]))
 
     def get_context_data(self, **kwargs):
@@ -508,13 +509,13 @@ class AccountCreateView(CrmEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Account erstellen'
+        context['form_title'] = _("Account erstellen")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, "Account erstellt.")
+        messages.success(self.request, _("Account erstellt."))
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -528,13 +529,13 @@ class AccountUpdateView(CrmEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Account bearbeiten'
+        context['form_title'] = _("Account bearbeiten")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, "Account aktualisiert.")
+        messages.success(self.request, _("Account aktualisiert."))
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -548,7 +549,7 @@ class LeadCreateView(CrmEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Lead erstellen'
+        context['form_title'] = _("Lead erstellen")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
@@ -561,7 +562,7 @@ class LeadCreateView(CrmEditMixin, CreateView):
                 enrich_lead_from_website(self.object)
         except Exception:
             pass
-        messages.success(self.request, "Lead erstellt.")
+        messages.success(self.request, _("Lead erstellt."))
         return response
 
     def get_success_url(self):
@@ -575,7 +576,7 @@ class LeadUpdateView(CrmEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Lead bearbeiten'
+        context['form_title'] = _("Lead bearbeiten")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
@@ -588,7 +589,7 @@ class LeadUpdateView(CrmEditMixin, UpdateView):
                 enrich_lead_from_website(self.object)
         except Exception:
             pass
-        messages.success(self.request, "Lead aktualisiert.")
+        messages.success(self.request, _("Lead aktualisiert."))
         return response
 
     def get_success_url(self):
@@ -602,13 +603,13 @@ class OpportunityCreateView(CrmEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Opportunity erstellen'
+        context['form_title'] = _("Opportunity erstellen")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, "Opportunity erstellt.")
+        messages.success(self.request, _("Opportunity erstellt."))
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -622,13 +623,13 @@ class OpportunityUpdateView(CrmEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Opportunity bearbeiten'
+        context['form_title'] = _("Opportunity bearbeiten")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, "Opportunity aktualisiert.")
+        messages.success(self.request, _("Opportunity aktualisiert."))
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -652,14 +653,14 @@ class EmailTemplateCreateView(CrmEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'E-Mail Template erstellen'
+        context['form_title'] = _("E-Mail Template erstellen")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
-        messages.success(self.request, "E-Mail-Template erstellt.")
+        messages.success(self.request, _("E-Mail-Template erstellt."))
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -673,13 +674,13 @@ class EmailTemplateUpdateView(CrmEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'E-Mail Template bearbeiten'
+        context['form_title'] = _("E-Mail Template bearbeiten")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, "E-Mail-Template aktualisiert.")
+        messages.success(self.request, _("E-Mail-Template aktualisiert."))
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -709,7 +710,7 @@ class LeadSourceProfileCreateView(CrmEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Lead-Quelle erstellen'
+        context['form_title'] = _("Lead-Quelle erstellen")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
@@ -725,7 +726,7 @@ class LeadSourceProfileUpdateView(CrmEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Lead-Quelle bearbeiten'
+        context['form_title'] = _("Lead-Quelle bearbeiten")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
@@ -741,7 +742,7 @@ class LeadSourceRunView(CrmEditMixin, TemplateView):
         profile_id = kwargs.get('pk')
         profile = LeadSourceProfile.objects.get(pk=profile_id)
         run_import_for_profile(profile)
-        messages.success(request, "Import gestartet.")
+        messages.success(request, _("Import gestartet."))
         return redirect('crm:lead_sources')
 
 
@@ -816,7 +817,7 @@ class LeadStagingBatchWebsiteUpdateView(CrmEditMixin, TemplateView):
                 item.status = 'incomplete'
             item.save(update_fields=['raw_data', 'status'])
             updated += 1
-        messages.success(request, f"Websites/Adressen gespeichert: {updated}.")
+        messages.success(request, _("Websites/Adressen gespeichert: %(count)s.") % {"count": updated})
         return redirect('crm:lead_staging_needs_website')
 
 
@@ -827,7 +828,7 @@ class LeadStagingUpdateView(CrmEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Staging-Lead bearbeiten'
+        context['form_title'] = _("Staging-Lead bearbeiten")
         context['can_edit'] = True
         context['selected_status'] = self.request.GET.get('status', '').strip()
         return context
@@ -843,7 +844,7 @@ class LeadStagingImportView(CrmEditMixin, TemplateView):
         item_id = kwargs.get('pk')
         item = LeadStaging.objects.get(pk=item_id)
         if not (item.name and item.company and item.email and item.phone and item.lead_source and item.lead_status):
-            messages.error(request, "Pflichtfelder fehlen (Name, Firma, E-Mail, Telefon, Quelle, Status).")
+            messages.error(request, _("Pflichtfelder fehlen (Name, Firma, E-Mail, Telefon, Quelle, Status)."))
             return redirect('crm:lead_staging')
         Lead.objects.create(
             name=item.name,
@@ -858,7 +859,7 @@ class LeadStagingImportView(CrmEditMixin, TemplateView):
         )
         item.status = 'imported'
         item.save(update_fields=['status'])
-        messages.success(request, "Lead importiert.")
+        messages.success(request, _("Lead importiert."))
         return redirect('crm:lead_staging')
 
 
@@ -869,7 +870,7 @@ class LeadStagingBulkImportView(CrmEditMixin, TemplateView):
         ids = request.POST.getlist('selected_ids')
         action = request.POST.get('action', 'import')
         if not ids:
-            messages.error(request, "Keine Einträge ausgewählt.")
+            messages.error(request, _("Keine Einträge ausgewählt."))
             return redirect('crm:lead_staging')
 
         if action == 'enrich':
@@ -879,12 +880,12 @@ class LeadStagingBulkImportView(CrmEditMixin, TemplateView):
             count = enrich_queryset(with_site)
             if without_site:
                 LeadStaging.objects.filter(id__in=[i.id for i in without_site]).update(status='needs_website')
-            messages.success(request, f"Auto-Enrichment abgeschlossen. Bearbeitet: {count}.")
+            messages.success(request, _("Auto-Enrichment abgeschlossen. Bearbeitet: %(count)s.") % {"count": count})
             return redirect('crm:lead_staging')
 
         if action == 'mark_needs_website':
             LeadStaging.objects.filter(id__in=ids).update(status='needs_website')
-            messages.success(request, "Status auf 'Website gesucht' gesetzt.")
+            messages.success(request, _("Status auf 'Website gesucht' gesetzt."))
             return redirect('crm:lead_staging')
 
         imported = 0
@@ -923,7 +924,7 @@ class LeadStagingBulkImportView(CrmEditMixin, TemplateView):
             item.save(update_fields=['status'])
             imported += 1
 
-        messages.success(request, f"Bulk-Import abgeschlossen. Importiert: {imported}, Übersprungen: {skipped}.")
+        messages.success(request, _("Bulk-Import abgeschlossen. Importiert: %(imported)s, Übersprungen: %(skipped)s.") % {"imported": imported, "skipped": skipped})
         return redirect('crm:lead_staging')
 
 
@@ -944,7 +945,7 @@ class LeadStagingQuickUpdateView(CrmEditMixin, TemplateView):
         if website and item.status == 'needs_website':
             item.status = 'incomplete'
         item.save(update_fields=['raw_data', 'status'])
-        messages.success(request, "Website/Adresse gespeichert.")
+        messages.success(request, _("Website/Adresse gespeichert."))
         return redirect('crm:lead_staging')
 
 

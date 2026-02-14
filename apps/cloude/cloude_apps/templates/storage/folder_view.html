@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{{ folder.name }} - CloudService{% endblock %}
 
@@ -150,7 +151,7 @@
                                         <div class="btn-group btn-group-sm">
                                             <a href="/storage/file/{{ file.id }}/download/" class="btn btn-outline-primary" title="Download" aria-label="Datei herunterladen">
                                                 <i class="bi bi-download"></i>
-                                                <span class="ms-1 d-none d-lg-inline">Download</span>
+                                                <span class="ms-1 d-none d-lg-inline">{% trans "Download" %}</span>
                                             </a>
                                             <button class="btn btn-outline-secondary" title="Teilen" aria-label="Datei teilen" data-bs-toggle="modal" data-bs-target="#shareModal{{ file.id }}">
                                                 <i class="bi bi-share"></i>
@@ -162,7 +163,7 @@
                                             </button>
                                             <button class="btn btn-outline-danger" title="L?schen" aria-label="Datei l?schen" onclick="deleteFile({{ file.id }})">
                                                 <i class="bi bi-trash"></i>
-                                                <span class="ms-1 d-none d-lg-inline">L?schen</span>
+                                                <span class="ms-1 d-none d-lg-inline">{% trans "L?schen" %}</span>
                                             </button>
                                         </div>
 

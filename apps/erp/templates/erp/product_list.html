@@ -1,16 +1,17 @@
 {% extends "erp/_list_base.html" %}
+{% load i18n %}
 
 {% block title %}Produkte{% endblock %}
 
 {% block app_breadcrumb %}Produkte{% endblock %}
 {% block list_heading %}Produkte{% endblock %}
 {% block list_actions %}
-    <a class="btn btn-primary" href="/erp/products/create/">Neu</a>
+    <a class="btn btn-primary" href="/erp/products/create/">{% trans "Neu" %}</a>
 {% endblock %}
 
 {% block list_filters %}
 <form class="d-flex" method="get">
-    <input class="form-control" name="q" placeholder="Suche Name/SKU" value="{{ request.GET.q|default:'' }}">
+    <input class="form-control" name="q" placeholder="{% trans 'Suche Name/SKU' %}" value="{{ request.GET.q|default:'' }}">
 </form>
 {% endblock %}
 
@@ -19,26 +20,44 @@
     <table class="table table-hover mb-0">
         <thead class="table-light">
             <tr>
-                <th>Name</th>
-                <th>SKU</th>
-                <th>Preis (Netto)</th>
-                <th>Preis (Brutto)</th>
-                <th>Lager</th>
+                <th>{% trans "Bild" %}</th>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Kategorien" %}</th>
+                <th>{% trans "SKU" %}</th>
+                <th>{% trans "Preis (Netto)" %}</th>
+                <th>{% trans "Preis (Brutto)" %}</th>
+                <th>{% trans "Lager" %}</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             {% for p in products %}
             <tr>
+                <td>
+                    {% if p.image %}
+                    <img src="{{ p.image.url }}" alt="{{ p.name }}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 6px;">
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
                 <td>{{ p.name }}</td>
+                <td>
+                    {% if p.categories.exists %}
+                        {% for c in p.categories.all %}
+                            <span class="badge bg-light text-dark">{{ c.name }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
                 <td>{{ p.sku|default:"-" }}</td>
                 <td>{{ p.price_net|default:"-" }}</td>
                 <td>{{ p.price_gross|default:"-" }}</td>
                 <td>{{ p.stock_qty|default:"-" }}</td>
-                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/erp/products/{{ p.id }}/edit/">Bearbeiten</a></td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/erp/products/{{ p.id }}/edit/">{% trans "Bearbeiten" %}</a></td>
             </tr>
             {% empty %}
-            <tr><td colspan="6" class="text-center text-muted py-3">Keine Produkte.</td></tr>
+            <tr><td colspan="6" class="text-center text-muted py-3">{% trans "Keine Produkte." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

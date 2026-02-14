@@ -1,4 +1,5 @@
 {% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM Hilfe{% endblock %}
 
@@ -15,8 +16,8 @@
             <li><strong>Name/Firma</strong>: Identifikation</li>
             <li><strong>E-Mail/Telefon</strong>: Follow-up Kontakt</li>
             <li><strong>Website</strong>: Auto-Enrich-Quelle</li>
-            <li><strong>Quelle</strong>: Pipeline-Analyse</li>
-            <li><strong>Status</strong>: z. B. neu, qualifiziert, gewonnen</li>
+            <li><strong>{% trans "Quelle" %}</strong>: Pipeline-Analyse</li>
+            <li><strong>{% trans "Status" %}</strong>: z. B. neu, qualifiziert, gewonnen</li>
         </ul>
     </div>
 </div>

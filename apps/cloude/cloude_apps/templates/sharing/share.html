@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}Mit Benutzer teilen - CloudService{% endblock %}
 
@@ -42,7 +43,7 @@
                             <select class="form-select" id="id_permission" name="permission">
                                 <option value="view" selected>Nur ansehen</option>
                                 <option value="download">Herunterladen</option>
-                                <option value="edit">Bearbeiten</option>
+                                <option value="edit">{% trans "Bearbeiten" %}</option>
                                 <option value="delete">Löschen</option>
                                 <option value="share">Weiterteilen</option>
                                 <option value="admin">Vollzugriff</option>

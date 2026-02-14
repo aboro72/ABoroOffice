@@ -1,11 +1,12 @@
 {% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Pipeline{% endblock %}
 
 {% block app_breadcrumb %}Pipeline{% endblock %}
 {% block app_actions %}
     {% if can_edit %}
-    <a class="btn btn-primary" href="{% url 'crm:opportunity_create' %}">Neu</a>
+    <a class="btn btn-primary" href="{% url 'crm:opportunity_create' %}">{% trans "Neu" %}</a>
     {% endif %}
     <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_list' %}">Liste</a>
 {% endblock %}

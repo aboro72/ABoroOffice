@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}Chat mit {{ session.visitor_name }} - {{ app_title }}{% endblock %}
 
@@ -21,68 +22,64 @@
     </div>
     
     <div style="display: flex; gap: 10px;">
-        <a href="{% url 'chat:agent_dashboard' %}" class="btn btn-secondary">
-            ← Zurück zum Dashboard
-        </a>
+        <a href="{% url 'chat:agent_dashboard' %}" class="btn btn-secondary">{% trans "← Zurück zum Dashboard" %}</a>
         {% if can_respond and session.status == 'active' %}
-        <button onclick="endChat()" class="btn btn-danger">
-            Chat beenden
-        </button>
+        <button onclick="endChat()" class="btn btn-danger">{% trans "Chat beenden" %}</button>
         {% endif %}
     </div>
 </div>
 
 <!-- Chat Info -->
 <div class="card" style="margin-bottom: 20px;">
-    <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">Chat-Informationen</h3>
+    <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 15px 0;">{% trans "Chat-Informationen" %}</h3>
     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Besucher</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Besucher" %}</p>
             <p style="font-weight: 500;">{{ session.visitor_name }}</p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">E-Mail</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "E-Mail" %}</p>
             <p style="font-weight: 500;">
                 <a href="mailto:{{ session.visitor_email }}" style="color: #667eea; text-decoration: none;">{{ session.visitor_email }}</a>
             </p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Gestartet am</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Gestartet am" %}</p>
             <p style="font-weight: 500;">{{ session.created_at|date:"d.m.Y H:i" }} Uhr</p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Zugewiesen an</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Zugewiesen an" %}</p>
             <p style="font-weight: 500;">
                 {% if session.assigned_agent %}
                     {{ session.assigned_agent.full_name }}
                 {% else %}
-                    <span style="color: #868e96;">Nicht zugewiesen</span>
+                    <span style="color: #868e96;">{% trans "Nicht zugewiesen" %}</span>
                 {% endif %}
             </p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">IP-Adresse</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "IP-Adresse" %}</p>
             <p style="font-weight: 500;">{{ session.visitor_ip }}</p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Seite</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Seite" %}</p>
             <p style="font-weight: 500;">
                 {% if session.visitor_page_url %}
                     <a href="{{ session.visitor_page_url }}" target="_blank" style="color: #667eea; text-decoration: none;">
                         {{ session.visitor_page_url|truncatechars:50 }}
                     </a>
                 {% else %}
-                    <span style="color: #868e96;">Nicht verfügbar</span>
+                    <span style="color: #868e96;">{% trans "Nicht verfügbar" %}</span>
                 {% endif %}
             </p>
         </div>
         {% if session.ended_at %}
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Beendet am</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Beendet am" %}</p>
             <p style="font-weight: 500;">{{ session.ended_at|date:"d.m.Y H:i" }} Uhr</p>
         </div>
         <div>
-            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">Chat-Dauer</p>
+            <p style="color: #868e96; font-size: 13px; margin-bottom: 5px;">{% trans "Chat-Dauer" %}</p>
             <p style="font-weight: 500;">{{ session.duration }}</p>
         </div>
         {% endif %}
@@ -91,7 +88,7 @@
 
 <!-- Chat Messages -->
 <div class="card">
-    <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 20px 0;">Chat-Verlauf</h3>
+    <h3 style="font-size: 16px; font-weight: 600; margin: 0 0 20px 0;">{% trans "Chat-Verlauf" %}</h3>
     
     <div id="chat-messages" style="height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; background: #f8f9fa; margin-bottom: 20px;">
         {% for message in messages %}
@@ -127,9 +124,7 @@
             {% endif %}
         </div>
         {% empty %}
-        <div style="text-align: center; color: #868e96; padding: 40px;">
-            Noch keine Nachrichten in diesem Chat.
-        </div>
+        <div style="text-align: center; color: #868e96; padding: 40px;">{% trans "Noch keine Nachrichten in diesem Chat." %}</div>
         {% endfor %}
     </div>
     
@@ -152,13 +147,9 @@
     </form>
     {% else %}
         {% if session.status == 'ended' %}
-        <div style="background: #e9ecef; padding: 15px; border-radius: 8px; text-align: center; color: #495057;">
-            Dieser Chat wurde beendet.
-        </div>
+        <div style="background: #e9ecef; padding: 15px; border-radius: 8px; text-align: center; color: #495057;">{% trans "Dieser Chat wurde beendet." %}</div>
         {% else %}
-        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center; color: #856404;">
-            Sie können in diesem Chat nicht antworten.
-        </div>
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center; color: #856404;">{% trans "Sie können in diesem Chat nicht antworten." %}</div>
         {% endif %}
     {% endif %}
 </div>

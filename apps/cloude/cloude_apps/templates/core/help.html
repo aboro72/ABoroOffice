@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Hilfe - CloudService{% endblock %}
 
@@ -25,7 +26,7 @@
         </div>
 
         <div class="col-md-9">
-            <h1><i class="bi bi-question-circle me-2"></i>Hilfe</h1>
+            <h1><i class="bi bi-question-circle me-2"></i>{% trans "Hilfe" %}</h1>
             <p class="lead">CloudService -> Dateien, Versionen und Freigaben.</p>
             <hr>
 

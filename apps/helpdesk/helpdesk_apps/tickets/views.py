@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponseForbidden
 from django.utils import timezone
 from django.core.mail import send_mail
@@ -70,7 +71,7 @@ Beschreibung:
 Ticket ansehen: {ticket_url}
 
 ---
-Diese Email wurde automatisch vom ABoro-Soft Helpdesk System gesendet.
+Diese E-Mail wurde automatisch vom ABoro-Soft Helpdesk System gesendet.
 """
 
     # Send to all agents
@@ -175,7 +176,7 @@ Beschreibung:
 Ticket ansehen: {ticket_url}
 
 ---
-Diese Email wurde automatisch vom ABoro-Soft Helpdesk System gesendet.
+Diese E-Mail wurde automatisch vom ABoro-Soft Helpdesk System gesendet.
 """
 
     try:
@@ -241,7 +242,7 @@ def ticket_list(request):
 def ticket_create(request):
     """Create a new ticket - customers create for themselves, agents can create for customers"""
     if request.user.role not in ['customer', 'support_agent', 'admin'] and not (request.user.is_staff or request.user.is_superuser):
-        messages.error(request, 'Sie haben keine Berechtigung, Tickets zu erstellen.')
+        messages.error(request, _("Sie haben keine Berechtigung, Tickets zu erstellen."))
         return redirect('main:dashboard')
 
     # Agents/admins use a different form to specify customer
@@ -267,12 +268,11 @@ def ticket_create(request):
                             customer.phone = customer_phone
                             customer.save()
                     except User.DoesNotExist:
-                        # Email provided but customer doesn't exist
+                        # E-Mail provided but customer doesn't exist
                         if not customer_first_name or not customer_last_name:
                             messages.error(
                                 request,
-                                f'Kunde mit Email {customer_email} existiert nicht. '
-                                'Bitte geben Sie Vor- und Nachname ein, um einen neuen Kunden zu erstellen.'
+                                _("Kunde mit E-Mail %(email)s existiert nicht. Bitte geben Sie Vor- und Nachname ein, um einen neuen Kunden zu erstellen.") % {"email": customer_email}
                             )
                             return render(request, 'tickets/create_agent.html', {'form': form})
 
@@ -284,8 +284,7 @@ def ticket_create(request):
                     if not customer_first_name or not customer_last_name:
                         messages.error(
                             request,
-                            'Bitte geben Sie entweder die Email eines existierenden Kunden ein '
-                            'oder Vor- und Nachname eines neuen Kunden.'
+                            _("Bitte geben Sie entweder die E-Mail eines existierenden Kunden ein oder Vor- und Nachname eines neuen Kunden.")
                         )
                         return render(request, 'tickets/create_agent.html', {'form': form})
 
@@ -324,11 +323,10 @@ def ticket_create(request):
                         )
                         messages.info(
                             request,
-                            f'Neuer Kunde "{customer.full_name}" wurde im System erstellt. '
-                            f'Initial-Passwort: {INITIAL_PASSWORD}'
+                            _("Neuer Kunde \"%(customer)s\" wurde im System erstellt. Initial-Passwort: %(password)s") % {"customer": customer.full_name, "password": INITIAL_PASSWORD}
                         )
                     except Exception as e:
-                        messages.error(request, f'Fehler beim Erstellen des Kunden: {str(e)}')
+                        messages.error(request, _("Fehler beim Erstellen des Kunden: %(error)s") % {"error": str(e)})
                         return render(request, 'tickets/create_agent.html', {'form': form})
 
                 # Create ticket for customer
@@ -353,7 +351,7 @@ def ticket_create(request):
                 # Send notification emails to other agents
                 notify_agents_new_ticket(ticket)
 
-                messages.success(request, f'Ticket {ticket.ticket_number} wurde für {customer.full_name} erstellt!')
+                messages.success(request, _("Ticket %(ticket)s wurde für %(customer)s erstellt!") % {"ticket": ticket.ticket_number, "customer": customer.full_name})
                 return redirect('tickets:detail', pk=ticket.pk)
         else:
             form = AgentTicketCreateForm()
@@ -383,13 +381,13 @@ def ticket_create(request):
                     try:
                         ai_comment = ai_service.create_auto_comment(ticket)
                         if ai_comment:
-                            messages.success(request, f'Ticket {ticket.ticket_number} wurde erstellt! Unsere KI hat bereits eine erste Antwort generiert.')
+                            messages.success(request, _("Ticket %(ticket)s wurde erstellt! Unsere KI hat bereits eine erste Antwort generiert.") % {"ticket": ticket.ticket_number})
                         else:
-                            messages.success(request, f'Ticket {ticket.ticket_number} wurde erfolgreich erstellt!')
+                            messages.success(request, _("Ticket %(ticket)s wurde erfolgreich erstellt!") % {"ticket": ticket.ticket_number})
                     except Exception as e:
-                        messages.success(request, f'Ticket {ticket.ticket_number} wurde erfolgreich erstellt!')
+                        messages.success(request, _("Ticket %(ticket)s wurde erfolgreich erstellt!") % {"ticket": ticket.ticket_number})
                 else:
-                    messages.success(request, f'Ticket {ticket.ticket_number} wurde erfolgreich erstellt!')
+                    messages.success(request, _("Ticket %(ticket)s wurde erfolgreich erstellt!") % {"ticket": ticket.ticket_number})
 
                 return redirect('tickets:detail', pk=ticket.pk)
         else:
@@ -405,7 +403,7 @@ def ticket_detail(request, pk):
 
     # Check permissions
     if not request.user.can_access_ticket(ticket):
-        return HttpResponseForbidden('Sie haben keine Berechtigung, dieses Ticket zu sehen.')
+        return HttpResponseForbidden(_("Sie haben keine Berechtigung, dieses Ticket zu sehen."))
 
     if request.method == 'POST':
         form = TicketCommentForm(request.POST)
@@ -465,11 +463,11 @@ def ticket_detail(request, pk):
                                 html_message=message,
                                 fail_silently=True,
                             )
-                            logger.info(f"Email sent to {customer_email} for Ticket #{ticket.ticket_number}")
+                            logger.info(f"E-Mail sent to {customer_email} for Ticket #{ticket.ticket_number}")
                 except Exception as e:
                     logger.error(f"Failed to send email notification: {e}")
 
-            messages.success(request, 'Kommentar hinzugefügt!')
+            messages.success(request, _("Kommentar hinzugefügt!"))
             return redirect('tickets:detail', pk=ticket.pk)
     else:
         form = TicketCommentForm()
@@ -518,20 +516,20 @@ def ticket_assign(request, pk):
                     assigned_agent = User.objects.get(id=agent_id, role='support_agent', is_active=True)
                     ticket.assigned_to = assigned_agent
                     action_text = f'Ticket wurde von {request.user.full_name} (Team Lead) an {assigned_agent.full_name} zugewiesen.'
-                    success_msg = f'Ticket {ticket.ticket_number} wurde {assigned_agent.full_name} zugewiesen.'
+                    success_msg = _("Ticket %(ticket)s wurde %(agent)s zugewiesen.") % {"ticket": ticket.ticket_number, "agent": assigned_agent.full_name}
                 except User.DoesNotExist:
-                    messages.error(request, 'Agent nicht gefunden.')
+                    messages.error(request, _("Agent nicht gefunden."))
                     return redirect('tickets:detail', pk=ticket.pk)
             else:
                 # Self-assign for team lead
                 ticket.assigned_to = request.user
                 action_text = f'Ticket wurde von {request.user.full_name} übernommen.'
-                success_msg = f'Ticket {ticket.ticket_number} wurde Ihnen zugewiesen.'
+                success_msg = _("Ticket %(ticket)s wurde Ihnen zugewiesen.") % {"ticket": ticket.ticket_number}
         else:
             # Regular agents can only self-assign
             ticket.assigned_to = request.user
             action_text = f'Ticket wurde von {request.user.full_name} übernommen.'
-            success_msg = f'Ticket {ticket.ticket_number} wurde Ihnen zugewiesen.'
+            success_msg = _("Ticket %(ticket)s wurde Ihnen zugewiesen.") % {"ticket": ticket.ticket_number}
 
         ticket.status = 'in_progress'
         ticket.save()
@@ -605,7 +603,7 @@ def ticket_escalate(request, pk):
             # Send email notification to escalated agent with urgency
             notify_agent_ticket_escalation(ticket, old_agent, new_agent, reason)
 
-            messages.success(request, f'Ticket wurde eskaliert an {new_agent.full_name} und Email wurde versendet')
+            messages.success(request, _("Ticket wurde eskaliert an %(agent)s und E-Mail wurde versendet") % {"agent": new_agent.full_name})
 
         return redirect('tickets:detail', pk=ticket.pk)
 
@@ -676,10 +674,10 @@ def ticket_close(request, pk):
                     recipient_list=[ticket.created_by.email],
                     fail_silently=False,
                 )
-                messages.success(request, f'Ticket {ticket.ticket_number} wurde geschlossen und die Zusammenfassung wurde per Email versendet.')
+                messages.success(request, _("Ticket %(ticket)s wurde geschlossen und die Zusammenfassung wurde per E-Mail versendet.") % {"ticket": ticket.ticket_number})
             except Exception as e:
                 # If email fails, still close the ticket but warn user
-                messages.warning(request, f'Ticket {ticket.ticket_number} wurde geschlossen, aber die Email konnte nicht versendet werden: {str(e)}')
+                messages.warning(request, _("Ticket %(ticket)s wurde geschlossen, aber die E-Mail konnte nicht versendet werden: %(error)s") % {"ticket": ticket.ticket_number, "error": str(e)})
 
             return redirect('tickets:detail', pk=ticket.pk)
 

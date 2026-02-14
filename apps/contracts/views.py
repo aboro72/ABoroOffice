@@ -1,5 +1,6 @@
 ﻿from django.views.generic import ListView, DetailView, CreateView, UpdateView, TemplateView
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.shortcuts import redirect
 from django.urls import reverse
 from .models import Contract, ContractVersion
@@ -41,7 +42,7 @@ class ContractCreateView(ContractsEditMixin, CreateView):
         if error:
             messages.error(self.request, error)
         else:
-            messages.success(self.request, "KI-Analyse abgeschlossen.")
+            messages.success(self.request, _("KI-Analyse abgeschlossen."))
         return response
 
     def get_success_url(self):
@@ -60,7 +61,7 @@ class ContractUpdateView(ContractsEditMixin, UpdateView):
         if error:
             messages.error(self.request, error)
         else:
-            messages.success(self.request, "KI-Analyse abgeschlossen.")
+            messages.success(self.request, _("KI-Analyse abgeschlossen."))
         return response
 
     def get_success_url(self):
@@ -86,7 +87,7 @@ class ContractVersionCreateView(ContractsEditMixin, CreateView):
         if error:
             messages.error(self.request, error)
         else:
-            messages.success(self.request, "KI-Analyse abgeschlossen.")
+            messages.success(self.request, _("KI-Analyse abgeschlossen."))
         return response
 
     def get_success_url(self):
@@ -103,7 +104,7 @@ class ContractAnalyzeView(ContractsEditMixin, TemplateView):
         if error:
             messages.error(request, error)
         else:
-            messages.success(request, "KI-Analyse abgeschlossen.")
+            messages.success(request, _("KI-Analyse abgeschlossen."))
         return redirect('contracts:contract_detail', pk=contract_id)
 
 

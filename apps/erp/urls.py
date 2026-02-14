@@ -1,6 +1,9 @@
 from django.urls import path, include
 from .views import (
     ErpHomeView,
+    ProductCategoryListView,
+    ProductCategoryCreateView,
+    ProductCategoryUpdateView,
     CustomerListView,
     CustomerCreateView,
     CustomerUpdateView,
@@ -48,6 +51,9 @@ app_name = 'erp'
 
 urlpatterns = [
     path('', ErpHomeView.as_view(), name='home'),
+    path('categories/', ProductCategoryListView.as_view(), name='categories'),
+    path('categories/create/', ProductCategoryCreateView.as_view(), name='category_create'),
+    path('categories/<int:pk>/edit/', ProductCategoryUpdateView.as_view(), name='category_edit'),
     path('customers/', CustomerListView.as_view(), name='customers'),
     path('customers/create/', CustomerCreateView.as_view(), name='customer_create'),
     path('customers/<int:pk>/edit/', CustomerUpdateView.as_view(), name='customer_edit'),

@@ -7,6 +7,7 @@ from django.views.generic import CreateView, DeleteView, ListView, TemplateView,
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.shortcuts import redirect, get_object_or_404, render
+from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy
 from django.http import JsonResponse, FileResponse
 from django.db.models import Q
@@ -215,7 +216,7 @@ class PublicLinkSettingsView(LoginRequiredMixin, DetailView):
         link.save()
 
         from django.contrib import messages
-        messages.success(request, 'Link-Einstellungen gespeichert.')
+        messages.success(request, _("Link-Einstellungen gespeichert."))
 
         return redirect('sharing:link_settings', link_id=link.id)
 

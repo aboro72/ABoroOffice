@@ -3,11 +3,13 @@ from django.urls import reverse
 from django.contrib import messages
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings
 from apps.cloude.cloude_apps.plugins.models import Plugin
 from .permissions import ErpViewMixin, ErpEditMixin, can_edit_erp
 from .models import (
     Customer,
+    ProductCategory,
     Product,
     Service,
     WorkOrder,
@@ -22,8 +24,10 @@ from .models import (
     StockReceiptItem,
     Course,
 )
+from apps.personnel.models import Instructor
 from .forms import (
     CustomerForm,
+    ProductCategoryForm,
     ProductForm,
     ServiceForm,
     WorkOrderForm,
@@ -51,6 +55,61 @@ class ErpHomeView(ErpViewMixin, TemplateView):
     template_name = 'erp/home.html'
 
 
+class ProductCategoryListView(ErpViewMixin, ListView):
+    model = ProductCategory
+    template_name = 'erp/category_list.html'
+    context_object_name = 'categories'
+    paginate_by = 25
+
+    def get_queryset(self):
+        qs = ProductCategory.objects.select_related('parent').all()
+        q = (self.request.GET.get('q') or '').strip()
+        sort = (self.request.GET.get('sort') or 'name').strip()
+        if q:
+            qs = qs.filter(name__icontains=q)
+        allowed_sorts = {'name', '-name'}
+        if sort not in allowed_sorts:
+            sort = 'name'
+        return qs.order_by(sort)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['list_sort_options'] = [
+            ('name', _("Name A-Z")),
+            ('-name', _("Name Z-A")),
+        ]
+        context['current_sort'] = (self.request.GET.get('sort') or 'name')
+        return context
+
+
+class ProductCategoryCreateView(ErpEditMixin, CreateView):
+    model = ProductCategory
+    form_class = ProductCategoryForm
+    template_name = 'erp/form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = _("Kategorie erstellen")
+        return context
+
+    def get_success_url(self):
+        return reverse('erp:categories')
+
+
+class ProductCategoryUpdateView(ErpEditMixin, UpdateView):
+    model = ProductCategory
+    form_class = ProductCategoryForm
+    template_name = 'erp/form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = _("Kategorie bearbeiten")
+        return context
+
+    def get_success_url(self):
+        return reverse('erp:categories')
+
+
 class CustomerListView(ErpViewMixin, ListView):
     model = Customer
     template_name = 'erp/customer_list.html'
@@ -71,10 +130,10 @@ class CustomerListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('name', 'Name A-Z'),
-            ('-name', 'Name Z-A'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('name', _("Name A-Z")),
+            ('-name', _("Name Z-A")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -87,7 +146,7 @@ class CustomerCreateView(ErpEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Kunde erstellen'
+        context['form_title'] = _("Kunde erstellen")
         return context
 
     def get_success_url(self):
@@ -101,7 +160,7 @@ class CustomerUpdateView(ErpEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Kunde bearbeiten'
+        context['form_title'] = _("Kunde bearbeiten")
         return context
 
     def get_success_url(self):
@@ -128,12 +187,12 @@ class ProductListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('name', 'Name A-Z'),
-            ('-name', 'Name Z-A'),
-            ('sku', 'SKU A-Z'),
-            ('-sku', 'SKU Z-A'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('name', _("Name A-Z")),
+            ('-name', _("Name Z-A")),
+            ('sku', _("SKU A-Z")),
+            ('-sku', _("SKU Z-A")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -146,7 +205,7 @@ class ProductCreateView(ErpEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Produkt erstellen'
+        context['form_title'] = _("Produkt erstellen")
         return context
 
     def form_valid(self, form):
@@ -165,7 +224,7 @@ class ProductUpdateView(ErpEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Produkt bearbeiten'
+        context['form_title'] = _("Produkt bearbeiten")
         return context
 
     def form_valid(self, form):
@@ -194,10 +253,10 @@ class ServiceListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('name', 'Name A-Z'),
-            ('-name', 'Name Z-A'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('name', _("Name A-Z")),
+            ('-name', _("Name Z-A")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -210,7 +269,7 @@ class ServiceCreateView(ErpEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Service erstellen'
+        context['form_title'] = _("Service erstellen")
         return context
 
     def get_success_url(self):
@@ -224,7 +283,7 @@ class ServiceUpdateView(ErpEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Service bearbeiten'
+        context['form_title'] = _("Service bearbeiten")
         return context
 
     def get_success_url(self):
@@ -251,12 +310,12 @@ class WorkOrderListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('title', 'Titel A-Z'),
-            ('-title', 'Titel Z-A'),
-            ('-due_date', 'Fällig spaeter'),
-            ('due_date', 'Fällig frueher'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('title', _("Titel A-Z")),
+            ('-title', _("Titel Z-A")),
+            ('-due_date', _("Fällig später")),
+            ('due_date', _("Fällig früher")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -282,10 +341,10 @@ class QuoteListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('number', 'Nummer A-Z'),
-            ('-number', 'Nummer Z-A'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('number', _("Nummer A-Z")),
+            ('-number', _("Nummer Z-A")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -298,7 +357,7 @@ class QuoteCreateView(ErpEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Angebot erstellen'
+        context['form_title'] = _("Angebot erstellen")
         return context
 
     def get_success_url(self):
@@ -319,7 +378,7 @@ class QuoteDetailView(ErpViewMixin, DetailView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not can_edit_erp(request.user):
-            messages.error(request, 'Keine Berechtigung.')
+            messages.error(request, _("Keine Berechtigung."))
             return self.get(request, *args, **kwargs)
         if 'add_item' in request.POST:
             form = QuoteItemForm(request.POST)
@@ -327,14 +386,14 @@ class QuoteDetailView(ErpViewMixin, DetailView):
                 item = form.save(commit=False)
                 item.quote = self.object
                 item.save()
-                messages.success(request, 'Position hinzugefuegt.')
+                messages.success(request, _("Position hinzugefuegt."))
             else:
-                messages.error(request, 'Bitte pruefe die Position.')
+                messages.error(request, _("Bitte pruefe die Position."))
             return self.get(request, *args, **kwargs)
 
         if 'create_order' in request.POST:
             order = create_order_from_quote(self.object)
-            messages.success(request, f'Auftrag {order.order_number} erstellt.')
+            messages.success(request, _("Auftrag %(number)s erstellt.") % {"number": order.order_number})
             return self.get(request, *args, **kwargs)
 
         return self.get(request, *args, **kwargs)
@@ -347,7 +406,7 @@ class WorkOrderCreateView(ErpEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Auftrag erstellen'
+        context['form_title'] = _("Auftrag erstellen")
         return context
 
     def get_success_url(self):
@@ -361,7 +420,7 @@ class WorkOrderUpdateView(ErpEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Auftrag bearbeiten'
+        context['form_title'] = _("Auftrag bearbeiten")
         return context
 
     def get_success_url(self):
@@ -388,10 +447,10 @@ class SalesOrderListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('order_number', 'Nummer A-Z'),
-            ('-order_number', 'Nummer Z-A'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('order_number', _("Nummer A-Z")),
+            ('-order_number', _("Nummer Z-A")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -404,7 +463,7 @@ class SalesOrderCreateView(ErpEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Sales Order erstellen'
+        context['form_title'] = _("Sales Order erstellen")
         return context
 
     def get_success_url(self):
@@ -427,7 +486,7 @@ class SalesOrderDetailView(ErpViewMixin, DetailView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not can_edit_erp(request.user):
-            messages.error(request, 'Keine Berechtigung.')
+            messages.error(request, _("Keine Berechtigung."))
             return self.get(request, *args, **kwargs)
         if 'add_item' in request.POST:
             form = SalesOrderItemForm(request.POST)
@@ -435,14 +494,14 @@ class SalesOrderDetailView(ErpViewMixin, DetailView):
                 item = form.save(commit=False)
                 item.order = self.object
                 item.save()
-                messages.success(request, 'Position hinzugefuegt.')
+                messages.success(request, _("Position hinzugefuegt."))
             else:
-                messages.error(request, 'Bitte pruefe die Position.')
+                messages.error(request, _("Bitte pruefe die Position."))
             return self.get(request, *args, **kwargs)
 
         if 'create_invoice' in request.POST:
             invoice = create_invoice_for_order(self.object)
-            messages.success(request, f'Rechnung {invoice.number} erstellt.')
+            messages.success(request, _("Rechnung %(number)s erstellt.") % {"number": invoice.number})
             return self.get(request, *args, **kwargs)
 
         return self.get(request, *args, **kwargs)
@@ -455,13 +514,13 @@ class SalesOrderUpdateView(ErpEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Sales Order bearbeiten'
+        context['form_title'] = _("Sales Order bearbeiten")
         return context
 
     def dispatch(self, request, *args, **kwargs):
         obj = self.get_object()
         if obj.is_locked:
-            messages.error(request, 'Auftrag ist gesperrt und kann nicht bearbeitet werden.')
+            messages.error(request, _("Auftrag ist gesperrt und kann nicht bearbeitet werden."))
             return redirect('erp:salesorder_detail', pk=obj.pk)
         return super().dispatch(request, *args, **kwargs)
 
@@ -489,10 +548,10 @@ class InvoiceListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('number', 'Nummer A-Z'),
-            ('-number', 'Nummer Z-A'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('number', _("Nummer A-Z")),
+            ('-number', _("Nummer Z-A")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -506,7 +565,7 @@ class InvoiceDetailView(ErpViewMixin, DetailView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not can_edit_erp(request.user):
-            messages.error(request, 'Keine Berechtigung.')
+            messages.error(request, _("Keine Berechtigung."))
             return self.get(request, *args, **kwargs)
         if 'create_dunning' in request.POST:
             notice = DunningNotice.objects.create(
@@ -515,28 +574,28 @@ class InvoiceDetailView(ErpViewMixin, DetailView):
                 status='draft',
             )
             notice.letter_text = build_letter_text(notice)
-            notice.email_subject = f"Mahnung {notice.number}"
+            notice.email_subject = _("Mahnung %(number)s") % {"number": notice.number}
             notice.email_body = notice.letter_text
             notice.save(update_fields=['letter_text', 'email_subject', 'email_body'])
-            messages.success(request, f'Mahnung {notice.number} erstellt.')
+            messages.success(request, _("Mahnung %(number)s erstellt.") % {"number": notice.number})
         if 'send_invoice' in request.POST:
             sent = send_invoice_email(self.object)
             if sent:
                 self.object.email_sent_at = timezone.now()
                 self.object.save(update_fields=['email_sent_at'])
-                messages.success(request, 'Rechnung per E-Mail versendet.')
+                messages.success(request, _("Rechnung per E-Mail versendet."))
             else:
-                messages.error(request, 'E-Mail konnte nicht versendet werden.')
+                messages.error(request, _("E-Mail konnte nicht versendet werden."))
         if 'download_invoice_letter' in request.POST:
             letter = build_invoice_letter(self.object)
             response = HttpResponse(letter, content_type='text/plain; charset=utf-8')
-            response['Content-Disposition'] = f'attachment; filename=\"{self.object.number}.txt\"'
+            response['Content-Disposition'] = f'attachment; filename="{self.object.number}.txt"'
             return response
         return self.get(request, *args, **kwargs)
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not can_edit_erp(request.user):
-            messages.error(request, 'Keine Berechtigung.')
+            messages.error(request, _("Keine Berechtigung."))
             return self.get(request, *args, **kwargs)
         if 'create_dunning' in request.POST:
             notice = DunningNotice.objects.create(
@@ -545,10 +604,10 @@ class InvoiceDetailView(ErpViewMixin, DetailView):
                 status='draft',
             )
             notice.letter_text = build_letter_text(notice)
-            notice.email_subject = f"Mahnung {notice.number}"
+            notice.email_subject = _("Mahnung %(number)s") % {"number": notice.number}
             notice.email_body = notice.letter_text
             notice.save(update_fields=['letter_text', 'email_subject', 'email_body'])
-            messages.success(request, f'Mahnung {notice.number} erstellt.')
+            messages.success(request, _("Mahnung %(number)s erstellt.") % {"number": notice.number})
         return self.get(request, *args, **kwargs)
 
 
@@ -572,10 +631,10 @@ class OrderConfirmationListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('number', 'Nummer A-Z'),
-            ('-number', 'Nummer Z-A'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('number', _("Nummer A-Z")),
+            ('-number', _("Nummer Z-A")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -601,12 +660,12 @@ class DunningListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('number', 'Nummer A-Z'),
-            ('-number', 'Nummer Z-A'),
-            ('-level', 'Stufe hoch'),
-            ('level', 'Stufe niedrig'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('number', _("Nummer A-Z")),
+            ('-number', _("Nummer Z-A")),
+            ('-level', _("Stufe hoch")),
+            ('level', _("Stufe niedrig")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -620,18 +679,18 @@ class DunningDetailView(ErpViewMixin, DetailView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not can_edit_erp(request.user):
-            messages.error(request, 'Keine Berechtigung.')
+            messages.error(request, _("Keine Berechtigung."))
             return self.get(request, *args, **kwargs)
         if 'send_email' in request.POST:
             sent = send_dunning_email(self.object)
             if sent:
                 mark_sent(self.object)
-                messages.success(request, 'Mahnung per E-Mail versendet.')
+                messages.success(request, _("Mahnung per E-Mail versendet."))
             else:
-                messages.error(request, 'E-Mail konnte nicht versendet werden.')
+                messages.error(request, _("E-Mail konnte nicht versendet werden."))
         if 'download_letter' in request.POST:
             response = HttpResponse(self.object.letter_text, content_type='text/plain; charset=utf-8')
-            response['Content-Disposition'] = f'attachment; filename=\"{self.object.number}.txt\"'
+            response['Content-Disposition'] = f'attachment; filename="{self.object.number}.txt"'
             return response
         return self.get(request, *args, **kwargs)
 
@@ -641,10 +700,10 @@ class DunningRunView(ErpViewMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         if not can_edit_erp(request.user):
-            messages.error(request, 'Keine Berechtigung.')
+            messages.error(request, _("Keine Berechtigung."))
             return redirect('erp:dunning')
         result = run_dunning_cycle()
-        messages.success(request, f"Mahnwesen ausgeführt: {result['created']} erstellt, {result['sent']} gesendet.")
+        messages.success(request, _("Mahnwesen ausgeführt: %(created)s erstellt, %(sent)s gesendet.") % {"created": result['created'], "sent": result['sent']})
         return redirect('erp:dunning')
 
 
@@ -665,10 +724,10 @@ class StockReceiptListView(ErpViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('-receipt_date', 'Datum spaeter'),
-            ('receipt_date', 'Datum frueher'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('-receipt_date', _("Datum später")),
+            ('receipt_date', _("Datum früher")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -681,7 +740,7 @@ class StockReceiptCreateView(ErpEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Wareneingang erstellen'
+        context['form_title'] = _("Wareneingang erstellen")
         return context
 
     def get_success_url(self):
@@ -702,7 +761,7 @@ class StockReceiptDetailView(ErpViewMixin, DetailView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not can_edit_erp(request.user):
-            messages.error(request, 'Keine Berechtigung.')
+            messages.error(request, _("Keine Berechtigung."))
             return self.get(request, *args, **kwargs)
 
         if 'add_item' in request.POST:
@@ -731,9 +790,9 @@ class StockReceiptDetailView(ErpViewMixin, DetailView):
                     Product.objects.filter(id=item.product_id).update(**update_fields)
                     product = Product.objects.get(id=item.product_id)
                     apply_pricing(product, cost_net=item.unit_cost_net, competitor_net=item.competitor_price_net)
-                messages.success(request, 'Wareneingang gebucht.')
+                messages.success(request, _("Wareneingang gebucht."))
             else:
-                messages.error(request, 'Bitte pruefe den Wareneingang.')
+                messages.error(request, _("Bitte pruefe den Wareneingang."))
         return self.get(request, *args, **kwargs)
 
         return self.get(request, *args, **kwargs)
@@ -762,14 +821,14 @@ class CourseListView(ErpViewMixin, ListView):
         qs = Course.objects.all()
         status = self.request.GET.get('status')
         customer = self.request.GET.get('customer')
-        instructor = self.request.GET.get('instructor')
+        external_employee = self.request.GET.get('external_employee')
         sort = (self.request.GET.get('sort') or '-created_at').strip()
         if status:
             qs = qs.filter(status=status)
         if customer:
             qs = qs.filter(customer_id=customer)
-        if instructor:
-            qs = qs.filter(instructor_id=instructor)
+        if external_employee:
+            qs = qs.filter(instructor_id=external_employee)
         allowed_sorts = {'created_at', '-created_at', 'start_date', '-start_date', 'title', '-title'}
         if sort not in allowed_sorts:
             sort = '-created_at'
@@ -779,19 +838,19 @@ class CourseListView(ErpViewMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['status_choices'] = Course.STATUS_CHOICES
         context['customers'] = Customer.objects.all().order_by('name')
-        context['instructors'] = Instructor.objects.all().order_by('name')
+        context['external_employees'] = Instructor.objects.filter(is_active=True).order_by('name')
         context['filters'] = {
             'status': self.request.GET.get('status', ''),
             'customer': self.request.GET.get('customer', ''),
-            'instructor': self.request.GET.get('instructor', ''),
+            'external_employee': self.request.GET.get('external_employee', ''),
         }
         context['list_sort_options'] = [
-            ('-created_at', 'Neueste zuerst'),
-            ('created_at', 'Älteste zuerst'),
-            ('title', 'Titel A-Z'),
-            ('-title', 'Titel Z-A'),
-            ('-start_date', 'Start spaeter'),
-            ('start_date', 'Start frueher'),
+            ('-created_at', _("Neueste zuerst")),
+            ('created_at', _("Älteste zuerst")),
+            ('title', _("Titel A-Z")),
+            ('-title', _("Titel Z-A")),
+            ('-start_date', _("Start später")),
+            ('start_date', _("Start früher")),
         ]
         context['current_sort'] = (self.request.GET.get('sort') or '-created_at')
         return context
@@ -832,7 +891,7 @@ class CourseCreateView(ErpEditMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Kurs erstellen'
+        context['form_title'] = _("Veranstaltung erstellen")
         return context
 
     def get_success_url(self):
@@ -846,7 +905,7 @@ class CourseUpdateView(ErpEditMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Kurs bearbeiten'
+        context['form_title'] = _("Veranstaltung bearbeiten")
         return context
 
     def get_success_url(self):

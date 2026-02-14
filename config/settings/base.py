@@ -160,6 +160,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -200,9 +201,16 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Internationalization
 LANGUAGE_CODE = 'de-de'
+LANGUAGES = [
+    ('de', 'Deutsch'),
+    ('en', 'English'),
+]
 TIME_ZONE = 'Europe/Berlin'
 USE_I18N = True
 USE_TZ = True
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 # Static files
 STATIC_URL = '/static/'

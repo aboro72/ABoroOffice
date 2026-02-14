@@ -1,11 +1,12 @@
 {% extends "erp/_list_base.html" %}
+{% load i18n %}
 
 {% block title %}Aufträge{% endblock %}
 
 {% block app_breadcrumb %}Aufträge{% endblock %}
 {% block list_heading %}Aufträge{% endblock %}
 {% block list_actions %}
-    <a class="btn btn-primary" href="/erp/salesorders/create/">Neu</a>
+    <a class="btn btn-primary" href="/erp/salesorders/create/">{% trans "Neu" %}</a>
 {% endblock %}
 
 {% block list_filters %}
@@ -19,10 +20,10 @@
     <table class="table table-hover mb-0">
         <thead class="table-light">
             <tr>
-                <th>Nummer</th>
-                <th>Kunde</th>
-                <th>Status</th>
-                <th>Summe</th>
+                <th>{% trans "Nummer" %}</th>
+                <th>{% trans "Kunde" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Summe" %}</th>
                 <th></th>
             </tr>
         </thead>
@@ -34,11 +35,11 @@
                 <td>{{ o.get_status_display }}</td>
                 <td>{{ o.total_gross|default:"-" }}</td>
                 <td class="text-end">
-                    <a class="btn btn-sm btn-outline-secondary" href="/erp/salesorders/{{ o.id }}/edit/">Bearbeiten</a>
+                    <a class="btn btn-sm btn-outline-secondary" href="/erp/salesorders/{{ o.id }}/edit/">{% trans "Bearbeiten" %}</a>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="text-center text-muted py-3">Keine Aufträge.</td></tr>
+            <tr><td colspan="5" class="text-center text-muted py-3">{% trans "Keine Aufträge." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

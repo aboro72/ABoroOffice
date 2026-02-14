@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}Tickets - {{ app_title }}{% endblock %}
 
@@ -50,7 +51,7 @@
         {% endif %}
     </h1>
     {% if user.role == 'customer' %}
-    <a href="{% url 'tickets:create' %}" class="btn btn-primary">+ Neues Ticket</a>
+    <a href="{% url 'tickets:create' %}" class="btn btn-primary">{% trans "+ Neues Ticket" %}</a>
     {% endif %}
 </div>
 
@@ -59,7 +60,7 @@
     <div class="card-body">
         <form method="get" class="row g-2 align-items-end">
             <div class="col-md-3">
-                <label class="form-label">Bereich</label>
+                <label class="form-label">{% trans "Bereich" %}</label>
                 <select name="department" class="form-select">
                     <option value="">Alle</option>
                     {% for dept in departments %}
@@ -70,7 +71,7 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Queue</label>
+                <label class="form-label">{% trans "Queue" %}</label>
                 <select name="queue" class="form-select">
                     <option value="">Alle</option>
                     {% for q in queues %}
@@ -81,14 +82,14 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Ansicht</label>
+                <label class="form-label">{% trans "Ansicht" %}</label>
                 <select name="scope" class="form-select">
                     <option value="">Alle</option>
                     <option value="mine" {% if request.GET.scope == 'mine' %}selected{% endif %}>Meine Bereiche</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <button class="btn btn-primary w-100">Filtern</button>
+                <button class="btn btn-primary w-100">{% trans "Filtern" %}</button>
             </div>
         </form>
     </div>
@@ -101,21 +102,21 @@
         <table class="table">
         <thead>
             <tr>
-                <th>Ticket-Nr.</th>
-                <th>Titel</th>
-                <th>Status</th>
-                <th>Priorität</th>
-                <th>Support Level</th>
+                <th>{% trans "Ticket-Nr." %}</th>
+                <th>{% trans "Titel" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Priorität" %}</th>
+                <th>{% trans "Support Level" %}</th>
                 {% if user.role != 'customer' %}
-                <th>Erstellt von</th>
-                <th>Zugewiesen an</th>
-                <th>Bereich</th>
-                <th>Queue</th>
-                <th>Klassenraum</th>
+                <th>{% trans "Erstellt von" %}</th>
+                <th>{% trans "Zugewiesen an" %}</th>
+                <th>{% trans "Bereich" %}</th>
+                <th>{% trans "Queue" %}</th>
+                <th>{% trans "Klassenraum" %}</th>
                 {% endif %}
-                <th>Erstellt am</th>
-                <th>Geschlossen am</th>
-                <th>Aktion</th>
+                <th>{% trans "Erstellt am" %}</th>
+                <th>{% trans "Geschlossen am" %}</th>
+                <th>{% trans "Aktion" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -159,7 +160,7 @@
                     {% if ticket.assigned_to %}
                         {{ ticket.assigned_to.full_name }}
                     {% else %}
-                        <span style="color: #868e96;">Nicht zugewiesen</span>
+                        <span style="color: #868e96;">{% trans "Nicht zugewiesen" %}</span>
                     {% endif %}
                 </td>
                 <td>{% if ticket.department %}{{ ticket.department.name }}{% else %}-{% endif %}</td>
@@ -181,7 +182,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-sm btn-primary">Ansehen</a>
+                    <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-sm btn-primary">{% trans "Ansehen" %}</a>
                 </td>
             </tr>
             {% endfor %}
@@ -192,8 +193,8 @@
 {% else %}
 <div class="card">
     <div class="empty-state">
-        <div class="empty-state-icon">📋</div>
-        <h2 style="margin-bottom: 10px; color: #495057;">Keine Tickets gefunden</h2>
+        <div class="empty-state-icon">{% trans "📋" %}</div>
+        <h2 style="margin-bottom: 10px; color: #495057;">{% trans "Keine Tickets gefunden" %}</h2>
         <p style="color: #868e96; margin-bottom: 20px;">
             {% if user.role == 'customer' %}
                 Sie haben noch keine Tickets erstellt.
@@ -204,7 +205,7 @@
             {% endif %}
         </p>
         {% if user.role == 'customer' %}
-        <a href="{% url 'tickets:create' %}" class="btn btn-primary">Erstes Ticket erstellen</a>
+        <a href="{% url 'tickets:create' %}" class="btn btn-primary">{% trans "Erstes Ticket erstellen" %}</a>
         {% endif %}
     </div>
 </div>
@@ -212,7 +213,7 @@
 
 {% if user.role == 'support_agent' %}
 <div class="card" style="margin-top: 20px;">
-    <h3 style="margin-bottom: 10px; font-size: 16px;">Legende:</h3>
+    <h3 style="margin-bottom: 10px; font-size: 16px;">{% trans "Legende:" %}</h3>
     <p style="color: #495057; line-height: 1.6;">
         <strong>Unzugewiesene Tickets:</strong> Tickets mit Status "Offen" ohne zugewiesenen Agent können Sie sich selbst zuweisen.<br>
         <strong>Ihre Tickets:</strong> Tickets, die Ihnen zugewiesen sind.<br>

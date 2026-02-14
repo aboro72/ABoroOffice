@@ -7,6 +7,7 @@ from django.views.generic import TemplateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from pathlib import Path
 from apps.cloude.cloude_apps.core.models import ActivityLog
 from apps.cloude.cloude_apps.plugins.hooks import hook_registry, UI_DASHBOARD_WIDGET
@@ -120,12 +121,12 @@ class SettingsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """Handle plugin upload"""
         if not self.test_func():
-            messages.error(request, 'Access denied')
+            messages.error(request, _("Zugriff verweigert"))
             return redirect('core:settings')
 
         zip_file = request.FILES.get('zip_file')
         if not zip_file:
-            messages.error(request, '❌ No file selected')
+            messages.error(request, _("❌ Keine Datei ausgewählt"))
             return redirect('core:settings')
 
         try:
@@ -171,21 +172,21 @@ class SettingsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 plugin=plugin,
                 action='uploaded',
                 user=request.user,
-                message=f"Plugin uploaded by {request.user.username}"
+                message=_("Plugin hochgeladen von %(user)s") % {"user": request.user.username}
             )
 
             messages.success(
                 request,
-                f'✅ Plugin "{plugin.name}" uploaded successfully. Click "Activate" to enable.'
+                _("✅ Plugin \"%(name)s\" hochgeladen. Klicken Sie auf \"Aktivieren\", um es zu aktivieren.") % {"name": plugin.name}
             )
             logger.info(f"Admin {request.user.username} uploaded plugin {plugin.name}")
 
         except ValueError as e:
-            messages.error(request, f'❌ Invalid plugin: {str(e)}')
+            messages.error(request, _("❌ Ungültiges Plugin: %(error)s") % {"error": str(e)})
             logger.error(f"Plugin upload validation failed: {e}")
 
         except Exception as e:
-            messages.error(request, f'❌ Upload failed: {str(e)}')
+            messages.error(request, _("❌ Upload fehlgeschlagen: %(error)s") % {"error": str(e)})
             logger.error(f"Plugin upload failed: {e}")
 
         return redirect('core:settings')

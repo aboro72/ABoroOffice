@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}Profil bearbeiten - CloudService{% endblock %}
 
@@ -56,7 +57,7 @@
                             </div>
                         {% endfor %}
 
-                        <button type="submit" class="btn btn-primary">Speichern</button>
+                        <button type="submit" class="btn btn-primary">{% trans "Speichern" %}</button>
                         <a href="/accounts/profile/" class="btn btn-secondary">Abbrechen</a>
                     </form>
                 </div>

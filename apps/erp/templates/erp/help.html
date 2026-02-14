@@ -1,23 +1,24 @@
-﻿{% extends "erp/_app_base.html" %}
+{% extends "erp/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}ERP Hilfe{% endblock %}
 
 {% block app_breadcrumb %}ERP Hilfe{% endblock %}
 {% block app_actions %}
-    <a class="btn btn-outline-secondary" href="/erp/pricing-help/">Pricing Hilfe</a>
+    <a class="btn btn-outline-secondary" href="/erp/pricing-help/">{% trans "Pricing Hilfe" %}</a>
 {% endblock %}
 
 {% block app_content %}
 
     <div class="card mb-3">
-        <div class="card-header">Workflow Angebot bis Rechnung</div>
+        <div class="card-header">{% trans "Workflow Angebot bis Rechnung" %}</div>
         <div class="card-body">
             <ol class="mb-0">
-                <li>Angebot erstellen.</li>
-                <li>Angebot annehmen -> Auftrag erzeugen.</li>
-                <li>Auftragsbestaetigung wird erstellt.</li>
-                <li>Auftrag ausfuehren -> Rechnung erzeugen.</li>
-                <li>Mahnwesen bei Verzug.</li>
+                <li>{% trans "Angebot erstellen." %}</li>
+                <li>{% trans "Angebot annehmen -> Auftrag erzeugen." %}</li>
+                <li>{% trans "Auftragsbestaetigung wird erstellt." %}</li>
+                <li>{% trans "Auftrag ausfuehren -> Rechnung erzeugen." %}</li>
+                <li>{% trans "Mahnwesen bei Verzug." %}</li>
             </ol>
         </div>
     </div>
@@ -25,24 +26,24 @@
     <div class="row g-3">
         <div class="col-lg-6">
             <div class="card h-100">
-                <div class="card-header">Nummern & Audit</div>
+                <div class="card-header">{% trans "Nummern & Audit" %}</div>
                 <div class="card-body">
                     <ul class="mb-0">
-                        <li>Eindeutige Nummern fuer Angebot/Auftrag/Rechnung/Mahnung.</li>
-                        <li>Aenderungen werden protokolliert.</li>
-                        <li>Suche in Angeboten/Aufträgen/Rechnungen/Mahnungen.</li>
+                        <li>{% trans "Eindeutige Nummern fuer Angebot/Auftrag/Rechnung/Mahnung." %}</li>
+                        <li>{% trans "Aenderungen werden protokolliert." %}</li>
+                        <li>{% trans "Suche in Angeboten/Aufträgen/Rechnungen/Mahnungen." %}</li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="col-lg-6">
             <div class="card h-100">
-                <div class="card-header">E-Mail & PDF</div>
+                <div class="card-header">{% trans "E-Mail & PDF" %}</div>
                 <div class="card-body">
                     <ul class="mb-0">
-                        <li>PDF-Ausgabe mit Logo/Absender.</li>
-                        <li>E-Mail-Vorlagen im Admin-Dashboard.</li>
-                        <li>Scheduler fuer Rechnungs-/Mahnlauf.</li>
+                        <li>{% trans "PDF-Ausgabe mit Logo/Absender." %}</li>
+                        <li>{% trans "E-Mail-Vorlagen im Admin-Dashboard." %}</li>
+                        <li>{% trans "Scheduler für Rechnungs-/Mahnlauf." %}</li>
                     </ul>
                 </div>
             </div>
@@ -52,24 +53,24 @@
     <div class="row g-3 mt-1">
         <div class="col-lg-6">
             <div class="card h-100">
-                <div class="card-header">Wareneingang & Preise</div>
+                <div class="card-header">{% trans "Wareneingang & Preise" %}</div>
                 <div class="card-body">
                     <ul class="mb-0">
-                        <li>EK-Preis + MwSt -> Preisvorschlag.</li>
-                        <li>Konkurrenzpreis optional (Provider/Custom API).</li>
-                        <li>Rundung auf 0,05.</li>
+                        <li>{% trans "EK-Preis + MwSt -> Preisvorschlag." %}</li>
+                        <li>{% trans "Konkurrenzpreis optional (Provider/Custom API)." %}</li>
+                        <li>{% trans "Rundung auf 0,05." %}</li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="col-lg-6">
             <div class="card h-100">
-                <div class="card-header">Kurse & Personal</div>
+                <div class="card-header">{% trans "Veranstaltungen & Personal" %}</div>
                 <div class="card-body">
                     <ul class="mb-0">
-                        <li>Kurse mit Veranstaltungsnummer.</li>
-                        <li>Dozenten/Skills aus Personalverwaltung.</li>
-                        <li>Mobile Klassenraeume als Produkt.</li>
+                        <li>{% trans "Veranstaltungen mit Eventnummer." %}</li>
+                        <li>{% trans "Externe Mitarbeiter/Skills aus Personalverwaltung." %}</li>
+                        <li>{% trans "Mobile Klassenraeume als Produkt." %}</li>
                     </ul>
                 </div>
             </div>
@@ -77,13 +78,13 @@
     </div>
 
     <div class="card mt-3">
-        <div class="card-header">Integrationen</div>
+        <div class="card-header">{% trans "Integrationen" %}</div>
         <div class="card-body">
             <ul class="mb-0">
-                <li>CRM -> Angebotserstellung</li>
-                <li>FiBu -> Auto-Postings (Rechnung/Waren)</li>
-                <li>Projekte -> automatisch aus Auftrag</li>
-                <li>Workflows -> Trigger fuer Rechnung/Mahnung</li>
+                <li>{% trans "CRM -> Angebotserstellung" %}</li>
+                <li>{% trans "FiBu -> Auto-Postings (Rechnung/Waren)" %}</li>
+                <li>{% trans "Projekte -> automatisch aus Auftrag" %}</li>
+                <li>{% trans "Workflows -> Trigger fuer Rechnung/Mahnung" %}</li>
             </ul>
         </div>
     </div>

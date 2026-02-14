@@ -1,13 +1,14 @@
-﻿{% extends "erp/_app_base.html" %}
+{% extends "erp/_app_base.html" %}
+{% load i18n %}
 {% block app_breadcrumb %}Konkurrenz-Debug{% endblock %}
 {% block app_actions %}
-    <a class="btn btn-outline-secondary" href="/erp/">Zurück</a>
+    <a class="btn btn-outline-secondary" href="/erp/">{% trans "Zurück" %}</a>
 {% endblock %}
 
 {% block app_content %}
     {% if debug %}
         <div class="card">
-            <div class="card-header">Letzter Abruf</div>
+            <div class="card-header">{% trans "Letzter Abruf" %}</div>
             <div class="card-body">
                 <div><strong>Zeit:</strong> {{ debug.at }}</div>
                 <div><strong>Query:</strong> {{ debug.query }}</div>
@@ -15,12 +16,12 @@
                 <div><strong>Preis:</strong> {{ debug.price|default:"-" }}</div>
                 <div><strong>Quelle:</strong> {{ debug.source }}</div>
                 <hr>
-                <div class="small text-muted mb-2">HTML-Auszug (erste 8000 Zeichen)</div>
+                <div class="small text-muted mb-2">{% trans "HTML-Auszug (erste 8000 Zeichen)" %}</div>
                 <pre class="bg-light p-3 rounded" style="white-space: pre-wrap;">{{ debug.html_snippet }}</pre>
             </div>
         </div>
     {% else %}
-        <div class="alert alert-warning">Noch kein Abruf gespeichert.</div>
+        <div class="alert alert-warning">{% trans "Noch kein Abruf gespeichert." %}</div>
     {% endif %}
 {% endblock %}
 

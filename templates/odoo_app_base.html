@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block extra_css %}
 {{ block.super }}
@@ -206,7 +207,7 @@
             <div class="odoo-title">{% block app_breadcrumb %}{% endblock %}</div>
             <form class="odoo-topbar-search" method="get" action="/search/">
                 <div class="input-group">
-                    <input type="text" class="form-control" name="q" placeholder="Suchen..." value="{{ global_search_query|default:'' }}">
+                    <input type="text" class="form-control" name="q" placeholder="{% trans "Suchen..." %}" value="{{ global_search_query|default:'' }}">
                     {% if request.path|slice:":5" == "/crm/" %}
                         <input type="hidden" name="scope" value="crm">
                     {% elif request.path|slice:":5" == "/erp/" %}
@@ -214,13 +215,13 @@
                     {% else %}
                         <input type="hidden" name="scope" value="global">
                     {% endif %}
-                    <button class="btn btn-outline-secondary" type="submit">Suchen</button>
+                    <button class="btn btn-outline-secondary" type="submit">{% trans "Suchen" %}</button>
                 </div>
             </form>
             <div class="odoo-actions">
                 <div class="dropdown odoo-switcher">
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        Apps
+                        {% trans "Apps" %}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         {% for app in app_switcher %}
@@ -230,7 +231,7 @@
                             </a>
                         </li>
                         {% empty %}
-                        <li><span class="dropdown-item text-muted">Keine Apps</span></li>
+                        <li><span class="dropdown-item text-muted">{% trans "Keine Apps" %}</span></li>
                         {% endfor %}
                     </ul>
                 </div>

@@ -1,11 +1,12 @@
-﻿{% extends "crm/_app_base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Opportunity{% endblock %}
 
 {% block app_breadcrumb %}{{ opportunity.name }}{% endblock %}
 {% block app_actions %}
     {% if can_edit %}
-    <a class="btn btn-outline-primary" href="{% url 'crm:opportunity_edit' opportunity.id %}">Bearbeiten</a>
+    <a class="btn btn-outline-primary" href="{% url 'crm:opportunity_edit' opportunity.id %}">{% trans "Bearbeiten" %}</a>
     {% endif %}
     <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_list' %}">Zurück</a>
 {% endblock %}
@@ -14,7 +15,7 @@
 <div class="row g-3">
     <div class="col-md-6">
         <div class="card h-100">
-            <div class="card-header">Details</div>
+            <div class="card-header">{% trans "Details" %}</div>
             <div class="card-body">
                 <div><strong>Account:</strong> <a href="{% url 'crm:account_detail' opportunity.account.id %}">{{ opportunity.account.name }}</a></div>
                 <div><strong>Stage:</strong> <span class="badge bg-secondary">{{ opportunity.get_stage_display }}</span></div>

@@ -1,16 +1,17 @@
-﻿{% extends "erp/_app_base.html" %}
+{% extends "erp/_app_base.html" %}
+{% load i18n %}
 
-{% block title %}Mahnwesen ausführen{% endblock %}
+{% block title %}{% trans "Mahnwesen ausf?hren" %}{% endblock %}
 
-{% block app_breadcrumb %}Mahnlauf{% endblock %}
+{% block app_breadcrumb %}{% trans "Mahnlauf" %}{% endblock %}
 {% block app_content %}
     <div class="card">
-        <div class="card-header">Mahnwesen ausführen</div>
+        <div class="card-header">{% trans "Mahnwesen ausf?hren" %}</div>
         <div class="card-body">
-            <p class="mb-3">Startet den automatischen Mahnlauf für überfällige Rechnungen.</p>
+            <p class="mb-3">{% trans "Startet den automatischen Mahnlauf für überfällige Rechnungen." %}</p>
             <form method="post">
                 {% csrf_token %}
-                <button class="btn btn-primary" type="submit">Jetzt ausführen</button>
+                <button class="btn btn-primary" type="submit">{% trans "Jetzt ausf?hren" %}</button>
             </form>
         </div>
     </div>

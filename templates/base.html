@@ -1,5 +1,7 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -107,38 +109,38 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard/">Dashboard</a>
+                        <a class="nav-link" href="/dashboard/">{% trans "Dashboard" %}</a>
                     </li>
                     {% if app_toggles.approvals %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'approvals:list' %}">Approvals</a>
+                        <a class="nav-link" href="{% url 'approvals:list' %}">{% trans "Freigaben" %}</a>
                     </li>
                     {% endif %}
                     {% if user.is_staff %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/api-docs/">API Docs</a>
+                        <a class="nav-link" href="/api-docs/">{% trans "API-Dokumentation" %}</a>
                     </li>
                     {% endif %}
                     {% if app_toggles.cloudstorage %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/cloudstorage/core/help/">Cloud Hilfe</a>
+                        <a class="nav-link" href="/cloudstorage/core/help/">{% trans "Cloud-Hilfe" %}</a>
                     </li>
                     {% if user.is_staff %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/cloudstorage/core/help/developer/">Plugin Doku</a>
+                        <a class="nav-link" href="/cloudstorage/core/help/developer/">{% trans "Plugin-Dokumentation" %}</a>
                     </li>
                     {% endif %}
                     {% endif %}
                     {% if user.is_staff %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin-dashboard/">Admin Dashboard</a>
+                        <a class="nav-link" href="/admin-dashboard/">{% trans "Admin-Dashboard" %}</a>
                     </li>
                     {% endif %}
                     <li class="nav-item">
                         {% if user.is_authenticated %}
                             <span class="nav-link">{{ user.username }}</span>
                         {% else %}
-                            <a class="nav-link" href="/login/">Login</a>
+                            <a class="nav-link" href="/login/">{% trans "Login" %}</a>
                         {% endif %}
                     </li>
                 </ul>
@@ -169,11 +171,11 @@
             <p class="mb-0">
                 &copy; 2025 ABoroOffice |
                 {% if user.is_staff %}
-                <a href="/api-docs/" class="text-muted">API Docs</a> |
+                <a href="/api-docs/" class="text-muted">{% trans "API-Dokumentation" %}</a> |
                 {% endif %}
                 {% if app_toggles.cloudstorage %}
-                <a href="/cloudstorage/core/help/" class="text-muted">Hilfe</a> |
-                <a href="/cloudstorage/core/help/developer/" class="text-muted">Plugin-Doku</a>
+                <a href="/cloudstorage/core/help/" class="text-muted">{% trans "Hilfe" %}</a> |
+                <a href="/cloudstorage/core/help/developer/" class="text-muted">{% trans "Plugin-Dokumentation" %}</a>
                 {% endif %}
             </p>
         </div>

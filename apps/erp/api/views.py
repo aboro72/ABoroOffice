@@ -6,11 +6,16 @@ from rest_framework.response import Response
 from apps.erp.models import (
     Customer,
     Product,
+    ProductCategory,
     Service,
     WorkOrder,
     SalesOrder,
     SalesOrderItem,
     Invoice,
+    Quote,
+    QuoteItem,
+    OrderConfirmation,
+    DunningNotice,
     StockReceipt,
     StockReceiptItem,
     Course,
@@ -19,11 +24,16 @@ from apps.erp.models import (
 from .serializers import (
     CustomerSerializer,
     ProductSerializer,
+    ProductCategorySerializer,
     ServiceSerializer,
     WorkOrderSerializer,
     SalesOrderSerializer,
     SalesOrderItemSerializer,
     InvoiceSerializer,
+    QuoteSerializer,
+    QuoteItemSerializer,
+    OrderConfirmationSerializer,
+    DunningNoticeSerializer,
     StockReceiptSerializer,
     StockReceiptItemSerializer,
     CourseSerializer,
@@ -138,6 +148,41 @@ class EnrollmentViewSet(BaseErpViewSet):
     serializer_class = EnrollmentSerializer
     search_fields = []
     ordering_fields = ['created_at']
+
+
+class ProductCategoryViewSet(BaseErpViewSet):
+    queryset = ProductCategory.objects.all()
+    serializer_class = ProductCategorySerializer
+    search_fields = ['name']
+    ordering_fields = ['name']
+
+
+class QuoteViewSet(BaseErpViewSet):
+    queryset = Quote.objects.all()
+    serializer_class = QuoteSerializer
+    search_fields = ['number']
+    ordering_fields = ['created_at', 'valid_until', 'total_amount']
+
+
+class QuoteItemViewSet(BaseErpViewSet):
+    queryset = QuoteItem.objects.all()
+    serializer_class = QuoteItemSerializer
+    search_fields = []
+    ordering_fields = ['id']
+
+
+class OrderConfirmationViewSet(BaseErpViewSet):
+    queryset = OrderConfirmation.objects.all()
+    serializer_class = OrderConfirmationSerializer
+    search_fields = ['number']
+    ordering_fields = ['created_at', 'confirmed_at']
+
+
+class DunningNoticeViewSet(BaseErpViewSet):
+    queryset = DunningNotice.objects.all()
+    serializer_class = DunningNoticeSerializer
+    search_fields = ['number']
+    ordering_fields = ['created_at', 'dunning_level']
 
 
 class CompetitorMockView(APIView):

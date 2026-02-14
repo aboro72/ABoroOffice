@@ -1,109 +1,216 @@
 ﻿from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, View
+
 from django.contrib import messages
+
 from django.shortcuts import redirect
+
 from django.urls import reverse
+
 from django.utils import timezone
+
 from django.http import HttpResponse
+
 from collections import defaultdict
+
 from .models import Campaign, ContentAsset, ContentIdea, ContentApproval, ContentRevision, CampaignKpiSnapshot
 from .forms import CampaignForm, ContentAssetForm, ContentIdeaForm, ApprovalForm
+
 from .services.ai import MarketingAIService
+
 from .permissions import (
+
     MarketingViewMixin,
+
     MarketingEditMixin,
+
     can_edit_marketing,
+
     can_approve_marketing,
+
 )
+
 import csv
+
 from io import TextIOWrapper
 
 
+
+
+
 CHANNEL_TEMPLATES = {
+
     "linkedin": {
+
         "label": "LinkedIn Post",
+
         "content": (
+
             "🚀 {Thema/Hook}\n\n"
+
             "Problem: {Problem kurz benennen}\n"
+
             "Lösung: {Wie wir helfen}\n"
+
             "Ergebnis: {Benefit/Outcome}\n\n"
+
             "👉 CTA: {Kontakt/Call-to-Action}\n"
+
             "#Hashtags"
+
         ),
+
     },
+
     "newsletter": {
+
         "label": "Newsletter",
+
         "content": (
+
             "Betreff: {Betreff}\n\n"
+
             "Hallo {Name/Team},\n\n"
+
             "Kurzer Überblick: {Zusammenfassung}\n"
+
             "- Punkt 1: {Mehrwert}\n"
+
             "- Punkt 2: {Mehrwert}\n"
+
             "- Punkt 3: {Mehrwert}\n\n"
+
             "CTA: {Link oder Antwortaufforderung}\n\n"
+
             "Viele Grüße\n{Absender}"
+
         ),
+
     },
+
     "blog": {
+
         "label": "Blog Artikel",
+
         "content": (
+
             "# {Titel}\n\n"
+
             "## Einleitung\n{Hook + Problem}\n\n"
+
             "## Hauptteil\n- Abschnitt 1: {Kernidee}\n- Abschnitt 2: {Beispiele}\n- Abschnitt 3: {Tipps}\n\n"
+
             "## Fazit\n{Zusammenfassung + CTA}\n"
+
         ),
+
     },
+
     "ad": {
+
         "label": "Anzeige",
+
         "content": (
+
             "{Headline}\n"
+
             "{Subline}\n"
+
             "{Benefit}\n"
+
             "CTA: {Jetzt testen/kontaktieren}\n"
+
         ),
+
     },
+
 }
 
 
+
+
+
 def _min_length_for(asset_type: str) -> int:
+
     return {
+
         "blog": 400,
+
         "newsletter": 200,
+
         "landing": 300,
+
         "social": 80,
+
         "ad": 40,
+
     }.get(asset_type, 80)
 
 
+
+
+
 def _run_preflight_checks(asset: ContentAsset) -> list:
+
     issues = []
+
     content = (asset.content or "").strip()
+
     if not content:
+
         issues.append("Content ist leer.")
+
     if len(content) < _min_length_for(asset.asset_type):
+
         issues.append("Content zu kurz für den gewählten Typ.")
+
     channel = (asset.channel or "").lower()
+
     if "linkedin" in channel and "#" not in content:
+
         issues.append("LinkedIn: Hashtags fehlen.")
+
     if "newsletter" in channel and ("betreff:" not in content.lower() and "subject:" not in content.lower()):
+
         issues.append("Newsletter: Betreff fehlt (z.B. 'Betreff: ...').")
+
     if asset.asset_type == "ad" and len(content) > 300:
+
         issues.append("Anzeige: Content zu lang.")
+
     cta_keywords = ["jetzt", "kontakt", "buchen", "angebot", "mehr erfahren", "kostenlos", "demo"]
+
     if not any(k in content.lower() for k in cta_keywords):
+
         issues.append("CTA fehlt (z.B. 'Jetzt', 'Kontakt', 'Mehr erfahren').")
+
     return issues
 
 
+
+
+
 def _parse_number(value, is_int=False):
+
     if value is None:
+
         return 0
+
     text = str(value).strip().replace(".", "").replace(",", ".")
+
     if not text:
+
         return 0
+
     try:
+
         return int(float(text)) if is_int else float(text)
+
     except Exception:
+
         return 0
+
+
+
 
 
 def _parse_kpi_csv(upload):
@@ -115,15 +222,25 @@ def _parse_kpi_csv(upload):
         "revenue": 0.0,
     }
     wrapped = TextIOWrapper(upload.file, encoding="utf-8", errors="ignore")
+
     reader = csv.DictReader(wrapped)
+
     for row in reader:
+
         normalized = {str(k).strip().lower(): v for k, v in row.items()}
+
         totals["impressions"] += _parse_number(normalized.get("impressions") or normalized.get("impr"), is_int=True)
+
         totals["clicks"] += _parse_number(normalized.get("clicks"), is_int=True)
+
         totals["conversions"] += _parse_number(
+
             normalized.get("conversions") or normalized.get("conv") or normalized.get("leads"),
+
             is_int=True,
+
         )
+
         totals["spend"] += _parse_number(normalized.get("spend") or normalized.get("cost"))
         totals["revenue"] += _parse_number(normalized.get("revenue") or normalized.get("value"))
     return totals
@@ -186,52 +303,98 @@ def _trend_values_for_snapshots(snapshots, metric):
     return points, min_value, max_value, delta
 
 
+
+
 class MarketingHomeView(MarketingViewMixin, TemplateView):
     template_name = 'marketing/home.html'
 
 
+
+
 class CampaignListView(MarketingViewMixin, ListView):
+
     model = Campaign
+
     template_name = 'marketing/campaign_list.html'
+
     context_object_name = 'campaigns'
+
     paginate_by = 25
 
+
+
     def get_queryset(self):
+
         return Campaign.objects.all().order_by('-updated_at')
 
 
+
+
+
 class CampaignCreateView(MarketingEditMixin, CreateView):
+
     model = Campaign
+
     form_class = CampaignForm
+
     template_name = 'marketing/form.html'
 
+
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         context['form_title'] = 'Kampagne erstellen'
+
         return context
 
+
+
     def get_success_url(self):
+
         return reverse('marketing:campaign_list')
+
+
+
 
 
 class CampaignUpdateView(MarketingEditMixin, UpdateView):
+
     model = Campaign
+
     form_class = CampaignForm
+
     template_name = 'marketing/form.html'
 
+
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         context['form_title'] = 'Kampagne bearbeiten'
+
         return context
 
+
+
     def get_success_url(self):
+
         return reverse('marketing:campaign_list')
+
+
+
 
 
 class CampaignDetailView(MarketingViewMixin, DetailView):
     model = Campaign
+
     template_name = 'marketing/campaign_detail.html'
+
     context_object_name = 'campaign'
+
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -257,22 +420,29 @@ class CampaignDetailView(MarketingViewMixin, DetailView):
         context['kpi_snapshots'] = snapshots
         return context
 
+
     def post(self, request, *args, **kwargs):
+
         self.object = self.get_object()
+
         if not can_edit_marketing(request.user):
-            messages.error(request, 'Keine Berechtigung für diese Aktion.')
+
+            messages.error(request, _("Keine Berechtigung für diese Aktion."))
+
             return redirect(reverse('marketing:campaign_detail', args=[self.object.pk]))
+
         action = request.POST.get('action')
+
         if action == 'import_kpi':
             upload = request.FILES.get('kpi_file')
             if not upload:
-                messages.error(request, 'Bitte CSV-Datei auswählen.')
+                messages.error(request, _("Bitte CSV-Datei auswählen."))
                 return redirect(reverse('marketing:campaign_detail', args=[self.object.pk]))
             try:
                 missing = _validate_kpi_csv(upload)
                 upload.seek(0)
                 if missing:
-                    messages.error(request, f"CSV fehlt Spalten: {', '.join(sorted(missing))}")
+                    messages.error(request, _("CSV fehlt Spalten: %(columns)s") % {"columns": ", ".join(sorted(missing))})
                     return redirect(reverse('marketing:campaign_detail', args=[self.object.pk]))
                 self.object.last_kpi_impressions = self.object.kpi_impressions
                 self.object.last_kpi_clicks = self.object.kpi_clicks
@@ -309,9 +479,9 @@ class CampaignDetailView(MarketingViewMixin, DetailView):
                     revenue=self.object.kpi_revenue,
                     imported_at=self.object.last_kpi_imported_at,
                 )
-                messages.success(request, 'KPIs importiert.')
+                messages.success(request, _("KPIs importiert."))
             except Exception as exc:
-                messages.error(request, f'KPI-Import fehlgeschlagen: {exc}')
+                messages.error(request, _("KPI-Import fehlgeschlagen: %(error)s") % {"error": exc})
         return redirect(reverse('marketing:campaign_detail', args=[self.object.pk]))
 
 
@@ -333,221 +503,436 @@ class MarketingKpiExportView(MarketingViewMixin, View):
         return response
 
 
+
+
 class AssetListView(MarketingViewMixin, ListView):
+
     model = ContentAsset
+
     template_name = 'marketing/asset_list.html'
+
     context_object_name = 'assets'
+
     paginate_by = 25
 
+
+
     def get_queryset(self):
+
         return ContentAsset.objects.select_related('campaign').all().order_by('-updated_at')
 
 
+
+
+
 class AssetDetailView(MarketingViewMixin, DetailView):
+
     model = ContentAsset
+
     template_name = 'marketing/asset_detail.html'
+
     context_object_name = 'asset'
 
+
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         context['can_edit'] = can_edit_marketing(self.request.user)
+
         context['can_approve'] = can_approve_marketing(self.request.user)
+
         context['revisions'] = self.object.revisions.order_by('-stamped_at')[:10]
+
         return context
 
+
+
     def post(self, request, *args, **kwargs):
+
         if not can_edit_marketing(request.user) and request.POST.get('action') not in ['apply_approval']:
-            messages.error(request, 'Keine Berechtigung für diese Aktion.')
+
+            messages.error(request, _("Keine Berechtigung für diese Aktion."))
+
             return redirect(reverse('marketing:asset_detail', args=[self.get_object().pk]))
+
         self.object = self.get_object()
+
         action = request.POST.get('action')
+
         if action == 'save_brief':
+
             brief = request.POST.get('brief', '').strip()
+
             self.object.brief = brief
+
             self.object.status = 'draft'
+
             self.object.save(update_fields=['brief', 'status', 'updated_at'])
-            messages.success(request, 'Briefing gespeichert.')
+
+            messages.success(request, _("Briefing gespeichert."))
+
             return redirect(reverse('marketing:asset_detail', args=[self.object.pk]))
+
         if action == 'apply_template':
+
             template_key = request.POST.get('template_key', '').strip()
+
             template = CHANNEL_TEMPLATES.get(template_key)
+
             if template:
+
                 if not self.object.content:
+
                     self.object.content = template["content"]
+
                 else:
+
                     self.object.content = f"{template['content']}\n\n{self.object.content}"
+
                 self.object.save(update_fields=['content', 'updated_at'])
-                messages.success(request, f"Template '{template['label']}' angewendet.")
+
+                messages.success(request, _("Template \"%(label)s\" angewendet.") % {"label": template["label"]})
+
             else:
-                messages.error(request, 'Template nicht gefunden.')
+
+                messages.error(request, _("Template nicht gefunden."))
+
             return redirect(reverse('marketing:asset_detail', args=[self.object.pk]))
+
         if action == 'generate_content':
+
             brief = request.POST.get('brief', '').strip() or self.object.brief
+
             if not brief:
-                messages.error(request, 'Bitte ein Briefing eingeben.')
+
+                messages.error(request, _("Bitte ein Briefing eingeben."))
+
                 return redirect(reverse('marketing:asset_detail', args=[self.object.pk]))
+
             try:
+
                 ai = MarketingAIService()
+
                 data = ai.generate_content(self.object.asset_type, self.object.channel, brief)
+
                 self.object.title = data.get('title') or self.object.title
+
                 self.object.content = data.get('content') or self.object.content
+
                 self.object.status = 'draft'
+
                 self.object.save(update_fields=['title', 'content', 'status', 'updated_at'])
-                messages.success(request, 'Content generiert.')
+
+                messages.success(request, _("Content generiert."))
+
             except Exception as exc:
-                messages.error(request, f'AI Fehler: {exc}')
+
+                messages.error(request, _("AI Fehler: %(error)s") % {"error": exc})
+
         elif action == 'request_approval':
+
             issues = _run_preflight_checks(self.object)
+
             if issues:
+
                 for issue in issues:
-                    messages.error(request, f"Prüfliste: {issue}")
+
+                    messages.error(request, _("Prüfliste: %(issue)s") % {"issue": issue})
+
                 return redirect(reverse('marketing:asset_detail', args=[self.object.pk]))
+
             ContentApproval.objects.create(
+
                 asset=self.object,
+
                 requested_by=request.user,
+
                 status='pending',
+
             )
+
             self.object.status = 'review'
+
             self.object.save(update_fields=['status', 'updated_at'])
-            messages.success(request, 'Freigabe angefordert.')
+
+            messages.success(request, _("Freigabe angefordert."))
+
         elif action == 'publish':
+
             self.object.status = 'published'
+
             if not self.object.scheduled_at:
+
                 self.object.scheduled_at = timezone.now()
+
             self.object.save(update_fields=['status', 'scheduled_at', 'updated_at'])
+
             ContentRevision.objects.create(
+
                 asset=self.object,
+
                 title=self.object.title,
+
                 content=self.object.content,
+
                 action='published',
+
                 note='Veröffentlicht',
+
                 stamped_by=request.user,
+
             )
-            messages.success(request, 'Content veröffentlicht.')
+
+            messages.success(request, _("Content veröffentlicht."))
+
         elif action == 'apply_approval':
+
             if not can_approve_marketing(request.user):
-                messages.error(request, 'Keine Freigabe-Berechtigung.')
+
+                messages.error(request, _("Keine Freigabe-Berechtigung."))
+
                 return redirect(reverse('marketing:asset_detail', args=[self.object.pk]))
+
             form = ApprovalForm(request.POST)
+
             if form.is_valid():
+
                 approval = form.save(commit=False)
+
                 approval.asset = self.object
+
                 approval.reviewed_by = request.user
+
                 approval.reviewed_at = timezone.now()
+
                 approval.save()
+
                 if approval.status == 'approved':
+
                     self.object.status = 'approved'
+
                     ContentRevision.objects.create(
+
                         asset=self.object,
+
                         title=self.object.title,
+
                         content=self.object.content,
+
                         action='approved',
+
                         note=approval.note or '',
+
                         stamped_by=request.user,
+
                     )
+
                 elif approval.status == 'rejected':
+
                     self.object.status = 'draft'
+
                     ContentRevision.objects.create(
+
                         asset=self.object,
+
                         title=self.object.title,
+
                         content=self.object.content,
+
                         action='rejected',
+
                         note=approval.note or '',
+
                         stamped_by=request.user,
+
                     )
+
                 self.object.save(update_fields=['status', 'updated_at'])
-                messages.success(request, 'Freigabe gespeichert.')
+
+                messages.success(request, _("Freigabe gespeichert."))
+
         return redirect(reverse('marketing:asset_detail', args=[self.object.pk]))
 
 
+
+
+
 class AssetCreateView(MarketingEditMixin, CreateView):
+
     model = ContentAsset
+
     form_class = ContentAssetForm
+
     template_name = 'marketing/form.html'
 
+
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         context['form_title'] = 'Content erstellen'
+
         return context
 
+
+
     def form_valid(self, form):
+
         obj = form.save(commit=False)
+
         obj.created_by = self.request.user
+
         obj.save()
+
         return redirect(reverse('marketing:asset_detail', args=[obj.pk]))
 
 
+
+
+
 class AssetUpdateView(MarketingEditMixin, UpdateView):
+
     model = ContentAsset
+
     form_class = ContentAssetForm
+
     template_name = 'marketing/form.html'
 
+
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         context['form_title'] = 'Content bearbeiten'
+
         return context
 
+
+
     def get_success_url(self):
+
         return reverse('marketing:asset_detail', args=[self.object.pk])
 
 
+
+
+
 class IdeaListView(MarketingViewMixin, ListView):
+
     model = ContentIdea
+
     template_name = 'marketing/idea_list.html'
+
     context_object_name = 'ideas'
+
     paginate_by = 25
 
+
+
     def get_queryset(self):
+
         return ContentIdea.objects.all().order_by('-created_at')
 
+
+
     def post(self, request, *args, **kwargs):
+
         topic = request.POST.get('topic', '').strip()
+
         if topic:
+
             try:
+
                 ai = MarketingAIService()
+
                 ideas = ai.generate_ideas(topic)
+
                 for idea in ideas:
+
                     ContentIdea.objects.create(title=idea, created_by=request.user)
-                messages.success(request, 'Ideen generiert.')
+
+                messages.success(request, _("Ideen generiert."))
+
             except Exception as exc:
-                messages.error(request, f'AI Fehler: {exc}')
+
+                messages.error(request, _("AI Fehler: %(error)s") % {"error": exc})
+
         return redirect('marketing:idea_list')
+
+
+
 
 
 class IdeaCreateView(MarketingEditMixin, CreateView):
+
     model = ContentIdea
+
     form_class = ContentIdeaForm
+
     template_name = 'marketing/form.html'
 
+
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         context['form_title'] = 'Idee erstellen'
+
         return context
 
+
+
     def form_valid(self, form):
+
         obj = form.save(commit=False)
+
         obj.created_by = self.request.user
+
         obj.save()
+
         return redirect('marketing:idea_list')
+
+
+
 
 
 class MarketingCalendarView(MarketingViewMixin, TemplateView):
     template_name = 'marketing/calendar.html'
 
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         start = timezone.now() - timezone.timedelta(days=7)
+
         end = timezone.now() + timezone.timedelta(days=30)
+
         assets = (
+
             ContentAsset.objects
+
             .filter(scheduled_at__isnull=False, scheduled_at__range=(start, end))
+
             .order_by('scheduled_at')
+
         )
+
         grouped = defaultdict(list)
+
         for asset in assets:
+
             date_key = asset.scheduled_at.date()
+
             grouped[date_key].append(asset)
+
         context['calendar_groups'] = sorted(grouped.items(), key=lambda x: x[0])
+
         context['calendar_start'] = start.date()
         context['calendar_end'] = end.date()
         return context

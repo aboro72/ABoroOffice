@@ -1,4 +1,5 @@
 {% extends "crm/_list_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Lead-Staging{% endblock %}
 
@@ -49,13 +50,13 @@
             <thead class="table-light">
                 <tr>
                     <th><input type="checkbox" id="select-all"></th>
-                    <th>Firma</th>
-                    <th>Name</th>
-                    <th>Status</th>
+                    <th>{% trans "Firma" %}</th>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Status" %}</th>
                     <th>Lead Quelle</th>
                     <th>Lead Status</th>
                     <th>Enrichment</th>
-                    <th>Quelle</th>
+                    <th>{% trans "Quelle" %}</th>
                     <th></th>
                 </tr>
             </thead>
@@ -109,7 +110,7 @@
                         >
                             Website setzen
                         </button>
-                        <a class="btn btn-sm btn-outline-secondary" href="{% url 'crm:lead_staging_edit' item.id %}">Bearbeiten</a>
+                        <a class="btn btn-sm btn-outline-secondary" href="{% url 'crm:lead_staging_edit' item.id %}">{% trans "Bearbeiten" %}</a>
                     </td>
                 </tr>
                 {% empty %}
@@ -132,19 +133,19 @@
             </div>
             <div class="modal-body">
                 <dl class="row mb-0">
-                    <dt class="col-sm-4">Firma</dt>
+                    <dt class="col-sm-4">{% trans "Firma" %}</dt>
                     <dd class="col-sm-8" id="detail-company"></dd>
-                    <dt class="col-sm-4">Name</dt>
+                    <dt class="col-sm-4">{% trans "Name" %}</dt>
                     <dd class="col-sm-8" id="detail-name"></dd>
-                    <dt class="col-sm-4">E-Mail</dt>
+                    <dt class="col-sm-4">{% trans "E-Mail" %}</dt>
                     <dd class="col-sm-8" id="detail-email"></dd>
-                    <dt class="col-sm-4">Telefon</dt>
+                    <dt class="col-sm-4">{% trans "Telefon" %}</dt>
                     <dd class="col-sm-8" id="detail-phone"></dd>
                     <dt class="col-sm-4">Website</dt>
                     <dd class="col-sm-8" id="detail-website"></dd>
                     <dt class="col-sm-4">Adresse</dt>
                     <dd class="col-sm-8" id="detail-address"></dd>
-                    <dt class="col-sm-4">Status</dt>
+                    <dt class="col-sm-4">{% trans "Status" %}</dt>
                     <dd class="col-sm-8" id="detail-status"></dd>
                     <dt class="col-sm-4">Lead Quelle</dt>
                     <dd class="col-sm-8" id="detail-lead-source"></dd>
@@ -152,9 +153,9 @@
                     <dd class="col-sm-8" id="detail-lead-status"></dd>
                     <dt class="col-sm-4">Enrichment</dt>
                     <dd class="col-sm-8" id="detail-enrichment"></dd>
-                    <dt class="col-sm-4">Notizen</dt>
+                    <dt class="col-sm-4">{% trans "Notizen" %}</dt>
                     <dd class="col-sm-8" id="detail-notes"></dd>
-                    <dt class="col-sm-4">Quelle</dt>
+                    <dt class="col-sm-4">{% trans "Quelle" %}</dt>
                     <dd class="col-sm-8" id="detail-source"></dd>
                 </dl>
             </div>
@@ -173,7 +174,7 @@
                 <form method="post" id="leadWebsiteForm">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label">Firma</label>
+                        <label class="form-label">{% trans "Firma" %}</label>
                         <div class="form-control-plaintext" id="website-company"></div>
                     </div>
                     <div class="mb-3">
@@ -184,7 +185,7 @@
                         <label class="form-label">Adresse</label>
                         <textarea name="address" class="form-control" id="address-input" rows="3"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Speichern</button>
+                    <button type="submit" class="btn btn-primary w-100">{% trans "Speichern" %}</button>
                 </form>
             </div>
         </div>

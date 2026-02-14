@@ -1,8 +1,9 @@
-﻿{% extends "crm/_app_base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Formular{% endblock %}
 
-{% block app_breadcrumb %}{{ form_title|default:"Formular" }}{% endblock %}
+{% block app_breadcrumb %}{{ form_title|default:_("Formular") }}{% endblock %}
 {% block app_actions %}
     <a class="btn btn-outline-secondary" href="javascript:history.back()">Zurück</a>
 {% endblock %}
@@ -35,7 +36,7 @@
     </div>
     {% endfor %}
     <div class="d-flex gap-2">
-        <button class="btn btn-primary" type="submit">Speichern</button>
+        <button class="btn btn-primary" type="submit">{% trans "Speichern" %}</button>
         <a class="btn btn-outline-secondary" href="javascript:history.back()">Abbrechen</a>
     </div>
 </form>
