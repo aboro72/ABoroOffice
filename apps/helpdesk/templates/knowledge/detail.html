@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{{ article.title }} - FAQ{% endblock %}
 
@@ -12,7 +13,7 @@
             </div>
         </div>
         {% if user.role == 'admin' or article.author == user or user.support_level >= 2 %}
-        <a href="{% url 'knowledge:edit' article.slug %}" class="btn btn-sm btn-secondary">Bearbeiten</a>
+        <a href="{% url 'knowledge:edit' article.slug %}" class="btn btn-sm btn-secondary">{% trans "Bearbeiten" %}</a>
         {% endif %}
     </div>
 
@@ -22,7 +23,7 @@
 
     <!-- Helpfulness Voting -->
     <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0; text-align: center;">
-        <h3 style="font-size: 16px; margin-bottom: 15px;">War dieser Artikel hilfreich?</h3>
+        <h3 style="font-size: 16px; margin-bottom: 15px;">{% trans "War dieser Artikel hilfreich?" %}</h3>
         <form method="post" style="display: inline-flex; gap: 10px;">
             {% csrf_token %}
             <button type="submit" name="vote" value="helpful" class="btn btn-success">👍 Hilfreich ({{ article.helpful_count }})</button>
@@ -33,7 +34,7 @@
 
 {% if related %}
 <div class="card">
-    <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px;">Verwandte Artikel</h3>
+    <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 15px;">{% trans "Verwandte Artikel" %}</h3>
     <div style="display: flex; flex-direction: column; gap: 10px;">
         {% for rel in related %}
         <a href="{% url 'knowledge:detail' rel.slug %}" style="padding: 12px; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #495057; transition: background 0.2s;">
@@ -45,6 +46,6 @@
 {% endif %}
 
 <div style="margin-top: 20px;">
-    <a href="{% url 'knowledge:list' %}" class="btn btn-secondary">← Zurück zur FAQ</a>
+    <a href="{% url 'knowledge:list' %}" class="btn btn-secondary">{% trans "← Zurück zur FAQ" %}</a>
 </div>
 {% endblock %}

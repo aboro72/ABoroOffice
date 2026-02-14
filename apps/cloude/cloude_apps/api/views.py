@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from django.db.models import Q, Count, Sum
 from django.http import FileResponse
 from django.utils import timezone
@@ -696,13 +697,13 @@ class PluginActivateView(APIView):
 
             # Redirect back with success message
             from django.shortcuts import redirect
-            messages.success(request, f'✅ Plugin "{plugin.name}" activated successfully')
+            messages.success(request, _("✅ Plugin \"%(name)s\" aktiviert.") % {"name": plugin.name})
             return redirect('core:settings')
 
         except Exception as e:
             from django.shortcuts import redirect
             from django.contrib import messages
-            messages.error(request, f'❌ Activation failed: {str(e)}')
+            messages.error(request, _("❌ Aktivierung fehlgeschlagen: %(error)s") % {"error": str(e)})
             return redirect('core:settings')
 
 
@@ -724,13 +725,13 @@ class PluginDeactivateView(APIView):
 
             # Redirect back with success message
             from django.shortcuts import redirect
-            messages.success(request, f'✅ Plugin "{plugin.name}" deactivated successfully')
+            messages.success(request, _("✅ Plugin \"%(name)s\" deaktiviert.") % {"name": plugin.name})
             return redirect('core:settings')
 
         except Exception as e:
             from django.shortcuts import redirect
             from django.contrib import messages
-            messages.error(request, f'❌ Deactivation failed: {str(e)}')
+            messages.error(request, _("❌ Deaktivierung fehlgeschlagen: %(error)s") % {"error": str(e)})
             return redirect('core:settings')
 
 
@@ -752,16 +753,16 @@ class PluginDiscoverView(APIView):
             new_count = sum(1 for d in discovered if d['created'])
 
             if new_count > 0:
-                messages.success(request, f'✅ {new_count} neue Plugin(s) entdeckt!')
+                messages.success(request, _("✅ %(count)s neue Plugin(s) entdeckt!") % {"count": new_count})
             else:
-                messages.info(request, 'Keine neuen Plugins gefunden.')
+                messages.info(request, _("Keine neuen Plugins gefunden."))
 
             return redirect('core:settings')
 
         except Exception as e:
             from django.shortcuts import redirect
             from django.contrib import messages
-            messages.error(request, f'❌ Fehler: {str(e)}')
+            messages.error(request, _("❌ Fehler: %(error)s") % {"error": str(e)})
             return redirect('core:settings')
 
 
@@ -821,9 +822,9 @@ class PluginSettingsView(APIView):
             plugin.settings = new_settings
             plugin.save()
 
-            messages.success(request, f'✅ Einstellungen für "{plugin.name}" gespeichert!')
+            messages.success(request, _("✅ Einstellungen für \"%(name)s\" gespeichert!") % {"name": plugin.name})
 
         except Exception as e:
-            messages.error(request, f'❌ Fehler beim Speichern: {str(e)}')
+            messages.error(request, _("❌ Fehler beim Speichern: %(error)s") % {"error": str(e)})
 
         return redirect('cloude_api:plugin_settings', plugin_id=plugin_id)

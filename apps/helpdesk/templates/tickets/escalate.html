@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}Ticket {% if can_deescalate %}weitergeben{% else %}eskalieren{% endif %} - {{ app_title }}{% endblock %}
 
@@ -61,7 +62,7 @@
         </div>
 
         <div class="form-group">
-            <label for="support_level">Neuer Support Level (optional)</label>
+            <label for="support_level">{% trans "Neuer Support Level (optional)" %}</label>
             <select name="support_level" id="support_level" class="form-control">
                 <option value="">Unverändert lassen</option>
                 {% for level_code, level_name in support_levels %}
@@ -86,8 +87,8 @@
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 30px;">
-            <button type="submit" class="btn btn-warning">Ticket weitergeben</button>
-            <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-secondary">Abbrechen</a>
+            <button type="submit" class="btn btn-warning">{% trans "Ticket weitergeben" %}</button>
+            <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-secondary">{% trans "Abbrechen" %}</a>
         </div>
     </form>
     {% else %}
@@ -96,13 +97,13 @@
             <strong>Keine Agents verfügbar</strong><br>
             Es gibt derzeit keine Agents mit einem höheren Support Level, an die Sie eskalieren könnten.
         </p>
-        <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-secondary">Zurück zum Ticket</a>
+        <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-secondary">{% trans "Zurück zum Ticket" %}</a>
     </div>
     {% endif %}
 </div>
 
 <div class="card">
-    <h3 style="margin-bottom: 15px; font-size: 16px;">Support Levels</h3>
+    <h3 style="margin-bottom: 15px; font-size: 16px;">{% trans "Support Levels" %}</h3>
     <ul style="line-height: 1.8; color: #495057; padding-left: 20px;">
         <li><strong>Level 1:</strong> First Line Support - Einfache Anfragen und Standardprobleme</li>
         <li><strong>Level 2:</strong> Technical Support - Komplexere technische Probleme</li>
@@ -110,25 +111,21 @@
         <li><strong>Level 4:</strong> Senior Expert - Team Lead, höchste Eskalationsstufe</li>
     </ul>
 
-    <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 15px;">⬆️ Nach oben eskalieren</h4>
-    <p style="color: #495057; line-height: 1.6;">
-        Eskalieren Sie ein Ticket zu einem höheren Level, wenn:
-    </p>
+    <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 15px;">{% trans "⬆️ Nach oben eskalieren" %}</h4>
+    <p style="color: #495057; line-height: 1.6;">{% trans "Eskalieren Sie ein Ticket zu einem höheren Level, wenn:" %}</p>
     <ul style="line-height: 1.8; color: #495057; padding-left: 20px; margin-top: 10px;">
-        <li>Das Problem außerhalb Ihres Kompetenzbereichs liegt</li>
-        <li>Spezialwissen erforderlich ist</li>
-        <li>Das Problem sehr dringend oder kritisch ist</li>
+        <li>{% trans "Das Problem außerhalb Ihres Kompetenzbereichs liegt" %}</li>
+        <li>{% trans "Spezialwissen erforderlich ist" %}</li>
+        <li>{% trans "Das Problem sehr dringend oder kritisch ist" %}</li>
     </ul>
 
-    <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 15px;">⬇️ Zurückgeben an niedrigeres Level</h4>
-    <p style="color: #495057; line-height: 1.6;">
-        Geben Sie ein Ticket zurück, wenn:
-    </p>
+    <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 15px;">{% trans "⬇️ Zurückgeben an niedrigeres Level" %}</h4>
+    <p style="color: #495057; line-height: 1.6;">{% trans "Geben Sie ein Ticket zurück, wenn:" %}</p>
     <ul style="line-height: 1.8; color: #495057; padding-left: 20px; margin-top: 10px;">
-        <li>Das Problem weniger komplex ist als ursprünglich gedacht</li>
-        <li>Ein niedrigeres Level das Problem lösen kann</li>
-        <li>Das Ticket an den falschen Spezialisten gegeben wurde</li>
-        <li>Weitere Analyse durch First/Second Line Support erforderlich ist</li>
+        <li>{% trans "Das Problem weniger komplex ist als ursprünglich gedacht" %}</li>
+        <li>{% trans "Ein niedrigeres Level das Problem lösen kann" %}</li>
+        <li>{% trans "Das Ticket an den falschen Spezialisten gegeben wurde" %}</li>
+        <li>{% trans "Weitere Analyse durch First/Second Line Support erforderlich ist" %}</li>
     </ul>
 </div>
 {% endblock %}

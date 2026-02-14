@@ -1,36 +1,55 @@
-{% extends "base.html" %}
+{% extends "erp/_list_base.html" %}
+{% load i18n %}
 
 {% block title %}Services{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Services</h2>
-        <a class="btn btn-primary" href="/erp/services/create/">Neu</a>
-    </div>
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Name</th>
-                        <th>Stundensatz</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for s in services %}
-                    <tr>
-                        <td>{{ s.name }}</td>
-                        <td>{{ s.hourly_rate }}</td>
-                        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/erp/services/{{ s.id }}/edit/">Bearbeiten</a></td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="3" class="text-center text-muted py-3">Keine Services.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+{% block app_breadcrumb %}Services{% endblock %}
+{% block list_heading %}Services{% endblock %}
+{% block list_actions %}
+    <a class="btn btn-primary" href="/erp/services/create/">{% trans "Neu" %}</a>
+{% endblock %}
+
+{% block list_content %}
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>{% trans "Bild" %}</th>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Kategorien" %}</th>
+                <th>{% trans "Preis (Netto)" %}</th>
+                <th>{% trans "Preis (Brutto)" %}</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in services %}
+            <tr>
+                <td>
+                    {% if s.image %}
+                    <img src="{{ s.image.url }}" alt="{{ s.name }}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 6px;">
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                <td>{{ s.name }}</td>
+                <td>
+                    {% if s.categories.exists %}
+                        {% for c in s.categories.all %}
+                            <span class="badge bg-light text-dark">{{ c.name }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                <td>{{ s.price_net|default:"-" }}</td>
+                <td>{{ s.price_gross|default:"-" }}</td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="/erp/services/{{ s.id }}/edit/">{% trans "Bearbeiten" %}</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted py-3">{% trans "Keine Services." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

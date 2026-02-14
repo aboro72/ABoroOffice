@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}Ticket für Kunde erstellen - {{ app_title }}{% endblock %}
 
 {% block content %}
 <div class="container" style="max-width: 900px; margin: 0 auto;">
 <div class="card">
-    <div class="card-header">
-        Ticket für Kunde erstellen (z.B. telefonische Anfrage)
-    </div>
+    <div class="card-header">{% trans "Ticket für Kunde erstellen (z.B. telefonische Anfrage)" %}</div>
 
     <div style="background: #e3f2fd; padding: 15px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
         <strong>ℹ️ Information:</strong><br>
@@ -136,23 +135,23 @@
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 30px;">
-            <button type="submit" class="btn btn-primary">Ticket für Kunde erstellen</button>
-            <a href="{% url 'tickets:list' %}" class="btn btn-secondary">Abbrechen</a>
+            <button type="submit" class="btn btn-primary">{% trans "Ticket für Kunde erstellen" %}</button>
+            <a href="{% url 'tickets:list' %}" class="btn btn-secondary">{% trans "Abbrechen" %}</a>
         </div>
     </form>
 </div>
 
 <div class="card">
-    <h3 style="margin-bottom: 15px; font-size: 16px;">Wichtige Hinweise:</h3>
+    <h3 style="margin-bottom: 15px; font-size: 16px;">{% trans "Wichtige Hinweise:" %}</h3>
     <ul style="line-height: 1.8; color: #495057; padding-left: 20px;">
         <li><strong>Existing Customer:</strong> Geben Sie einfach die E-Mail des Kunden ein. Vor-, Nachname und Telefonnummer sind optional.</li>
         <li><strong>Neuer Customer:</strong> Wenn der Kunde noch nicht registriert ist, füllen Sie Vor- und Nachname aus. Der Kunde wird automatisch im System erstellt.</li>
         <li><strong>Telefonnummer:</strong> Die Telefonnummer sollte immer angegeben werden, damit Sie den Kunden direkt kontaktieren können.</li>
         <li>Neue Kunden erhalten das Initial-Passwort <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: monospace;">P@ssw0rd123</code></li>
-        <li>Der Kunde muss das Passwort bei der ersten Anmeldung ändern</li>
-        <li>Der Kunde erhält automatisch eine Benachrichtigung über das erstellte Ticket</li>
-        <li>Das System vermerkt intern, dass Sie dieses Ticket für den Kunden erstellt haben</li>
-        <li>Der Kunde kann das Ticket in seinem Dashboard sehen und Kommentare hinzufügen</li>
+        <li>{% trans "Der Kunde muss das Passwort bei der ersten Anmeldung ändern" %}</li>
+        <li>{% trans "Der Kunde erhält automatisch eine Benachrichtigung über das erstellte Ticket" %}</li>
+        <li>{% trans "Das System vermerkt intern, dass Sie dieses Ticket für den Kunden erstellt haben" %}</li>
+        <li>{% trans "Der Kunde kann das Ticket in seinem Dashboard sehen und Kommentare hinzufügen" %}</li>
     </ul>
 </div>
 
@@ -184,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 resultsDiv.innerHTML = '';
 
                 if (data.results.length === 0) {
-                    resultsDiv.innerHTML = '<div style="padding: 10px; color: #868e96;">Keine Kunden gefunden</div>';
+                    resultsDiv.innerHTML = '<div style="padding: 10px; color: #868e96;">{% trans "Keine Kunden gefunden" %}</div>';
                     resultsDiv.style.display = 'block';
                     return;
                 }
@@ -228,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error fetching customers:', error);
-                resultsDiv.innerHTML = '<div style="padding: 10px; color: #c92a2a;">Fehler beim Suchen von Kunden</div>';
+                resultsDiv.innerHTML = '<div style="padding: 10px; color: #c92a2a;">{% trans "Fehler beim Suchen von Kunden" %}</div>';
                 resultsDiv.style.display = 'block';
             });
     });

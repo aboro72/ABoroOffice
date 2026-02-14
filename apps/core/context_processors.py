@@ -23,6 +23,24 @@ def system_settings_context(request):
             'projects': toggles.get('projects', False),
             'workflows': toggles.get('workflows', False),
         }
+        app_switcher = []
+        def add_app(key, label, url, icon, can_view=True):
+            if app_toggles.get(key, False) and can_view:
+                app_switcher.append({
+                    'key': key,
+                    'label': label,
+                    'url': url,
+                    'icon': icon,
+                })
+        add_app('crm', 'CRM', '/crm/', 'fa-solid fa-chart-line', can_view_crm(request.user))
+        add_app('erp', 'ERP', '/erp/', 'fa-solid fa-boxes-stacked', can_view_erp(request.user))
+        add_app('projects', 'Projekte', '/projects/', 'fa-solid fa-diagram-project')
+        add_app('personnel', 'Personal', '/personnel/', 'fa-solid fa-users')
+        add_app('fibu', 'FiBu', '/fibu/', 'fa-solid fa-file-invoice-dollar')
+        add_app('workflows', 'Workflows', '/workflows/', 'fa-solid fa-gear')
+        add_app('marketing', 'Marketing', '/marketing/', 'fa-solid fa-bullhorn')
+        add_app('contracts', 'Verträge', '/contracts/', 'fa-solid fa-file-contract')
+
         return {
             'system_settings': settings_obj,
             'app_toggles': app_toggles,
@@ -30,6 +48,8 @@ def system_settings_context(request):
             'crm_can_view': can_view_crm(request.user),
             'crm_can_edit': can_edit_crm(request.user),
             'erp_can_view': can_view_erp(request.user),
+            'app_switcher': app_switcher,
+            'global_search_query': (request.GET.get('q') or '').strip(),
         }
     except Exception:
         return {
@@ -52,5 +72,7 @@ def system_settings_context(request):
             'crm_can_view': False,
             'crm_can_edit': False,
             'erp_can_view': False,
+            'app_switcher': [],
+            'global_search_query': '',
         }
 

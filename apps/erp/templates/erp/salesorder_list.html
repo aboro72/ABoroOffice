@@ -1,51 +1,47 @@
-{% extends "base.html" %}
+{% extends "erp/_list_base.html" %}
+{% load i18n %}
 
-{% block title %}Sales Orders{% endblock %}
+{% block title %}Aufträge{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Sales Orders</h2>
-        <div class="d-flex gap-2">
-            <form class="d-flex" method="get">
-                <input class="form-control form-control-sm" name="q" placeholder="Suche Nr./Kunde" value="{{ request.GET.q|default:'' }}">
-            </form>
-            <a class="btn btn-primary" href="/erp/salesorders/create/">Neu</a>
-        </div>
-    </div>
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nr.</th>
-                        <th>Kunde</th>
-                        <th>Status</th>
-                        <th>Netto</th>
-                        <th>MwSt</th>
-                        <th>Brutto</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for o in orders %}
-                    <tr>
-                        <td><a href="/erp/salesorders/{{ o.id }}/">{{ o.order_number|default:o.id }}</a></td>
-                        <td>{% if o.customer %}{{ o.customer.name }}{% else %}-{% endif %}</td>
-                        <td>{{ o.get_status_display }}</td>
-                        <td>{{ o.net_amount }}</td>
-                        <td>{{ o.tax_amount }}</td>
-                        <td>{{ o.total_amount }}</td>
-                        <td class="text-end">
-                            <a class="btn btn-sm btn-outline-secondary" href="/erp/salesorders/{{ o.id }}/edit/">Bearbeiten</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="7" class="text-center text-muted py-3">Keine Sales Orders.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+{% block app_breadcrumb %}Aufträge{% endblock %}
+{% block list_heading %}Aufträge{% endblock %}
+{% block list_actions %}
+    <a class="btn btn-primary" href="/erp/salesorders/create/">{% trans "Neu" %}</a>
+{% endblock %}
+
+{% block list_filters %}
+<form class="d-flex" method="get">
+    <input class="form-control" name="q" placeholder="Suche Nummer/Kunde" value="{{ request.GET.q|default:'' }}">
+</form>
+{% endblock %}
+
+{% block list_content %}
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>{% trans "Nummer" %}</th>
+                <th>{% trans "Kunde" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Summe" %}</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for o in orders %}
+            <tr>
+                <td><a href="/erp/salesorders/{{ o.id }}/">{{ o.order_number }}</a></td>
+                <td>{{ o.customer|default:"-" }}</td>
+                <td>{{ o.get_status_display }}</td>
+                <td>{{ o.total_gross|default:"-" }}</td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" href="/erp/salesorders/{{ o.id }}/edit/">{% trans "Bearbeiten" %}</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-3">{% trans "Keine Aufträge." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}Benutzerverwaltung - {{ app_title }}{% endblock %}
 
 {% block content %}
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h1 style="font-size: 28px; font-weight: 600; margin: 0;">Benutzerverwaltung</h1>
+        <h1 style="font-size: 28px; font-weight: 600; margin: 0;">{% trans "Benutzerverwaltung" %}</h1>
         <a href="{% url 'main:user_create' %}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 16px;">➕</span>
+            <span style="font-size: 16px;">{% trans "➕" %}</span>
             Neuer Benutzer
         </a>
     </div>
@@ -16,23 +17,23 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
             <div style="font-size: 24px; font-weight: 700;">{{ stats.total_users }}</div>
-            <div style="font-size: 12px; opacity: 0.9;">Gesamt</div>
+            <div style="font-size: 12px; opacity: 0.9;">{% trans "Gesamt" %}</div>
         </div>
         <div style="background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
             <div style="font-size: 24px; font-weight: 700;">{{ stats.active_users }}</div>
-            <div style="font-size: 12px; opacity: 0.9;">Aktiv</div>
+            <div style="font-size: 12px; opacity: 0.9;">{% trans "Aktiv" %}</div>
         </div>
         <div style="background: linear-gradient(135deg, #ff6b6b 0%, #fa5252 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
             <div style="font-size: 24px; font-weight: 700;">{{ stats.admins }}</div>
-            <div style="font-size: 12px; opacity: 0.9;">Admins</div>
+            <div style="font-size: 12px; opacity: 0.9;">{% trans "Admins" %}</div>
         </div>
         <div style="background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
             <div style="font-size: 24px; font-weight: 700;">{{ stats.agents }}</div>
-            <div style="font-size: 12px; opacity: 0.9;">Agents</div>
+            <div style="font-size: 12px; opacity: 0.9;">{% trans "Agents" %}</div>
         </div>
         <div style="background: linear-gradient(135deg, #4ecdc4 0%, #2d9cdb 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
             <div style="font-size: 24px; font-weight: 700;">{{ stats.customers }}</div>
-            <div style="font-size: 12px; opacity: 0.9;">Kunden</div>
+            <div style="font-size: 12px; opacity: 0.9;">{% trans "Kunden" %}</div>
         </div>
     </div>
 
@@ -40,11 +41,11 @@
     <form method="get" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end;">
             <div>
-                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">Suche</label>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">{% trans "Suche" %}</label>
                 <input type="text" name="search" value="{{ search_query }}" placeholder="Name, E-Mail oder Benutzername..." style="width: 100%; padding: 10px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 14px;">
             </div>
             <div>
-                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">Rolle</label>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">{% trans "Rolle" %}</label>
                 <select name="role" style="width: 100%; padding: 10px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 14px;">
                     <option value="">Alle Rollen</option>
                     {% for value, label in role_choices %}
@@ -53,16 +54,14 @@
                 </select>
             </div>
             <div>
-                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">Status</label>
+                <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">{% trans "Status" %}</label>
                 <select name="status" style="width: 100%; padding: 10px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 14px;">
                     <option value="">Alle</option>
                     <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Aktiv</option>
                     <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inaktiv</option>
                 </select>
             </div>
-            <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
-                Suchen
-            </button>
+            <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">{% trans "Suchen" %}</button>
         </div>
     </form>
 
@@ -71,12 +70,12 @@
         <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                 <tr>
-                    <th style="padding: 15px; text-align: left; font-weight: 600;">Benutzer</th>
-                    <th style="padding: 15px; text-align: left; font-weight: 600;">E-Mail</th>
-                    <th style="padding: 15px; text-align: left; font-weight: 600;">Rolle</th>
-                    <th style="padding: 15px; text-align: center; font-weight: 600;">Status</th>
-                    <th style="padding: 15px; text-align: center; font-weight: 600;">Erstellt</th>
-                    <th style="padding: 15px; text-align: center; font-weight: 600;">Aktionen</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600;">{% trans "Benutzer" %}</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600;">{% trans "E-Mail" %}</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600;">{% trans "Rolle" %}</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600;">{% trans "Status" %}</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600;">{% trans "Erstellt" %}</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600;">{% trans "Aktionen" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -117,15 +116,11 @@
                     <td style="padding: 15px; text-align: center;">
                         <div style="display: flex; gap: 8px; justify-content: center;">
                             <a href="{% url 'main:user_edit' user_obj.id %}" 
-                               style="background: #4ecdc4; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600;">
-                                Bearbeiten
-                            </a>
+                               style="background: #4ecdc4; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600;">{% trans "Bearbeiten" %}</a>
                             {% if user_obj.id != user.id %}
                             <a href="{% url 'main:user_delete' user_obj.id %}" 
                                style="background: #ff6b6b; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 600;"
-                               onclick="return confirm('Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?')">
-                                Löschen
-                            </a>
+                               onclick="return confirm('Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?')">{% trans "Löschen" %}</a>
                             {% endif %}
                         </div>
                     </td>
@@ -133,9 +128,9 @@
                 {% empty %}
                 <tr>
                     <td colspan="6" style="padding: 40px; text-align: center; color: #868e96;">
-                        <div style="font-size: 48px; margin-bottom: 15px;">👥</div>
-                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">Keine Benutzer gefunden</div>
-                        <div>Keine Benutzer entsprechen den gewählten Filterkriterien.</div>
+                        <div style="font-size: 48px; margin-bottom: 15px;">{% trans "👥" %}</div>
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">{% trans "Keine Benutzer gefunden" %}</div>
+                        <div>{% trans "Keine Benutzer entsprechen den gewählten Filterkriterien." %}</div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -148,9 +143,7 @@
     <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px;">
         {% if page_obj.has_previous %}
             <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
-               style="padding: 8px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
-                ← Zurück
-            </a>
+               style="padding: 8px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{% trans "← Zurück" %}</a>
         {% endif %}
         
         <span style="color: #495057; font-weight: 600;">
@@ -159,9 +152,7 @@
         
         {% if page_obj.has_next %}
             <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
-               style="padding: 8px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
-                Weiter →
-            </a>
+               style="padding: 8px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">{% trans "Weiter →" %}</a>
         {% endif %}
     </div>
     {% endif %}

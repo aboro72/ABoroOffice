@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -123,50 +124,50 @@
     <div class="game-container">
         <canvas id="gameCanvas" width="800" height="600"></canvas>
         <div class="hud">
-            <div>💾 Leben: <span id="lives">3</span></div>
-            <div>🪙 Münzen: <span id="coins">0</span>/<span id="totalCoins">0</span></div>
-            <div>⏱️ Zeit: <span id="timer">60</span>s</div>
-            <div>📊 Level: <span id="level">1</span></div>
+            <div>💾 Leben: <span id="lives">{% trans "3" %}</span></div>
+            <div>🪙 Münzen: <span id="coins">{% trans "0" %}</span>/<span id="totalCoins">{% trans "0" %}</span></div>
+            <div>⏱️ Zeit: <span id="timer">{% trans "60" %}</span>s</div>
+            <div>📊 Level: <span id="level">{% trans "1" %}</span></div>
         </div>
     </div>
 
     <div id="startMenu" class="menu active">
-        <h1>🎮 RETRO RUNNER 💾</h1>
-        <p>Du hast das geheime Spiel gefunden!</p>
+        <h1>{% trans "🎮 RETRO RUNNER 💾" %}</h1>
+        <p>{% trans "Du hast das geheime Spiel gefunden!" %}</p>
         <p style="font-size: 14px; margin: 20px 0;">
             🎯 Sammle alle Münzen bevor die Zeit abläuft!<br>
             ⌨️ Pfeiltasten: Bewegen | Leertaste: Springen<br>
             💾 Diskette auf Beinen = Dein Held!
         </p>
-        <button class="btn" onclick="startGame()">SPIEL STARTEN</button>
-        <button class="btn" onclick="showHighscores()" style="background: #ffd700;">🏆 BESTENLISTE</button>
-        <button class="btn" onclick="location.href='/virus-kong/'" style="background: #cc00cc;">🦠 VIRUS KONG</button>
-        <p class="secret-msg">🤫 Psst... nicht weitersagen! (v2.3 - Highscores fixed!)</p>
+        <button class="btn" onclick="startGame()">{% trans "SPIEL STARTEN" %}</button>
+        <button class="btn" onclick="showHighscores()" style="background: #ffd700;">{% trans "🏆 BESTENLISTE" %}</button>
+        <button class="btn" onclick="location.href='/virus-kong/'" style="background: #cc00cc;">{% trans "🦠 VIRUS KONG" %}</button>
+        <p class="secret-msg">{% trans "🤫 Psst... nicht weitersagen! (v2.3 - Highscores fixed!)" %}</p>
     </div>
 
     <div id="gameOverMenu" class="menu">
-        <h1>💔 GAME OVER!</h1>
-        <p class="level-complete">Score: <span id="finalScore">0</span></p>
-        <p>Erreichte Level: <span id="reachedLevel">1</span></p>
+        <h1>{% trans "💔 GAME OVER!" %}</h1>
+        <p class="level-complete">Score: <span id="finalScore">{% trans "0" %}</span></p>
+        <p>Erreichte Level: <span id="reachedLevel">{% trans "1" %}</span></p>
         <p id="rankMessage" style="color: #ffd700; font-weight: bold; margin: 10px 0;"></p>
-        <button class="btn" onclick="restartGame()">NOCHMAL VERSUCHEN</button>
-        <button class="btn" onclick="showHighscores()" style="background: #ffd700;">🏆 BESTENLISTE</button>
-        <button class="btn" onclick="window.history.back()">ZURÜCK ZUM HELPDESK</button>
+        <button class="btn" onclick="restartGame()">{% trans "NOCHMAL VERSUCHEN" %}</button>
+        <button class="btn" onclick="showHighscores()" style="background: #ffd700;">{% trans "🏆 BESTENLISTE" %}</button>
+        <button class="btn" onclick="window.history.back()">{% trans "ZURÜCK ZUM HELPDESK" %}</button>
     </div>
 
     <div id="victoryMenu" class="menu">
-        <h1>🎉 LEVEL GESCHAFFT!</h1>
-        <p class="level-complete">Alle Münzen gesammelt!</p>
-        <p>Zeit übrig: <span id="timeBonus">0</span>s (+<span id="bonusPoints">0</span> Punkte)</p>
-        <button class="btn" onclick="nextLevel()">NÄCHSTES LEVEL</button>
+        <h1>{% trans "🎉 LEVEL GESCHAFFT!" %}</h1>
+        <p class="level-complete">{% trans "Alle Münzen gesammelt!" %}</p>
+        <p>Zeit übrig: <span id="timeBonus">{% trans "0" %}</span>s (+<span id="bonusPoints">{% trans "0" %}</span> Punkte)</p>
+        <button class="btn" onclick="nextLevel()">{% trans "NÄCHSTES LEVEL" %}</button>
     </div>
 
     <div id="highscoreMenu" class="menu">
-        <h1>🏆 BESTENLISTE 🏆</h1>
+        <h1>{% trans "🏆 BESTENLISTE 🏆" %}</h1>
         <div id="highscoreList" style="max-height: 400px; overflow-y: auto; margin: 20px 0;">
-            <p style="color: #00ff00;">Lade Bestenliste...</p>
+            <p style="color: #00ff00;">{% trans "Lade Bestenliste..." %}</p>
         </div>
-        <button class="btn" onclick="hideHighscores()">ZURÜCK</button>
+        <button class="btn" onclick="hideHighscores()">{% trans "ZURÜCK" %}</button>
     </div>
 
     <script>
@@ -723,7 +724,7 @@
             .catch(error => {
                 console.error('Error loading highscores:', error);
                 document.getElementById('highscoreList').innerHTML =
-                    '<p style="color: #ff6b6b;">Fehler beim Laden der Bestenliste</p>';
+                    '<p style="color: #ff6b6b;">{% trans "Fehler beim Laden der Bestenliste" %}</p>';
             });
         }
 
@@ -736,10 +737,10 @@
             } else {
                 html = '<table style="width: 100%; color: #00ff00; font-family: \'Courier New\', monospace; font-size: 14px; border-collapse: collapse;">';
                 html += '<thead><tr style="border-bottom: 2px solid #00ff00;">';
-                html += '<th style="padding: 10px; text-align: left;">Rang</th>';
-                html += '<th style="padding: 10px; text-align: left;">Agent</th>';
-                html += '<th style="padding: 10px; text-align: right;">Score</th>';
-                html += '<th style="padding: 10px; text-align: center;">Level</th>';
+                html += '<th style="padding: 10px; text-align: left;">{% trans "Rang" %}</th>';
+                html += '<th style="padding: 10px; text-align: left;">{% trans "Agent" %}</th>';
+                html += '<th style="padding: 10px; text-align: right;">{% trans "Score" %}</th>';
+                html += '<th style="padding: 10px; text-align: center;">{% trans "Level" %}</th>';
                 html += '</tr></thead><tbody>';
 
                 data.scores.forEach(score => {
@@ -763,7 +764,7 @@
                 // Player's best score
                 if (data.player_best) {
                     html += '<div style="margin-top: 20px; padding: 15px; background: rgba(255, 215, 0, 0.1); border: 2px solid #ffd700; border-radius: 8px;">';
-                    html += '<p style="color: #ffd700; font-weight: bold; margin-bottom: 5px;">👤 DEINE BESTLEISTUNG:</p>';
+                    html += '<p style="color: #ffd700; font-weight: bold; margin-bottom: 5px;">{% trans "👤 DEINE BESTLEISTUNG:" %}</p>';
                     html += `<p style="color: #00ff00;">Platz ${data.player_best.rank} | Score: ${data.player_best.score} | Level: ${data.player_best.level}</p>`;
                     html += '</div>';
                 }

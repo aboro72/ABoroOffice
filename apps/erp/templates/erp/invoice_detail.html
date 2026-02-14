@@ -1,93 +1,87 @@
-{% extends "base.html" %}
+{% extends "erp/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}Rechnung {{ invoice.number }}{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="mb-0">Rechnung {{ invoice.number }}</h2>
-            <div class="text-muted">Status: {{ invoice.get_status_display }}</div>
-        </div>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary" href="/erp/invoices/">Zur Liste</a>
-            <a class="btn btn-outline-secondary" href="/erp/salesorders/{{ invoice.order.id }}/">Sales Order</a>
-            <form method="post">
-                {% csrf_token %}
-                <button class="btn btn-outline-primary" name="send_invoice" type="submit">Rechnung per E-Mail</button>
-            </form>
-            <form method="post">
-                {% csrf_token %}
-                <button class="btn btn-outline-secondary" name="download_invoice_letter" type="submit">PDF herunterladen</button>
-            </form>
+{% block app_breadcrumb %}Rechnung {{ invoice.number }}{% endblock %}
+{% block app_actions %}
+    <a class="btn btn-outline-secondary" href="/erp/invoices/">{% trans "Zur Liste" %}</a>
+    <a class="btn btn-outline-secondary" href="/erp/salesorders/{{ invoice.order.id }}/">{% trans "Sales Order" %}</a>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-outline-primary" name="send_invoice" type="submit">{% trans "Rechnung per E-Mail" %}</button>
+    </form>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-outline-secondary" name="download_invoice_letter" type="submit">{% trans "PDF herunterladen" %}</button>
+    </form>
+{% endblock %}
+
+{% block app_content %}
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Rechnungsdaten" %}</div>
+            <div class="card-body">
+                <div><strong>{% trans "Kunde" %}:</strong> {{ invoice.billing_name }}</div>
+                <div class="mt-2"><strong>Adresse:</strong><br>{{ invoice.billing_address|linebreaksbr }}</div>
+                <div class="mt-2"><strong>Datum:</strong> {{ invoice.issue_date }}</div>
+                {% if invoice.due_date %}
+                <div><strong>{% trans "Fällig" %}:</strong> {{ invoice.due_date }}</div>
+                {% endif %}
+                {% if invoice.notes %}
+                <div class="mt-3"><strong>Notizen:</strong><br>{{ invoice.notes|linebreaksbr }}</div>
+                {% endif %}
+            </div>
         </div>
     </div>
-
-    <div class="row g-3">
-        <div class="col-lg-8">
-            <div class="card h-100">
-                <div class="card-header">Rechnungsdaten</div>
-                <div class="card-body">
-                    <div><strong>Kunde:</strong> {{ invoice.billing_name }}</div>
-                    <div class="mt-2"><strong>Adresse:</strong><br>{{ invoice.billing_address|linebreaksbr }}</div>
-                    <div class="mt-2"><strong>Datum:</strong> {{ invoice.issue_date }}</div>
-                    {% if invoice.due_date %}
-                    <div><strong>Faellig:</strong> {{ invoice.due_date }}</div>
-                    {% endif %}
-                    {% if invoice.notes %}
-                    <div class="mt-3"><strong>Notizen:</strong><br>{{ invoice.notes|linebreaksbr }}</div>
-                    {% endif %}
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Summen" %}</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <span>{% trans "Netto" %}</span>
+                    <strong>{{ invoice.net_amount }}</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>MwSt ({{ invoice.tax_rate }}%)</span>
+                    <strong>{{ invoice.tax_amount }}</strong>
+                </div>
+                <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                    <span>{% trans "Brutto" %}</span>
+                    <strong>{{ invoice.total_amount }}</strong>
                 </div>
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header">Summen</div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <span>Netto</span>
-                        <strong>{{ invoice.net_amount }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>MwSt ({{ invoice.tax_rate }}%)</span>
-                        <strong>{{ invoice.tax_amount }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between border-top pt-2 mt-2">
-                        <span>Brutto</span>
-                        <strong>{{ invoice.total_amount }}</strong>
-                    </div>
-                </div>
-            </div>
 
-            <div class="card mt-3">
-                <div class="card-header">Mahnwesen</div>
-                <div class="card-body">
-                    <form method="post" class="d-flex gap-2 align-items-end">
-                        {% csrf_token %}
-                        <div>
-                            <label class="form-label">Stufe</label>
-                            <select class="form-select" name="level">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                        </div>
-                        <div class="flex-grow-1">
-                            <button class="btn btn-outline-primary mt-4" name="create_dunning" type="submit">Mahnung erstellen</button>
-                        </div>
-                    </form>
-                    <hr>
-                    <ul class="list-group list-group-flush">
-                        {% for n in invoice.dunning_notices.all %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="/erp/dunning/{{ n.id }}/">{{ n.number }}</a>
-                            <span class="badge bg-secondary">{{ n.get_status_display }}</span>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item text-muted">Keine Mahnungen.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+        <div class="card mt-3">
+            <div class="card-header">{% trans "Mahnwesen" %}</div>
+            <div class="card-body">
+                <form method="post" class="d-flex gap-2 align-items-end">
+                    {% csrf_token %}
+                    <div>
+                        <label class="form-label">{% trans "Stufe" %}</label>
+                        <select class="form-select" name="level">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                    <div class="flex-grow-1">
+                        <button class="btn btn-outline-primary mt-4" name="create_dunning" type="submit">{% trans "Mahnung erstellen" %}</button>
+                    </div>
+                </form>
+                <hr>
+                <ul class="list-group list-group-flush">
+                    {% for n in invoice.dunning_notices.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="/erp/dunning/{{ n.id }}/">{{ n.number }}</a>
+                        <span class="badge bg-secondary">{{ n.get_status_display }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">{% trans "Keine Mahnungen." %}</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>

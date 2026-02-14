@@ -5,6 +5,7 @@ Uses ABoroUser as AUTH_USER_MODEL.
 
 from django import forms
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
@@ -42,11 +43,11 @@ def register(request):
         if form.is_valid():
             data = form.cleaned_data
             if data['password'] != data['password_confirm']:
-                messages.error(request, 'Passwörter stimmen nicht überein.')
+                messages.error(request, _("Passwörter stimmen nicht überein."))
             elif User.objects.filter(username=data['username']).exists():
-                messages.error(request, 'Benutzername ist bereits vergeben.')
+                messages.error(request, _("Benutzername ist bereits vergeben."))
             elif User.objects.filter(email=data['email']).exists():
-                messages.error(request, 'E-Mail ist bereits registriert.')
+                messages.error(request, _("E-Mail ist bereits registriert."))
             else:
                 user = User.objects.create_user(
                     username=data['username'],
@@ -61,10 +62,10 @@ def register(request):
                 user.role = 'customer'
                 user.save()
 
-                messages.success(request, 'Konto erstellt. Bitte anmelden.')
+                messages.success(request, _("Konto erstellt. Bitte anmelden."))
                 return redirect('helpdesk_accounts:login')
         else:
-            messages.error(request, 'Bitte prüfen Sie Ihre Eingaben.')
+            messages.error(request, _("Bitte prüfen Sie Ihre Eingaben."))
     else:
         form = RegistrationForm()
 
@@ -88,17 +89,17 @@ def profile_edit(request):
             profile_form = ProfileForm(request.POST, instance=request.user)
             if profile_form.is_valid():
                 profile_form.save()
-                messages.success(request, 'Profil aktualisiert.')
+                messages.success(request, _("Profil aktualisiert."))
                 return redirect('helpdesk_accounts:profile_edit')
-            messages.error(request, 'Profil konnte nicht gespeichert werden.')
+            messages.error(request, _("Profil konnte nicht gespeichert werden."))
         elif action == 'password':
             password_form = PasswordChangeForm(user=request.user, data=request.POST)
             if password_form.is_valid():
                 user = password_form.save()
                 update_session_auth_hash(request, user)
-                messages.success(request, 'Passwort aktualisiert.')
+                messages.success(request, _("Passwort aktualisiert."))
                 return redirect('helpdesk_accounts:profile_edit')
-            messages.error(request, 'Passwort konnte nicht geändert werden.')
+            messages.error(request, _("Passwort konnte nicht geändert werden."))
 
     return render(
         request,

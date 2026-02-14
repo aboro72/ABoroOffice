@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}Benutzerverwaltung - {{ app_title }}{% endblock %}
 
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-    <h1 style="font-size: 28px; font-weight: 600; margin: 0;">👥 Benutzerverwaltung</h1>
+    <h1 style="font-size: 28px; font-weight: 600; margin: 0;">{% trans "👥 Benutzerverwaltung" %}</h1>
     {% if can_create_users %}
     <a href="{% url 'helpdesk_accounts:user_create' %}" class="btn btn-primary">
         <i class="fas fa-plus"></i> Neuen Benutzer erstellen
@@ -17,7 +18,7 @@
     <form method="get" class="filter-form">
         <div style="display: grid; grid-template-columns: 1fr 200px 150px 120px; gap: 15px; align-items: end;">
             <div>
-                <label for="search" style="font-weight: 600; color: #495057; margin-bottom: 5px; display: block;">Suchen:</label>
+                <label for="search" style="font-weight: 600; color: #495057; margin-bottom: 5px; display: block;">{% trans "Suchen:" %}</label>
                 <input type="text" name="search" id="search" value="{{ search }}" 
                        placeholder="Name, E-Mail oder Benutzername..." 
                        style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;">
@@ -25,7 +26,7 @@
             
             {% if available_roles %}
             <div>
-                <label for="role" style="font-weight: 600; color: #495057; margin-bottom: 5px; display: block;">Rolle:</label>
+                <label for="role" style="font-weight: 600; color: #495057; margin-bottom: 5px; display: block;">{% trans "Rolle:" %}</label>
                 <select name="role" id="role" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;">
                     <option value="">Alle Rollen</option>
                     {% for value, label in available_roles %}
@@ -36,7 +37,7 @@
             {% endif %}
             
             <div>
-                <label for="status" style="font-weight: 600; color: #495057; margin-bottom: 5px; display: block;">Status:</label>
+                <label for="status" style="font-weight: 600; color: #495057; margin-bottom: 5px; display: block;">{% trans "Status:" %}</label>
                 <select name="status" id="status" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;">
                     <option value="">Alle</option>
                     <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Aktiv</option>
@@ -45,9 +46,7 @@
             </div>
             
             <div>
-                <button type="submit" style="width: 100%; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    Filtern
-                </button>
+                <button type="submit" style="width: 100%; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">{% trans "Filtern" %}</button>
             </div>
         </div>
     </form>
@@ -60,12 +59,12 @@
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Benutzer</th>
-                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Rolle</th>
-                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Kontakt</th>
-                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Status</th>
-                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">Erstellt</th>
-                    <th style="padding: 12px; text-align: center; font-weight: 600; color: #495057;">Aktionen</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">{% trans "Benutzer" %}</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">{% trans "Rolle" %}</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">{% trans "Kontakt" %}</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">{% trans "Status" %}</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #495057;">{% trans "Erstellt" %}</th>
+                    <th style="padding: 12px; text-align: center; font-weight: 600; color: #495057;">{% trans "Aktionen" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -109,14 +108,10 @@
                         <div style="display: flex; gap: 5px; justify-content: center;">
                             <a href="{% url 'helpdesk_accounts:user_detail' user.id %}" 
                                style="padding: 6px 10px; background: #17a2b8; color: white; text-decoration: none; border-radius: 4px; font-size: 12px;" 
-                               title="Details anzeigen">
-                                👁️
-                            </a>
+                               title="Details anzeigen">{% trans "👁️" %}</a>
                             <a href="{% url 'helpdesk_accounts:user_edit' user.id %}" 
                                style="padding: 6px 10px; background: #ffc107; color: #212529; text-decoration: none; border-radius: 4px; font-size: 12px;" 
-                               title="Bearbeiten">
-                                ✏️
-                            </a>
+                               title="Bearbeiten">{% trans "✏️" %}</a>
                             {% if user != request.user %}
                             <button onclick="toggleUserStatus({{ user.id }})" 
                                     style="padding: 6px 10px; background: {% if user.is_active %}#dc3545{% else %}#28a745{% endif %}; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;" 
@@ -125,9 +120,7 @@
                             </button>
                             <button onclick="resetUserPassword({{ user.id }})" 
                                     style="padding: 6px 10px; background: #6f42c1; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;" 
-                                    title="Passwort zurücksetzen">
-                                🔑
-                            </button>
+                                    title="Passwort zurücksetzen">{% trans "🔑" %}</button>
                             {% endif %}
                         </div>
                     </td>
@@ -143,13 +136,9 @@
         <div style="display: inline-flex; gap: 5px;">
             {% if users.has_previous %}
             <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
-               style="padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; text-decoration: none; color: #495057; border-radius: 4px;">
-                « Erste
-            </a>
+               style="padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; text-decoration: none; color: #495057; border-radius: 4px;">{% trans "« Erste" %}</a>
             <a href="?page={{ users.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
-               style="padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; text-decoration: none; color: #495057; border-radius: 4px;">
-                ‹ Zurück
-            </a>
+               style="padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; text-decoration: none; color: #495057; border-radius: 4px;">{% trans "‹ Zurück" %}</a>
             {% endif %}
             
             <span style="padding: 8px 12px; background: #667eea; color: white; border-radius: 4px; font-weight: 600;">
@@ -158,13 +147,9 @@
             
             {% if users.has_next %}
             <a href="?page={{ users.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
-               style="padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; text-decoration: none; color: #495057; border-radius: 4px;">
-                Weiter ›
-            </a>
+               style="padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; text-decoration: none; color: #495057; border-radius: 4px;">{% trans "Weiter ›" %}</a>
             <a href="?page={{ users.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
-               style="padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; text-decoration: none; color: #495057; border-radius: 4px;">
-                Letzte »
-            </a>
+               style="padding: 8px 12px; background: #f8f9fa; border: 1px solid #dee2e6; text-decoration: none; color: #495057; border-radius: 4px;">{% trans "Letzte »" %}</a>
             {% endif %}
         </div>
     </div>
@@ -172,13 +157,11 @@
     
     {% else %}
     <div style="text-align: center; padding: 40px; color: #666;">
-        <div style="font-size: 48px; margin-bottom: 20px;">👥</div>
-        <h3>Keine Benutzer gefunden</h3>
+        <div style="font-size: 48px; margin-bottom: 20px;">{% trans "👥" %}</div>
+        <h3>{% trans "Keine Benutzer gefunden" %}</h3>
         <p>{% if search or role_filter or status_filter %}Versuchen Sie andere Suchkriterien.{% else %}Es sind noch keine Benutzer vorhanden.{% endif %}</p>
         {% if can_create_users %}
-        <a href="{% url 'helpdesk_accounts:user_create' %}" class="btn btn-primary" style="margin-top: 15px;">
-            Ersten Benutzer erstellen
-        </a>
+        <a href="{% url 'helpdesk_accounts:user_create' %}" class="btn btn-primary" style="margin-top: 15px;">{% trans "Ersten Benutzer erstellen" %}</a>
         {% endif %}
     </div>
     {% endif %}

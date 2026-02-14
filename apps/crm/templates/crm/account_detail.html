@@ -1,153 +1,150 @@
-{% extends "base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Account{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    {% include "crm/_nav.html" %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">{{ account.name }}</h2>
-        <div class="d-flex gap-2">
-            {% if can_edit %}
-            <a class="btn btn-outline-primary" href="{% url 'crm:account_edit' account.id %}">Bearbeiten</a>
-            {% endif %}
-            <a class="btn btn-outline-secondary" href="{% url 'crm:account_list' %}">Zurück</a>
-        </div>
-    </div>
+{% block app_breadcrumb %}{{ account.name }}{% endblock %}
+{% block app_actions %}
+    {% if can_edit %}
+    <a class="btn btn-outline-primary" href="{% url 'crm:account_edit' account.id %}">{% trans "Bearbeiten" %}</a>
+    {% endif %}
+    <a class="btn btn-outline-secondary" href="{% url 'crm:account_list' %}">Zurück</a>
+{% endblock %}
 
-    <div class="row g-3">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">Details</div>
-                <div class="card-body">
-                    <div><strong>Status:</strong> {{ account.get_status_display }}</div>
-                    <div><strong>Branche:</strong> {{ account.industry|default:"-" }}</div>
-                    <div><strong>Website:</strong> {{ account.website|default:"-" }}</div>
-                    <div><strong>Telefon:</strong> {{ account.phone|default:"-" }}</div>
-                    <div><strong>E-Mail:</strong> {{ account.email|default:"-" }}</div>
-                    <div><strong>Owner:</strong> {{ account.owner|default:"-" }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">AI Zusammenfassung</div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="ai_summary">
-                        <button type="submit" class="btn btn-primary w-100">Zusammenfassung generieren</button>
-                    </form>
-                    {% if ai_summary %}
-                    <div class="alert alert-info mt-3">{{ ai_summary }}</div>
-                    {% endif %}
-                </div>
+{% block app_content %}
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Details" %}</div>
+            <div class="card-body">
+                <div><strong>Status:</strong> {{ account.get_status_display }}</div>
+                <div><strong>Branche:</strong> {{ account.industry|default:"-" }}</div>
+                <div><strong>Website:</strong> {{ account.website|default:"-" }}</div>
+                <div><strong>Telefon:</strong> {{ account.phone|default:"-" }}</div>
+                <div><strong>E-Mail:</strong> {{ account.email|default:"-" }}</div>
+                <div><strong>Owner:</strong> {{ account.owner|default:"-" }}</div>
             </div>
         </div>
     </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">AI Zusammenfassung</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ai_summary">
+                    <button type="submit" class="btn btn-primary w-100">Zusammenfassung generieren</button>
+                </form>
+                {% if ai_summary %}
+                <div class="alert alert-info mt-3">{{ ai_summary }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div class="row g-3 mt-1">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">Kontakte</div>
-                <div class="card-body">
-                    {% if account.contacts.exists %}
-                    <ul class="list-group list-group-flush">
-                        {% for contact in account.contacts.all %}
-                        <li class="list-group-item">
-                            <div class="fw-bold">{{ contact.first_name }} {{ contact.last_name }}</div>
-                            <div class="text-muted small">{{ contact.email|default:"-" }}</div>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item text-muted">Keine Kontakte.</li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="text-muted">Keine Kontakte.</div>
-                    {% endif %}
-                </div>
+<div class="row g-3 mt-1">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">Kontakte</div>
+            <div class="card-body">
+                {% if account.contacts.exists %}
+                <ul class="list-group list-group-flush">
+                    {% for contact in account.contacts.all %}
+                    <li class="list-group-item">
+                        <div class="fw-bold">{{ contact.first_name }} {{ contact.last_name }}</div>
+                        <div class="text-muted small">{{ contact.email|default:"-" }}</div>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">Keine Kontakte.</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted">Keine Kontakte.</div>
+                {% endif %}
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">Opportunities</div>
-                <div class="card-body">
-                    {% if account.opportunities.exists %}
-                    <ul class="list-group list-group-flush">
-                        {% for opp in account.opportunities.all %}
-                        <li class="list-group-item">
-                            <div class="fw-bold">{{ opp.name }}</div>
-                            <div class="text-muted small">{{ opp.get_stage_display }} · {{ opp.amount }}</div>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item text-muted">Keine Opportunities.</li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="text-muted">Keine Opportunities.</div>
-                    {% endif %}
-                </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">Opportunities</div>
+            <div class="card-body">
+                {% if account.opportunities.exists %}
+                <ul class="list-group list-group-flush">
+                    {% for opp in account.opportunities.all %}
+                    <li class="list-group-item">
+                        <div class="fw-bold">{{ opp.name }}</div>
+                        <div class="text-muted small">{{ opp.get_stage_display }} Â· {{ opp.amount }}</div>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">Keine Opportunities.</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted">Keine Opportunities.</div>
+                {% endif %}
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">Notizen</div>
-                <div class="card-body">
-                    {% if can_edit %}
-                    <form method="post" class="mb-3">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="add_note">
-                        {{ note_form.as_p }}
-                        <button type="submit" class="btn btn-outline-primary w-100">Notiz speichern</button>
-                    </form>
-                    {% endif %}
-                    {% if notes %}
-                    <ul class="list-group list-group-flush">
-                        {% for note in notes %}
-                        <li class="list-group-item">
-                            <div class="text-muted small">{{ note.created_at }}</div>
-                            <div>{{ note.content|truncatechars:120 }}</div>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item text-muted">Keine Notizen.</li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="text-muted">Keine Notizen.</div>
-                    {% endif %}
-                </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Notizen" %}</div>
+            <div class="card-body">
+                {% if can_edit %}
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_note">
+                    {{ note_form.as_p }}
+                    <button type="submit" class="btn btn-outline-primary w-100">Notiz speichern</button>
+                </form>
+                {% endif %}
+                {% if notes %}
+                <ul class="list-group list-group-flush">
+                    {% for note in notes %}
+                    <li class="list-group-item">
+                        <div class="text-muted small">{{ note.created_at }}</div>
+                        <div>{{ note.content|truncatechars:120 }}</div>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">Keine Notizen.</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted">Keine Notizen.</div>
+                {% endif %}
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">Aktivitäten</div>
-                <div class="card-body">
-                    {% if can_edit %}
-                    <form method="post" class="mb-3">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="add_activity">
-                        {{ activity_form.as_p }}
-                        <button type="submit" class="btn btn-outline-primary w-100">Aktivität speichern</button>
-                    </form>
-                    {% endif %}
-                    {% if activities %}
-                    <ul class="list-group list-group-flush">
-                        {% for activity in activities %}
-                        <li class="list-group-item">
-                            <div class="fw-semibold">{{ activity.subject }}</div>
-                            <div class="small text-muted">
-                                {{ activity.get_activity_type_display }} · {{ activity.get_status_display }}
-                                {% if activity.due_date %}· {{ activity.due_date }}{% endif %}
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="text-muted">Keine Aktivitäten.</div>
-                    {% endif %}
-                </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">Aktivitaeten</div>
+            <div class="card-body">
+                {% if can_edit %}
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_activity">
+                    {{ activity_form.as_p }}
+                    <button type="submit" class="btn btn-outline-primary w-100">Aktivitaet speichern</button>
+                </form>
+                {% endif %}
+                {% if activities %}
+                <ul class="list-group list-group-flush">
+                    {% for activity in activities %}
+                    <li class="list-group-item">
+                        <div class="fw-semibold">{{ activity.subject }}</div>
+                        <div class="small text-muted">
+                            {{ activity.get_activity_type_display }} Â· {{ activity.get_status_display }}
+                            {% if activity.due_date %}Â· {{ activity.due_date }}{% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted">Keine Aktivitaeten.</div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+

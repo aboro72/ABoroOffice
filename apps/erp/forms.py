@@ -3,6 +3,7 @@ from .models import (
     Customer,
     Product,
     Service,
+    ProductCategory,
     WorkOrder,
     SalesOrder,
     SalesOrderItem,
@@ -45,6 +46,8 @@ class ProductForm(BaseErpForm):
         fields = [
             'name',
             'sku',
+            'categories',
+            'image',
             'price',
             'cost_net',
             'vat_rate',
@@ -64,7 +67,16 @@ class ProductForm(BaseErpForm):
 class ServiceForm(BaseErpForm):
     class Meta:
         model = Service
-        fields = ['name', 'hourly_rate', 'description']
+        fields = ['name', 'categories', 'image', 'hourly_rate', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+class ProductCategoryForm(BaseErpForm):
+    class Meta:
+        model = ProductCategory
+        fields = ['name', 'parent', 'description']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }

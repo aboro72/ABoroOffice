@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}{{ file.name }} - CloudService{% endblock %}
 
@@ -511,7 +512,7 @@ function loadWordPreview() {
                         console.error('Error rendering Word document:', error);
                         previewElement.innerHTML = '<div class="alert alert-warning">' +
                             'Fehler beim Anzeigen des Dokuments. ' +
-                            '<a href="/storage/file/{{ file.id }}/download/" class="btn btn-sm btn-primary">Download</a>' +
+                            '<a href="/storage/file/{{ file.id }}/download/" class="btn btn-sm btn-primary">{% trans "Download" %}</a>' +
                             '</div>';
                     });
             })

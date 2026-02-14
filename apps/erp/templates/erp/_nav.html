@@ -1,0 +1,17 @@
+{% load i18n %}
+<a href="{% url 'erp:home' %}"><i class="fa-solid fa-house"></i> Übersicht</a>
+<a href="{% url 'erp:customers' %}"><i class="fa-solid fa-users"></i> {% trans "Kunden" %}</a>
+<a href="{% url 'erp:quotes' %}"><i class="fa-solid fa-file-lines"></i> {% trans "Angebote" %}</a>
+<a href="{% url 'erp:confirmations' %}"><i class="fa-solid fa-file-signature"></i> {% trans "Auftragsbest?tigungen" %}</a>
+<a href="{% url 'erp:salesorders' %}"><i class="fa-solid fa-clipboard-list"></i> {% trans "Auftr?ge" %}</a>
+<a href="{% url 'erp:invoices' %}"><i class="fa-solid fa-file-invoice"></i> {% trans "Rechnungen" %}</a>
+<a href="{% url 'erp:dunning' %}"><i class="fa-solid fa-triangle-exclamation"></i> {% trans "Mahnwesen" %}</a>
+<a href="{% url 'erp:products' %}"><i class="fa-solid fa-box"></i> {% trans "Produkte" %}</a>
+<a href="{% url 'erp:categories' %}"><i class="fa-solid fa-tags"></i> {% trans "Kategorien" %}</a>
+<a href="{% url 'erp:services' %}"><i class="fa-solid fa-screwdriver-wrench"></i> {% trans "Services" %}</a>
+<a href="{% url 'erp:workorders' %}"><i class="fa-solid fa-helmet-safety"></i> Arbeitsaufträge</a>
+<a href="{% url 'erp:stockreceipts' %}"><i class="fa-solid fa-warehouse"></i> {% trans "Wareneingang" %}</a>
+<a href="{% url 'erp:courses' %}"><i class="fa-solid fa-graduation-cap"></i> {% trans "Veranstaltungen" %}</a>
+<a href="{% url 'erp:plugins' %}"><i class="fa-solid fa-plug"></i> {% trans "Plugins" %}</a>
+<a href="{% url 'erp:pricing_help' %}"><i class="fa-solid fa-euro-sign"></i> {% trans "Preise" %}</a>
+<a href="{% url 'erp:help' %}"><i class="fa-regular fa-circle-question"></i> {% trans "Hilfe" %}</a>

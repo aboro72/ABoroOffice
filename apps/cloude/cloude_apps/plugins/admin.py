@@ -10,6 +10,7 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import path, reverse
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html, mark_safe
 from django.template.response import TemplateResponse
 
@@ -177,17 +178,17 @@ class PluginAdmin(admin.ModelAdmin):
         plugin_id = request.GET.get('id')
 
         if not plugin_id:
-            messages.error(request, 'No plugin specified')
+            messages.error(request, _("Kein Plugin angegeben"))
             return redirect('admin:plugins_plugin_changelist')
 
         try:
             loader = PluginLoader()
             loader.load_plugin(plugin_id)
-            messages.success(request, '✅ Plugin activated successfully')
+            messages.success(request, _("✅ Plugin aktiviert"))
             logger.info(f"Admin {request.user.username} activated plugin {plugin_id}")
 
         except Exception as e:
-            messages.error(request, f'❌ Activation failed: {str(e)}')
+            messages.error(request, _("❌ Aktivierung fehlgeschlagen: %(error)s") % {"error": str(e)})
             logger.error(f"Plugin activation failed: {e}")
 
         return redirect('admin:plugins_plugin_changelist')
@@ -197,17 +198,17 @@ class PluginAdmin(admin.ModelAdmin):
         plugin_id = request.GET.get('id')
 
         if not plugin_id:
-            messages.error(request, 'No plugin specified')
+            messages.error(request, _("Kein Plugin angegeben"))
             return redirect('admin:plugins_plugin_changelist')
 
         try:
             loader = PluginLoader()
             loader.unload_plugin(plugin_id)
-            messages.success(request, '✅ Plugin deactivated successfully')
+            messages.success(request, _("✅ Plugin deaktiviert"))
             logger.info(f"Admin {request.user.username} deactivated plugin {plugin_id}")
 
         except Exception as e:
-            messages.error(request, f'❌ Deactivation failed: {str(e)}')
+            messages.error(request, _("❌ Deaktivierung fehlgeschlagen: %(error)s") % {"error": str(e)})
             logger.error(f"Plugin deactivation failed: {e}")
 
         return redirect('admin:plugins_plugin_changelist')
@@ -227,7 +228,7 @@ class PluginAdmin(admin.ModelAdmin):
         zip_file = request.FILES.get('zip_file')
 
         if not zip_file:
-            messages.error(request, '❌ No file selected')
+            messages.error(request, _("❌ Keine Datei ausgewählt"))
             return redirect('admin:plugin_upload')
 
         loader = PluginLoader()
@@ -284,12 +285,12 @@ class PluginAdmin(admin.ModelAdmin):
             return redirect('admin:plugins_plugin_change', plugin.id)
 
         except ValueError as e:
-            messages.error(request, f'❌ Invalid plugin: {str(e)}')
+            messages.error(request, _("❌ Ungültiges Plugin: %(error)s") % {"error": str(e)})
             logger.error(f"Plugin upload validation failed: {e}")
             return redirect('admin:plugin_upload')
 
         except Exception as e:
-            messages.error(request, f'❌ Upload failed: {str(e)}')
+            messages.error(request, _("❌ Upload fehlgeschlagen: %(error)s") % {"error": str(e)})
             logger.error(f"Plugin upload failed: {e}")
             return redirect('admin:plugin_upload')
 

@@ -1,86 +1,83 @@
-{% extends "base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Opportunity{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    {% include "crm/_nav.html" %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">{{ opportunity.name }}</h2>
-        <div class="d-flex gap-2">
-            {% if can_edit %}
-            <a class="btn btn-outline-primary" href="{% url 'crm:opportunity_edit' opportunity.id %}">Bearbeiten</a>
-            {% endif %}
-            <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_list' %}">Zurück</a>
-        </div>
-    </div>
-
-    <div class="row g-3">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">Details</div>
-                <div class="card-body">
-                    <div><strong>Account:</strong> <a href="{% url 'crm:account_detail' opportunity.account.id %}">{{ opportunity.account.name }}</a></div>
-                    <div><strong>Stage:</strong> <span class="badge bg-secondary">{{ opportunity.get_stage_display }}</span></div>
-                    <div><strong>Amount:</strong> {{ opportunity.amount }}</div>
-                    <div><strong>Close Date:</strong> {{ opportunity.close_date|default:"-" }}</div>
-                    <div><strong>Owner:</strong> {{ opportunity.owner|default:"-" }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">AI E‑Mail Entwurf</div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="ai_email">
-                        <button type="submit" class="btn btn-primary w-100">Entwurf generieren</button>
-                    </form>
-                    {% if ai_email %}
-                    <div class="alert alert-info mt-3" style="white-space: pre-wrap;">{{ ai_email }}</div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
+{% block app_breadcrumb %}{{ opportunity.name }}{% endblock %}
+{% block app_actions %}
     {% if can_edit %}
-    <div class="row g-3 mt-1">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">E-Mail senden</div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="send_email">
-                        {{ email_form.as_p }}
-                        <button type="submit" class="btn btn-primary w-100">Senden</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">Letzte E-Mails</div>
-                <div class="card-body">
-                    {% if email_logs %}
-                    <ul class="list-group list-group-flush">
-                        {% for log in email_logs %}
-                        <li class="list-group-item">
-                            <div><strong>{{ log.to_email }}</strong> · {{ log.sent_at }}</div>
-                            <div class="text-muted small">{{ log.subject }}</div>
-                            <div class="text-muted small">Status: {{ log.status }}</div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="text-muted">Noch keine E-Mails.</div>
-                    {% endif %}
-                </div>
+    <a class="btn btn-outline-primary" href="{% url 'crm:opportunity_edit' opportunity.id %}">{% trans "Bearbeiten" %}</a>
+    {% endif %}
+    <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_list' %}">Zurück</a>
+{% endblock %}
+
+{% block app_content %}
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Details" %}</div>
+            <div class="card-body">
+                <div><strong>Account:</strong> <a href="{% url 'crm:account_detail' opportunity.account.id %}">{{ opportunity.account.name }}</a></div>
+                <div><strong>Stage:</strong> <span class="badge bg-secondary">{{ opportunity.get_stage_display }}</span></div>
+                <div><strong>Amount:</strong> {{ opportunity.amount }}</div>
+                <div><strong>Close Date:</strong> {{ opportunity.close_date|default:"-" }}</div>
+                <div><strong>Owner:</strong> {{ opportunity.owner|default:"-" }}</div>
             </div>
         </div>
     </div>
-    {% endif %}
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">AI E-Mail Entwurf</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ai_email">
+                    <button type="submit" class="btn btn-primary w-100">Entwurf generieren</button>
+                </form>
+                {% if ai_email %}
+                <div class="alert alert-info mt-3" style="white-space: pre-wrap;">{{ ai_email }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
+
+{% if can_edit %}
+<div class="row g-3 mt-1">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">E-Mail senden</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="send_email">
+                    {{ email_form.as_p }}
+                    <button type="submit" class="btn btn-primary w-100">Senden</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Letzte E-Mails</div>
+            <div class="card-body">
+                {% if email_logs %}
+                <ul class="list-group list-group-flush">
+                    {% for log in email_logs %}
+                    <li class="list-group-item">
+                        <div><strong>{{ log.to_email }}</strong> Â· {{ log.sent_at }}</div>
+                        <div class="text-muted small">{{ log.subject }}</div>
+                        <div class="text-muted small">Status: {{ log.status }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted">Noch keine E-Mails.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
+

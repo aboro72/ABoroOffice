@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.generic import TemplateView, FormView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
 from django.conf import settings as django_settings
@@ -33,7 +34,7 @@ class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
         return self.request.user.role == 'admin'
 
     def handle_no_permission(self):
-        messages.error(self.request, 'Sie haben keine Berechtigung für diese Seite.')
+        messages.error(self.request, _("Sie haben keine Berechtigung für diese Seite."))
         return redirect('/')
 
 
@@ -149,7 +150,7 @@ class SettingsView(AdminRequiredMixin, FormView):
             ip_address=get_client_ip(self.request)
         )
 
-        messages.success(self.request, 'Einstellungen erfolgreich gespeichert.')
+        messages.success(self.request, _("Einstellungen erfolgreich gespeichert."))
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -157,7 +158,7 @@ class SettingsView(AdminRequiredMixin, FormView):
         context['settings'] = self.get_object()
         context['test_email_form'] = TestEmailForm()
         context['test_imap_form'] = TestIMAPForm()
-        context['page_title'] = 'System Einstellungen'
+        context['page_title'] = _("Systemeinstellungen")
         return context
 
 
@@ -173,7 +174,7 @@ def test_email_config(request):
 
             try:
                 # Create test message
-                subject = 'Helpdesk - Test Email'
+                subject = _("Helpdesk - Test-E-Mail")
                 message = f"""
                 <html>
                     <body>
@@ -208,12 +209,12 @@ def test_email_config(request):
                     ip_address=get_client_ip(request)
                 )
 
-                messages.success(request, f'Test-Email erfolgreich an {test_email} versendet!')
+                messages.success(request, _("Test-E-Mail erfolgreich an %(email)s versendet!") % {"email": test_email})
                 return redirect('admin:settings')
 
             except Exception as e:
                 logger.error(f'Email test failed: {str(e)}')
-                messages.error(request, f'Email-Test fehlgeschlagen: {str(e)}')
+                messages.error(request, _("E-Mail-Test fehlgeschlagen: %(error)s") % {"error": str(e)})
                 return redirect('admin:settings')
 
     return redirect('admin:settings')
@@ -230,7 +231,7 @@ def test_imap_config(request):
             test_action = form.cleaned_data['test_action']
 
             if not settings_obj.imap_enabled:
-                messages.error(request, 'IMAP ist in den Einstellungen nicht aktiviert.')
+                messages.error(request, _("IMAP ist in den Einstellungen nicht aktiviert."))
                 return redirect('admin:settings')
 
             try:
@@ -240,7 +241,7 @@ def test_imap_config(request):
                 imap.login(settings_obj.imap_username, settings_obj.imap_password)
 
                 if test_action == 'test_connection':
-                    messages.success(request, 'IMAP-Verbindung erfolgreich getestet!')
+                    messages.success(request, _("IMAP-Verbindung erfolgreich getestet!"))
 
                 elif test_action == 'fetch_emails':
                     # Select mailbox
@@ -251,7 +252,7 @@ def test_imap_config(request):
                     email_ids = messages_data[0].split()[-5:]  # Last 5
 
                     email_count = len(email_ids)
-                    messages.success(request, f'IMAP-Verbindung erfolgreich! {email_count} E-Mails im Postfach gefunden.')
+                    messages.success(request, _("IMAP-Verbindung erfolgreich! %(count)s E-Mails im Postfach gefunden.") % {"count": email_count})
 
                 imap.close()
                 imap.logout()
@@ -266,7 +267,7 @@ def test_imap_config(request):
 
             except Exception as e:
                 logger.error(f'IMAP test failed: {str(e)}')
-                messages.error(request, f'IMAP-Test fehlgeschlagen: {str(e)}')
+                messages.error(request, _("IMAP-Test fehlgeschlagen: %(error)s") % {"error": str(e)})
 
         return redirect('admin:settings')
 

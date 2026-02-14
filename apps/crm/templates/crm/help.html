@@ -1,105 +1,103 @@
-{% extends "base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM Hilfe{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    {% include "crm/_nav.html" %}
-    <div class="mb-3">
-        <h2 class="mb-1">CRM Hilfe</h2>
-        <div class="text-muted">Leads, Accounts, Opportunities, KI, Enrich, API.</div>
-    </div>
+{% block app_breadcrumb %}CRM Hilfe{% endblock %}
+{% block app_content %}
+<div class="mb-3">
+    <div class="text-muted">Leads, Accounts, Opportunities, KI, Enrich, API.</div>
+</div>
 
-    <div class="card mb-3">
-        <div class="card-header">Kern-Felder (Lead)</div>
-        <div class="card-body">
-            <ul class="mb-0">
-                <li><strong>Name/Firma</strong>: Identifikation</li>
-                <li><strong>E-Mail/Telefon</strong>: Follow-up Kontakt</li>
-                <li><strong>Website</strong>: Auto-Enrich-Quelle</li>
-                <li><strong>Quelle</strong>: Pipeline-Analyse</li>
-                <li><strong>Status</strong>: z. B. neu, qualifiziert, gewonnen</li>
-            </ul>
-        </div>
+<div class="card mb-3">
+    <div class="card-header">Kern-Felder (Lead)</div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li><strong>Name/Firma</strong>: Identifikation</li>
+            <li><strong>E-Mail/Telefon</strong>: Follow-up Kontakt</li>
+            <li><strong>Website</strong>: Auto-Enrich-Quelle</li>
+            <li><strong>{% trans "Quelle" %}</strong>: Pipeline-Analyse</li>
+            <li><strong>{% trans "Status" %}</strong>: z. B. neu, qualifiziert, gewonnen</li>
+        </ul>
     </div>
+</div>
 
-    <div class="row g-3">
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">Schnellstart</div>
-                <div class="card-body">
-                    <ol class="mb-0">
-                        <li>Lead anlegen (Name/Firma).</li>
-                        <li>Website eintragen (Auto-Enrich).</li>
-                        <li>Notiz + Aktivität hinzufügen.</li>
-                        <li>Opportunity anlegen und Stage pflegen.</li>
-                        <li>Gewonnene Opportunity -> Angebot im ERP.</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">Lead-Staging</div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Profile steuern Keywords, Orte, Limit pro Run.</li>
-                        <li>Staging-Einträge prüfen, dann in Leads übernehmen.</li>
-                        <li>Fallback-Provider optional (Admin-Dashboard).</li>
-                    </ul>
-                </div>
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Schnellstart</div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li>Lead anlegen (Name/Firma).</li>
+                    <li>Website eintragen (Auto-Enrich).</li>
+                    <li>Notiz + Aktivitaet hinzufuegen.</li>
+                    <li>Opportunity anlegen und Stage pflegen.</li>
+                    <li>Gewonnene Opportunity -> Angebot im ERP.</li>
+                </ol>
             </div>
         </div>
     </div>
-
-    <div class="row g-3 mt-1">
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">Auto-Enrich</div>
-                <div class="card-body">
-                    <p class="mb-2">Website vorhanden -> Telefon/Adresse/E-Mail werden extrahiert.</p>
-                    <p class="mb-0">Manuell über „Lead aus Website anreichern“ im Lead-Detail.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">KI-Funktionen</div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Zusammenfassung + nächste Schritte</li>
-                        <li>Lead-Scoring (Regel + optional KI)</li>
-                        <li>Follow-up E-Mail Entwurf</li>
-                        <li>Q&A „Frag die Kundenakte“</li>
-                    </ul>
-                </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Lead-Staging</div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Profile steuern Keywords, Orte, Limit pro Run.</li>
+                    <li>Staging-Einträge pruefen, dann in Leads übernehmen.</li>
+                    <li>Fallback-Provider optional (Admin-Dashboard).</li>
+                </ul>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="card mt-3">
-        <div class="card-header">Beispiel-Workflow</div>
-        <div class="card-body">
-            <ol class="mb-0">
-                <li>Neuer Lead -> Status „neu“.</li>
-                <li>Auto-Enrich -> Kontakt vervollständigen.</li>
-                <li>Opportunity anlegen -> Stage „proposal“.</li>
-                <li>Stage „won“ -> ERP Angebot erzeugen.</li>
-            </ol>
+<div class="row g-3 mt-1">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Auto-Enrich</div>
+            <div class="card-body">
+                <p class="mb-2">Website vorhanden -> Telefon/Adresse/E-Mail werden extrahiert.</p>
+                <p class="mb-0">Manuell über "Lead aus Website anreichern" im Lead-Detail.</p>
+            </div>
         </div>
     </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">KI-Funktionen</div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Zusammenfassung + nächste Schritte</li>
+                    <li>Lead-Scoring (Regel + optional KI)</li>
+                    <li>Follow-up E-Mail Entwurf</li>
+                    <li>Q&A "Frag die Kundenakte"</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div class="card mt-3">
-        <div class="card-header">CRM API (Read/Write)</div>
-        <div class="card-body">
-            <div class="fw-semibold">Swagger</div>
-            <pre class="small bg-light p-2 rounded mb-0">/crm/api/docs/</pre>
-            <pre class="small bg-light p-2 rounded">/crm/api/schema/</pre>
-            <div class="mt-3">
-                <div class="fw-semibold">Beispiel</div>
-                <pre class="small bg-light p-2 rounded">POST /crm/api/leads/
+<div class="card mt-3">
+    <div class="card-header">Beispiel-Workflow</div>
+    <div class="card-body">
+        <ol class="mb-0">
+            <li>Neuer Lead -> Status "neu".</li>
+            <li>Auto-Enrich -> Kontakt vervollstaendigen.</li>
+            <li>Opportunity anlegen -> Stage "proposal".</li>
+            <li>Stage "won" -> ERP Angebot erzeugen.</li>
+        </ol>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">CRM API (Read/Write)</div>
+    <div class="card-body">
+        <div class="fw-semibold">Swagger</div>
+        <pre class="small bg-light p-2 rounded mb-0">/crm/api/docs/</pre>
+        <pre class="small bg-light p-2 rounded">/crm/api/schema/</pre>
+        <div class="mt-3">
+            <div class="fw-semibold">Beispiel</div>
+            <pre class="small bg-light p-2 rounded">POST /crm/api/leads/
 {"name":"Max Mustermann","company":"Example GmbH","email":"max@example.com","website":"https://example.de"}</pre>
-            </div>
         </div>
     </div>
 </div>

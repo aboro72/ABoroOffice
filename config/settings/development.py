@@ -32,6 +32,12 @@ EMAIL_BACKEND = 'apps.core.email_backend.DBConsoleEmailBackend'
 LOGGING['loggers']['django']['level'] = 'DEBUG'  # noqa: F405
 LOGGING['loggers']['apps']['level'] = 'DEBUG'  # noqa: F405
 
+# Reduce console noise in development
+LOGGING['handlers']['console']['level'] = 'ERROR'  # noqa: F405
+LOGGING['root']['level'] = 'ERROR'  # noqa: F405
+LOGGING['loggers']['django']['level'] = 'ERROR'  # noqa: F405
+LOGGING['loggers']['apps']['level'] = 'ERROR'  # noqa: F405
+
 # Allow all CORS origins in development
 CORS_ALLOW_ALL_ORIGINS = True
 

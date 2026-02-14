@@ -11,6 +11,7 @@ class TeachingSkill(models.Model):
 
 
 class Instructor(models.Model):
+    """Externe Mitarbeiter (z.B. Dozenten, Trainer)"""
     name = models.CharField(max_length=200)
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=50, blank=True)
@@ -23,6 +24,10 @@ class Instructor(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = 'Externer Mitarbeiter'
+        verbose_name_plural = 'Externe Mitarbeiter'
 
 
 class Department(models.Model):

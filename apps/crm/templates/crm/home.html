@@ -1,79 +1,88 @@
-{% extends "base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - ABoroOffice{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    {% include "crm/_nav.html" %}
-    <div class="text-center mb-4">
-        <h1 class="display-6">CRM</h1>
-        <p class="text-muted">Grundgerüst für Kontakte, Leads und Opportunities</p>
-    </div>
+{% block app_breadcrumb %}Übersicht{% endblock %}
+{% block app_actions %}
+    {% if can_edit %}
+    <a class="btn btn-primary" href="{% url 'crm:lead_create' %}">Neuer Lead</a>
+    <a class="btn btn-outline-secondary" href="{% url 'crm:account_create' %}">Neuer Account</a>
+    {% endif %}
+{% endblock %}
 
-    <div class="row g-3">
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <div class="text-muted">Accounts</div>
-                    <div class="display-6">{{ accounts_count }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <div class="text-muted">Leads</div>
-                    <div class="display-6">{{ leads_count }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <div class="text-muted">Opportunities</div>
-                    <div class="display-6">{{ opps_count }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <div class="text-muted">Offene Aktivitäten</div>
-                    <div class="display-6">{{ open_activities }}</div>
-                </div>
+{% block app_content %}
+<div class="text-center mb-4">
+    <h1 class="display-6">CRM</h1>
+    <p class="text-muted">Grundgeruest fuer Kontakte, Leads und Opportunities</p>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-muted">Accounts</div>
+                <div class="display-6">{{ accounts_count }}</div>
             </div>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-muted">Leads</div>
+                <div class="display-6">{{ leads_count }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-muted">Opportunities</div>
+                <div class="display-6">{{ opps_count }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="text-muted">Offene Aktivitaeten</div>
+                <div class="display-6">{{ open_activities }}</div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div class="row g-3 mt-3">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="fw-bold">Schnellstart</div>
-                    <div class="text-muted small">Direkt zu Kernbereichen</div>
-                    <div class="d-grid gap-2 mt-3">
-                        <a class="btn btn-outline-primary" href="{% url 'crm:account_list' %}">Accounts</a>
-                        <a class="btn btn-outline-primary" href="{% url 'crm:lead_list' %}">Leads</a>
-                        <a class="btn btn-outline-primary" href="{% url 'crm:opportunity_list' %}">Opportunities</a>
-                        <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_board' %}">Pipeline Board</a>
-                        {% if can_edit %}
-                        <a class="btn btn-outline-secondary" href="{% url 'crm:email_template_list' %}">E-Mail Templates</a>
-                        {% endif %}
-                    </div>
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="fw-bold">Schnellstart</div>
+                <div class="text-muted small">Direkt zu Kernbereichen</div>
+                <div class="d-grid gap-2 mt-3">
+                    <a class="btn btn-outline-primary" href="{% url 'crm:account_list' %}">Accounts</a>
+                    <a class="btn btn-outline-primary" href="{% url 'crm:lead_list' %}">Leads</a>
+                    <a class="btn btn-outline-primary" href="{% url 'crm:opportunity_list' %}">Opportunities</a>
+                    <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_board' %}">Pipeline Board</a>
+                    {% if can_edit %}
+                    <a class="btn btn-outline-secondary" href="{% url 'crm:email_template_list' %}">E-Mail Templates</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
-            <div class="card h-100">
-                <div class="card-header">Heute im Blick</div>
-                <div class="card-body">
-                    <p class="mb-2">Offene Aktivitäten: <strong>{{ open_activities }}</strong></p>
-                    <p class="mb-2">Leads insgesamt: <strong>{{ leads_count }}</strong></p>
-                    <p class="mb-2">Opportunities insgesamt: <strong>{{ opps_count }}</strong></p>
-                    <p class="mb-0">Accounts insgesamt: <strong>{{ accounts_count }}</strong></p>
-                </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-header">Heute im Blick</div>
+            <div class="card-body">
+                <p class="mb-2">Offene Aktivitaeten: <strong>{{ open_activities }}</strong></p>
+                <p class="mb-2">Leads insgesamt: <strong>{{ leads_count }}</strong></p>
+                <p class="mb-2">Opportunities insgesamt: <strong>{{ opps_count }}</strong></p>
+                <p class="mb-0">Accounts insgesamt: <strong>{{ accounts_count }}</strong></p>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
+
+

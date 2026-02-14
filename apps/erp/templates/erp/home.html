@@ -1,83 +1,68 @@
-{% extends "base.html" %}
+{% extends "erp/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}ERP{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h2 class="mb-0">ERP</h2>
-            <div class="text-muted">Aufträge, Handel, Kurse – zentral verwalten</div>
-        </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-outline-secondary" href="/erp/customers/">Kunden</a>
-            <a class="btn btn-outline-secondary" href="/erp/quotes/">Angebote</a>
-            <a class="btn btn-outline-secondary" href="/erp/confirmations/">Auftragsbestätigungen</a>
-            <a class="btn btn-outline-secondary" href="/erp/salesorders/">Aufträge</a>
-            <a class="btn btn-outline-secondary" href="/erp/invoices/">Rechnungen</a>
-            <a class="btn btn-outline-secondary" href="/erp/dunning/">Mahnwesen</a>
-            <a class="btn btn-outline-secondary" href="/erp/products/">Produkte</a>
-            <a class="btn btn-outline-secondary" href="/erp/stock/receipts/">Wareneingang</a>
-            <a class="btn btn-outline-secondary" href="/erp/courses/">Kurse</a>
-            <a class="btn btn-outline-secondary" href="/erp/plugins/">Plugins</a>
-            <a class="btn btn-outline-secondary" href="/erp/competitor-debug/">Konkurrenz-Debug</a>
-            <a class="btn btn-outline-secondary" href="/erp/help/">Hilfe</a>
-        </div>
-    </div>
+{% block app_breadcrumb %}Übersicht{% endblock %}
+{% block app_actions %}
+    <a class="btn btn-outline-secondary" href="/erp/customers/">{% trans "Kunden" %}</a>
+    <a class="btn btn-outline-secondary" href="/erp/quotes/">{% trans "Angebote" %}</a>
+    <a class="btn btn-outline-secondary" href="/erp/salesorders/">{% trans "Auftr?ge" %}</a>
+    <a class="btn btn-outline-secondary" href="/erp/invoices/">{% trans "Rechnungen" %}</a>
+{% endblock %}
 
-    <div class="row g-3">
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header">Handwerk & IT</div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Work Orders (Planung, Zuweisung)</li>
-                        <li>Kundenverwaltung</li>
-                        <li>Verknüpfung zu Verträgen</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header">Retail & Gastro</div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Produkte + Aufträge</li>
-                        <li>API‑Basis für Kassen‑Plugin</li>
-                        <li>Marketing‑Verknüpfung</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header">Bildung</div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Kurse + Teilnehmer</li>
-                        <li>API für Kurs‑Frontend</li>
-                        <li>CRM/Marketing Anbindung</li>
-                    </ul>
-                </div>
+{% block app_content %}
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Handwerk & IT" %}</div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>{% trans "Arbeitsauftr?ge (Planung, Zuweisung)" %}</li>
+                    <li>{% trans "Kundenverwaltung" %}</li>
+                    <li>{% trans "Verknuepfung zu Verträgen" %}</li>
+                </ul>
             </div>
         </div>
     </div>
-
-    <div class="card mt-4">
-        <div class="card-header">Integrationen & APIs</div>
-        <div class="card-body">
-            <div class="d-flex flex-wrap gap-2">
-                <a class="btn btn-outline-primary" href="/erp/api/docs/">ERP Swagger</a>
-                <a class="btn btn-outline-secondary" href="/erp/api/schema/">Schema</a>
-                <a class="btn btn-outline-secondary" href="/erp/api/redoc/">Redoc</a>
-                <a class="btn btn-outline-secondary" href="/contracts/">Verträge</a>
-                <a class="btn btn-outline-secondary" href="/marketing/">Marketing</a>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Retail & Gastro" %}</div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>{% trans "Produkte + Aufträge" %}</li>
+                    <li>{% trans "API-Basis fuer Kassen-Plugin" %}</li>
+                    <li>{% trans "Marketing-Verknuepfung" %}</li>
+                </ul>
             </div>
-            <div class="text-muted small mt-2">
-                Kassen‑Plugin (Tablet/Touch) kann über das Plugin‑System angebunden werden.
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Bildung" %}</div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>{% trans "Veranstaltungen + Teilnehmer" %}</li>
+                    <li>{% trans "API für Veranstaltungs-Frontend" %}</li>
+                    <li>{% trans "CRM/Marketing Anbindung" %}</li>
+                </ul>
             </div>
         </div>
     </div>
 </div>
+
+<div class="card mt-4">
+    <div class="card-header">{% trans "Integrationen & APIs" %}</div>
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" href="/erp/api/docs/">{% trans "ERP Swagger" %}</a>
+            <a class="btn btn-outline-secondary" href="/erp/api/schema/">{% trans "Schema" %}</a>
+            <a class="btn btn-outline-secondary" href="/erp/api/redoc/">{% trans "Redoc" %}</a>
+            <a class="btn btn-outline-secondary" href="/contracts/">{% trans "Verträge" %}</a>
+            <a class="btn btn-outline-secondary" href="/marketing/">{% trans "Marketing" %}</a>
+        </div>
+        <div class="text-muted small mt-2">{% trans "Kassen-Plugin (Tablet/Touch) kann über das Plugin-System angebunden werden." %}</div>
+    </div>
+</div>
 {% endblock %}
+

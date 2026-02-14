@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -102,7 +103,7 @@
 <body>
     <div class="login-container">
         <h1>{{ company_name }} Helpdesk</h1>
-        <p class="subtitle">Anmelden um fortzufahren</p>
+        <p class="subtitle">{% trans "Anmelden um fortzufahren" %}</p>
 
         {% if form.errors %}
         <div class="error">
@@ -114,26 +115,26 @@
             {% csrf_token %}
 
             <div class="form-group">
-                <label for="id_username">E-Mail oder Benutzername:</label>
+                <label for="id_username">{% trans "E-Mail oder Benutzername:" %}</label>
                 <input type="text" name="username" id="id_username" required autofocus>
             </div>
 
             <div class="form-group">
-                <label for="id_password">Passwort:</label>
+                <label for="id_password">{% trans "Passwort:" %}</label>
                 <input type="password" name="password" id="id_password" required>
             </div>
 
-            <button type="submit">Anmelden</button>
+            <button type="submit">{% trans "Anmelden" %}</button>
 
             <input type="hidden" name="next" value="{{ next }}">
         </form>
 
         <div class="admin-link">
-            Noch kein Konto? <a href="{% url 'helpdesk_accounts:register' %}">Jetzt registrieren</a>
+            Noch kein Konto? <a href="{% url 'helpdesk_accounts:register' %}">{% trans "Jetzt registrieren" %}</a>
         </div>
 
         <div class="admin-link" style="border-top: none; margin-top: 10px; padding-top: 0;">
-            <a href="/admin/">→ Zum Admin-Interface</a>
+            <a href="/admin/">{% trans "→ Zum Admin-Interface" %}</a>
         </div>
     </div>
 </body>

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import (
     InstructorListView,
     InstructorCreateView,
@@ -39,4 +39,5 @@ urlpatterns = [
     path('time-entries/create/', TimeEntryCreateView.as_view(), name='time_entry_create'),
     path('time-entries/<int:pk>/edit/', TimeEntryUpdateView.as_view(), name='time_entry_edit'),
     path('payroll/export/', PayrollExportView.as_view(), name='payroll_export'),
+    path('api/', include('apps.personnel.api.urls', namespace='personnel_api')),
 ]

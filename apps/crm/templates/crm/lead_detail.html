@@ -1,229 +1,226 @@
-{% extends "base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Lead{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    {% include "crm/_nav.html" %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">{{ lead.name }}</h2>
-        <div class="d-flex gap-2">
-            {% if can_edit %}
-            <a class="btn btn-outline-primary" href="{% url 'crm:lead_edit' lead.id %}">Bearbeiten</a>
-            {% endif %}
-            <a class="btn btn-outline-secondary" href="{% url 'crm:lead_list' %}">Zurück</a>
-        </div>
-    </div>
-
-    <div class="row g-3">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">Details</div>
-                <div class="card-body">
-                    <div><strong>Status:</strong> {{ lead.get_status_display }}</div>
-                    <div><strong>Firma:</strong> {{ lead.company|default:"-" }}</div>
-                    <div><strong>E-Mail:</strong> {{ lead.email|default:"-" }}</div>
-                    <div><strong>Telefon:</strong> {{ lead.phone|default:"-" }}</div>
-                    <div><strong>Adresse:</strong> {{ lead.address|default:"-" }}</div>
-                    <div><strong>Quelle:</strong> {{ lead.get_source_display }}</div>
-                    <div class="mt-2">
-                        <span class="badge bg-secondary me-1">Regel {{ lead.rule_score }}</span>
-                        <span class="badge bg-info text-dark me-1">AI {{ lead.ai_score }}</span>
-                        <span class="badge bg-primary">Gesamt {{ lead.score }}</span>
-                    </div>
-                    {% if lead.score_reason %}
-                    <div class="mt-2"><strong>Begruendung:</strong> {{ lead.score_reason }}</div>
-                    {% endif %}
-                    {% if lead.score_updated_at %}
-                    <div class="text-muted small">Zuletzt aktualisiert: {{ lead.score_updated_at }}</div>
-                    {% endif %}
-                    <div><strong>Owner:</strong> {{ lead.owner|default:"-" }}</div>
-                    {% if can_edit %}
-                    <form method="post" class="mt-3">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="recalc_score">
-                        <button type="submit" class="btn btn-outline-primary w-100">Score neu berechnen</button>
-                    </form>
-                    <form method="post" class="mt-2">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="enrich_lead">
-                        <button type="submit" class="btn btn-outline-secondary w-100">Lead aus Website anreichern</button>
-                    </form>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">AI Zusammenfassung</div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="ai_summary">
-                        <button type="submit" class="btn btn-primary w-100">Zusammenfassung + nächste Schritte</button>
-                    </form>
-                    {% if lead.ai_error %}
-                    <div class="alert alert-danger mt-3">{{ lead.ai_error }}</div>
-                    {% endif %}
-                    {% if lead.ai_last_analyzed %}
-                    <div class="text-muted small mt-2">Letzte Analyse: {{ lead.ai_last_analyzed|date:"Y-m-d H:i" }}</div>
-                    {% endif %}
-                    {% if lead.ai_summary %}
-                    <div class="alert alert-info mt-3">{{ lead.ai_summary }}</div>
-                    {% endif %}
-                    {% if ai_next_steps %}
-                    <h6 class="mt-3">Nächste Schritte</h6>
-                    <ul class="mb-0">
-                        {% for item in ai_next_steps %}
-                        <li>{{ item }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
+{% block app_breadcrumb %}{{ lead.name }}{% endblock %}
+{% block app_actions %}
     {% if can_edit %}
-    <div class="row g-3 mt-1">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">AI Follow-up Entwurf</div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="ai_followup">
-                        <button type="submit" class="btn btn-primary w-100">Entwurf erstellen</button>
-                    </form>
-                    {% if lead.ai_followup_subject or lead.ai_followup_body %}
-                    <div class="mt-3">
-                        <div class="fw-semibold">Betreff</div>
-                        <div class="text-muted">{{ lead.ai_followup_subject|default:"-" }}</div>
-                        <div class="fw-semibold mt-2">Text</div>
-                        <pre class="small bg-light p-2 rounded">{{ lead.ai_followup_body|default:"-" }}</pre>
-                    </div>
-                    {% endif %}
+    <a class="btn btn-outline-primary" href="{% url 'crm:lead_edit' lead.id %}">{% trans "Bearbeiten" %}</a>
+    {% endif %}
+    <a class="btn btn-outline-secondary" href="{% url 'crm:lead_list' %}">Zurück</a>
+{% endblock %}
+
+{% block app_content %}
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Details" %}</div>
+            <div class="card-body">
+                <div><strong>Status:</strong> {{ lead.get_status_display }}</div>
+                <div><strong>Firma:</strong> {{ lead.company|default:"-" }}</div>
+                <div><strong>E-Mail:</strong> {{ lead.email|default:"-" }}</div>
+                <div><strong>Telefon:</strong> {{ lead.phone|default:"-" }}</div>
+                <div><strong>Adresse:</strong> {{ lead.address|default:"-" }}</div>
+                <div><strong>Quelle:</strong> {{ lead.get_source_display }}</div>
+                <div class="mt-2">
+                    <span class="badge bg-secondary me-1">Regel {{ lead.rule_score }}</span>
+                    <span class="badge bg-info text-dark me-1">AI {{ lead.ai_score }}</span>
+                    <span class="badge bg-primary">Gesamt {{ lead.score }}</span>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">E-Mail senden</div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="send_email">
-                        {{ email_form.as_p }}
-                        <button type="submit" class="btn btn-primary w-100">Senden</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">Letzte E-Mails</div>
-                <div class="card-body">
-                    {% if email_logs %}
-                    <ul class="list-group list-group-flush">
-                        {% for log in email_logs %}
-                        <li class="list-group-item">
-                            <div><strong>{{ log.to_email }}</strong> · {{ log.sent_at }}</div>
-                            <div class="text-muted small">{{ log.subject }}</div>
-                            <div class="text-muted small">Status: {{ log.status }}</div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="text-muted">Noch keine E-Mails.</div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">Frag die Kundenakte</div>
-                <div class="card-body">
-                    <form method="post" class="mb-3">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="ai_qa">
-                        <div class="mb-2">
-                            <label class="form-label">Frage</label>
-                            <input type="text" name="question" class="form-control" placeholder="z.B. Was sind die nächsten Schritte?">
-                        </div>
-                        <button type="submit" class="btn btn-outline-primary w-100">Antwort holen</button>
-                    </form>
-                    {% if lead.ai_last_question %}
-                    <div class="small text-muted">Letzte Frage:</div>
-                    <div class="mb-2">{{ lead.ai_last_question }}</div>
-                    {% endif %}
-                    {% if lead.ai_last_answer %}
-                    <div class="small text-muted">Antwort:</div>
-                    <div>{{ lead.ai_last_answer }}</div>
-                    {% endif %}
-                </div>
+                {% if lead.score_reason %}
+                <div class="mt-2"><strong>Begründung:</strong> {{ lead.score_reason }}</div>
+                {% endif %}
+                {% if lead.score_updated_at %}
+                <div class="text-muted small">Zuletzt aktualisiert: {{ lead.score_updated_at }}</div>
+                {% endif %}
+                <div><strong>Owner:</strong> {{ lead.owner|default:"-" }}</div>
+                {% if can_edit %}
+                <form method="post" class="mt-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="recalc_score">
+                    <button type="submit" class="btn btn-outline-primary w-100">Score neu berechnen</button>
+                </form>
+                <form method="post" class="mt-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="enrich_lead">
+                    <button type="submit" class="btn btn-outline-secondary w-100">Lead aus Website anreichern</button>
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>
-    {% endif %}
-
-    <div class="row g-3 mt-1">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">Notizen</div>
-                <div class="card-body">
-                    {% if can_edit %}
-                    <form method="post" class="mb-3">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="add_note">
-                        {{ note_form.as_p }}
-                        <button type="submit" class="btn btn-outline-primary w-100">Notiz speichern</button>
-                    </form>
-                    {% endif %}
-                    {% if notes %}
-                    <ul class="list-group list-group-flush">
-                        {% for note in notes %}
-                        <li class="list-group-item">
-                            <div class="small text-muted">{{ note.created_at }}</div>
-                            <div>{{ note.content }}</div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="text-muted">Noch keine Notizen.</div>
-                    {% endif %}
-                </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">AI Zusammenfassung</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ai_summary">
+                    <button type="submit" class="btn btn-primary w-100">Zusammenfassung + nächste Schritte</button>
+                </form>
+                {% if lead.ai_error %}
+                <div class="alert alert-danger mt-3">{{ lead.ai_error }}</div>
+                {% endif %}
+                {% if lead.ai_last_analyzed %}
+                <div class="text-muted small mt-2">Letzte Analyse: {{ lead.ai_last_analyzed|date:"Y-m-d H:i" }}</div>
+                {% endif %}
+                {% if lead.ai_summary %}
+                <div class="alert alert-info mt-3">{{ lead.ai_summary }}</div>
+                {% endif %}
+                {% if ai_next_steps %}
+                <h6 class="mt-3">Naechste Schritte</h6>
+                <ul class="mb-0">
+                    {% for item in ai_next_steps %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">Aktivitäten</div>
-                <div class="card-body">
-                    {% if can_edit %}
-                    <form method="post" class="mb-3">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="add_activity">
-                        {{ activity_form.as_p }}
-                        <button type="submit" class="btn btn-outline-primary w-100">Aktivität speichern</button>
-                    </form>
-                    {% endif %}
-                    {% if activities %}
-                    <ul class="list-group list-group-flush">
-                        {% for activity in activities %}
-                        <li class="list-group-item">
-                            <div class="fw-semibold">{{ activity.subject }}</div>
-                            <div class="small text-muted">
-                                {{ activity.get_activity_type_display }} · {{ activity.get_status_display }}
-                                {% if activity.due_date %}· {{ activity.due_date }}{% endif %}
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="text-muted">Noch keine Aktivitäten.</div>
-                    {% endif %}
+    </div>
+</div>
+
+{% if can_edit %}
+<div class="row g-3 mt-1">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">AI Follow-up Entwurf</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ai_followup">
+                    <button type="submit" class="btn btn-primary w-100">Entwurf erstellen</button>
+                </form>
+                {% if lead.ai_followup_subject or lead.ai_followup_body %}
+                <div class="mt-3">
+                    <div class="fw-semibold">Betreff</div>
+                    <div class="text-muted">{{ lead.ai_followup_subject|default:"-" }}</div>
+                    <div class="fw-semibold mt-2">Text</div>
+                    <pre class="small bg-light p-2 rounded">{{ lead.ai_followup_body|default:"-" }}</pre>
                 </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">E-Mail senden</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="send_email">
+                    {{ email_form.as_p }}
+                    <button type="submit" class="btn btn-primary w-100">Senden</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Letzte E-Mails</div>
+            <div class="card-body">
+                {% if email_logs %}
+                <ul class="list-group list-group-flush">
+                    {% for log in email_logs %}
+                    <li class="list-group-item">
+                        <div><strong>{{ log.to_email }}</strong> Â· {{ log.sent_at }}</div>
+                        <div class="text-muted small">{{ log.subject }}</div>
+                        <div class="text-muted small">Status: {{ log.status }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted">Noch keine E-Mails.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Frag die Kundenakte</div>
+            <div class="card-body">
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="ai_qa">
+                    <div class="mb-2">
+                        <label class="form-label">Frage</label>
+                        <input type="text" name="question" class="form-control" placeholder="z.B. Was sind die nächsten Schritte?">
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary w-100">Antwort holen</button>
+                </form>
+                {% if lead.ai_last_question %}
+                <div class="small text-muted">Letzte Frage:</div>
+                <div class="mb-2">{{ lead.ai_last_question }}</div>
+                {% endif %}
+                {% if lead.ai_last_answer %}
+                <div class="small text-muted">Antwort:</div>
+                <div>{{ lead.ai_last_answer }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mt-1">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">{% trans "Notizen" %}</div>
+            <div class="card-body">
+                {% if can_edit %}
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_note">
+                    {{ note_form.as_p }}
+                    <button type="submit" class="btn btn-outline-primary w-100">Notiz speichern</button>
+                </form>
+                {% endif %}
+                {% if notes %}
+                <ul class="list-group list-group-flush">
+                    {% for note in notes %}
+                    <li class="list-group-item">
+                        <div class="small text-muted">{{ note.created_at }}</div>
+                        <div>{{ note.content }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted">Noch keine Notizen.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Aktivitaeten</div>
+            <div class="card-body">
+                {% if can_edit %}
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_activity">
+                    {{ activity_form.as_p }}
+                    <button type="submit" class="btn btn-outline-primary w-100">Aktivitaet speichern</button>
+                </form>
+                {% endif %}
+                {% if activities %}
+                <ul class="list-group list-group-flush">
+                    {% for activity in activities %}
+                    <li class="list-group-item">
+                        <div class="fw-semibold">{{ activity.subject }}</div>
+                        <div class="small text-muted">
+                            {{ activity.get_activity_type_display }} Â· {{ activity.get_status_display }}
+                            {% if activity.due_date %}Â· {{ activity.due_date }}{% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="text-muted">Noch keine Aktivitaeten.</div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+

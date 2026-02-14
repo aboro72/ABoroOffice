@@ -1,48 +1,49 @@
 from django.views.generic import TemplateView, ListView, DetailView, CreateView
 from django.db import models
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from .models import Workflow, WorkflowStep, WorkflowExecution
 from .forms import WorkflowForm, WorkflowStepForm
 from .services import execute_workflow
-
-
+
+
 class WorkflowHomeView(LoginRequiredMixin, TemplateView):
     template_name = 'workflows/home.html'
 
 
 class WorkflowHelpView(LoginRequiredMixin, TemplateView):
     template_name = 'workflows/help.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['workflow_count'] = Workflow.objects.count()
-        context['active_workflows'] = Workflow.objects.filter(is_active=True).count()
-        context['execution_count'] = WorkflowExecution.objects.count()
-        return context
-
-
-class WorkflowListView(LoginRequiredMixin, ListView):
-    model = Workflow
-    template_name = 'workflows/workflow_list.html'
-    context_object_name = 'workflows'
-
-
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['workflow_count'] = Workflow.objects.count()
+        context['active_workflows'] = Workflow.objects.filter(is_active=True).count()
+        context['execution_count'] = WorkflowExecution.objects.count()
+        return context
+
+
+class WorkflowListView(LoginRequiredMixin, ListView):
+    model = Workflow
+    template_name = 'workflows/workflow_list.html'
+    context_object_name = 'workflows'
+
+
 class WorkflowCreateView(LoginRequiredMixin, CreateView):
-    model = Workflow
-    form_class = WorkflowForm
-    template_name = 'workflows/form.html'
-    success_url = reverse_lazy('workflows:workflow_list')
-
-
+    model = Workflow
+    form_class = WorkflowForm
+    template_name = 'workflows/form.html'
+    success_url = reverse_lazy('workflows:workflow_list')
+
+
 class WorkflowDetailView(LoginRequiredMixin, DetailView):
-    model = Workflow
-    template_name = 'workflows/workflow_detail.html'
-    context_object_name = 'workflow'
-
+    model = Workflow
+    template_name = 'workflows/workflow_detail.html'
+    context_object_name = 'workflow'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['steps'] = self.object.steps.order_by('order')
@@ -58,7 +59,7 @@ class WorkflowDetailView(LoginRequiredMixin, DetailView):
             ('in', 'in'),
         ]
         return context
-
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if 'add_step' in request.POST:
@@ -87,9 +88,9 @@ class WorkflowDetailView(LoginRequiredMixin, DetailView):
                 data = json.loads(raw) if raw.strip() else {}
                 self.object.trigger_filters = data
                 self.object.save(update_fields=['trigger_filters'])
-                messages.success(request, "Trigger-Filter gespeichert.")
+                messages.success(request, _("Trigger-Filter gespeichert."))
             except Exception as exc:
-                messages.error(request, f"Trigger-Filter ungültig: {exc}")
+                messages.error(request, _("Trigger-Filter ungültig: %(error)s") % {"error": exc})
             return redirect('workflows:workflow_detail', pk=self.object.pk)
         if 'validate_filters' in request.POST:
             errors = []
@@ -100,9 +101,9 @@ class WorkflowDetailView(LoginRequiredMixin, DetailView):
             except Exception as exc:
                 errors.append(str(exc))
             if errors:
-                messages.error(request, f"Trigger-Filter JSON ungültig: {errors[0]}")
+                messages.error(request, _("Trigger-Filter JSON ungültig: %(error)s") % {"error": errors[0]})
             else:
-                messages.success(request, "Trigger-Filter JSON ist gültig.")
+                messages.success(request, _("Trigger-Filter JSON ist gültig."))
             return redirect('workflows:workflow_detail', pk=self.object.pk)
         if 'run_workflow' in request.POST:
             exec_obj = WorkflowExecution.objects.create(
@@ -123,4 +124,4 @@ class WorkflowDetailView(LoginRequiredMixin, DetailView):
             exec_obj.finished_at = timezone.now()
             exec_obj.save(update_fields=['status', 'message', 'finished_at'])
             return redirect('workflows:workflow_detail', pk=self.object.pk)
-        return redirect('workflows:workflow_detail', pk=self.object.pk)
+        return redirect('workflows:workflow_detail', pk=self.object.pk)

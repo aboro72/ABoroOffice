@@ -1,42 +1,34 @@
-{% extends "base.html" %}
+{% extends "crm/_app_base.html" %}
+{% load i18n %}
 
 {% block title %}CRM - Pipeline{% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    {% include "crm/_nav.html" %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Pipeline</h2>
-        <div class="d-flex gap-2">
-            {% if can_edit %}
-            <a class="btn btn-primary" href="{% url 'crm:opportunity_create' %}">Neu</a>
-            {% endif %}
-            <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_list' %}">Liste</a>
-        </div>
-    </div>
+{% block app_breadcrumb %}Pipeline{% endblock %}
+{% block app_actions %}
+    {% if can_edit %}
+    <a class="btn btn-primary" href="{% url 'crm:opportunity_create' %}">{% trans "Neu" %}</a>
+    {% endif %}
+    <a class="btn btn-outline-secondary" href="{% url 'crm:opportunity_list' %}">Liste</a>
+{% endblock %}
 
-    <div class="row g-3">
-        {% for col in board %}
-        <div class="col-md-4 col-lg-2">
-            <div class="card h-100">
-                <div class="card-header text-center">{{ col.label }}</div>
-                <div class="card-body p-2">
-                    {% for item in col.items %}
-                    <div class="card mb-2">
-                        <div class="card-body p-2">
-                            <div class="fw-bold">{{ item.name }}</div>
-                            <div class="text-muted" style="font-size: 0.8rem;">{{ item.account.name }}</div>
-                            <div class="text-muted" style="font-size: 0.8rem;">{{ item.amount }}</div>
-                            <a class="stretched-link" href="{% url 'crm:opportunity_detail' item.id %}"></a>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="text-muted text-center py-3">—</div>
-                    {% endfor %}
-                </div>
+{% block app_content %}
+<div class="odoo-kanban">
+    {% for col in board %}
+    <div class="odoo-kanban-column">
+        <div class="odoo-kanban-column-header">{{ col.label }}</div>
+        <div class="odoo-kanban-column-body">
+            {% for item in col.items %}
+            <div class="odoo-kanban-card">
+                <div class="fw-bold">{{ item.name }}</div>
+                <div class="text-muted" style="font-size: 0.8rem;">{{ item.account.name }}</div>
+                <div class="text-muted" style="font-size: 0.8rem;">{{ item.amount }}</div>
+                <a class="stretched-link" href="{% url 'crm:opportunity_detail' item.id %}"></a>
             </div>
+            {% empty %}
+            <div class="text-muted text-center py-3">-</div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
+    {% endfor %}
 </div>
 {% endblock %}

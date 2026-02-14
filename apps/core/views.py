@@ -1,13 +1,19 @@
-﻿"""
-Views for the Core app
 """
+
+Views for the Core app
+
+"""
+
+
 
 from django.views.generic import TemplateView
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.http import HttpResponse
+from django.utils.translation import gettext_lazy as _
+from django.http import HttpResponse, HttpResponseRedirect
+from urllib.parse import urlencode
 from django.core.paginator import Paginator
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -33,16 +39,52 @@ from apps.core.forms import (
     ErpCompetitorForm,
 )
 from apps.helpdesk.helpdesk_apps.admin_panel.models import SystemSettings, EmailLog
+from apps.crm.permissions import can_view_crm
+from apps.erp.permissions import can_view_erp
+
+
+def quick_search(request):
+    q = (request.GET.get('q') or '').strip()
+    scope = (request.GET.get('scope') or '').strip()
+    if not q:
+        return redirect(request.META.get('HTTP_REFERER', '/dashboard/'))
+
+    def _redirect(path):
+        params = urlencode({'q': q})
+        return HttpResponseRedirect(f"{path}?{params}")
+
+    if scope == 'crm' and can_view_crm(request.user):
+        return _redirect('/crm/leads/')
+    if scope == 'erp' and can_view_erp(request.user):
+        return _redirect('/erp/customers/')
+
+    if can_view_crm(request.user):
+        return _redirect('/crm/leads/')
+    if can_view_erp(request.user):
+        return _redirect('/erp/customers/')
+    return redirect('/dashboard/')
+
+
 
 
 class HomeView(TemplateView):
+
     """Home page view"""
+
     template_name = 'home.html'
 
+
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         context['title'] = 'Home - ABoroOffice'
+
         return context
+
+
+
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -194,12 +236,20 @@ class PluginCardsView(LoginRequiredMixin, TemplateView):
         return context
 
 
+
+
 class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     """Standalone admin dashboard (not Django admin)."""
+
     template_name = 'admin_dashboard.html'
 
+
+
     def test_func(self):
+
         return self.request.user.is_superuser or self.request.user.is_staff
+
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -269,14 +319,24 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         # Plugin data
         try:
+
             from apps.cloude.cloude_apps.plugins.models import Plugin, PluginLog
+
             context['plugins'] = Plugin.objects.all().order_by('-uploaded_at')
+
             context['plugin_logs'] = PluginLog.objects.all().order_by('-created_at')[:20]
+
             context['has_plugins'] = Plugin.objects.exists()
+
         except Exception:
+
             context['plugins'] = []
+
             context['plugin_logs'] = []
+
             context['has_plugins'] = False
+
+
 
         return context
 
@@ -385,38 +445,67 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             if end_date:
                 qs = qs.filter(created_at__date__lte=end_date)
             qs.update(archived=True)
-            messages.success(request, 'Gefilterte E-Mails wurden archiviert.')
+            messages.success(request, _("Gefilterte E-Mails wurden archiviert."))
             return redirect('admin_dashboard')
         return super().get(request, *args, **kwargs)
 
+
     def post(self, request, *args, **kwargs):
+
         if not self.test_func():
-            messages.error(request, 'Access denied')
+
+            messages.error(request, _("Zugriff verweigert."))
+
             return redirect('admin_dashboard')
+
+
 
         settings_obj = SystemSettings.get_settings()
 
+
+
         # Theme settings update
+
         if 'save_theme' in request.POST:
+
             form = ThemeSettingsForm(request.POST, instance=settings_obj)
+
             if form.is_valid():
+
                 form.save()
-                messages.success(request, 'Theme-Einstellungen gespeichert.')
+
+                messages.success(request, _("Theme-Einstellungen gespeichert."))
+
             else:
-                messages.error(request, 'Bitte prüfe die Theme-Felder.')
+
+                messages.error(request, _("Bitte prüfe die Theme-Felder."))
+
             return redirect('admin_dashboard')
+
+
 
         # Branding settings update
+
         if 'save_branding' in request.POST:
+
             form = BrandingSettingsForm(request.POST, request.FILES, instance=settings_obj)
+
             if form.is_valid():
+
                 form.save()
-                messages.success(request, 'Branding gespeichert.')
+
+                messages.success(request, _("Branding gespeichert."))
+
             else:
-                messages.error(request, 'Bitte prüfe die Branding-Felder.')
+
+                messages.error(request, _("Bitte prüfe die Branding-Felder."))
+
             return redirect('admin_dashboard')
 
+
+
         # App toggles update
+
         if 'save_app_toggles' in request.POST:
             form = AppTogglesForm(request.POST, system_settings=settings_obj)
             if form.is_valid():
@@ -438,75 +527,84 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 settings_obj.app_toggles = new_toggles
                 settings_obj.save()
 
+
                 # Archive approvals if turned off
+
                 if prev.get('approvals', False) and not new_toggles.get('approvals', False):
+
                     from apps.approvals.models import Approval
+
                     Approval.objects.update(archived=True)
 
-                messages.success(request, 'App-Toggles gespeichert.')
+
+
+                messages.success(request, _("App-Toggles gespeichert."))
+
             else:
-                messages.error(request, 'Bitte prüfe die App-Toggles.')
+
+                messages.error(request, _("Bitte prüfe die App-Toggles."))
+
             return redirect('admin_dashboard')
 
         if 'save_dashboard' in request.POST:
             form = DashboardSettingsForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'Dashboard-Einstellungen gespeichert.')
+                messages.success(request, _("Dashboard-Einstellungen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die Dashboard-Einstellungen.')
+                messages.error(request, _("Bitte prüfe die Dashboard-Einstellungen."))
             return redirect('admin_dashboard')
         if 'save_crm_fallback' in request.POST:
             form = CRMFallbackSettingsForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'CRM-Fallback-Einstellungen gespeichert.')
+                messages.success(request, _("CRM-Fallback-Einstellungen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die CRM-Fallback-Einstellungen.')
+                messages.error(request, _("Bitte prüfe die CRM-Fallback-Einstellungen."))
             return redirect('admin_dashboard')
         if 'save_crm_enrichment' in request.POST:
             form = CRMEnrichmentSettingsForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'CRM-Enrichment-Einstellungen gespeichert.')
+                messages.success(request, _("CRM-Enrichment-Einstellungen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die CRM-Enrichment-Einstellungen.')
+                messages.error(request, _("Bitte prüfe die CRM-Enrichment-Einstellungen."))
             return redirect('admin_dashboard')
 
         if 'save_dunning' in request.POST:
             form = DunningSettingsForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'Mahnwesen-Einstellungen gespeichert.')
+                messages.success(request, _("Mahnwesen-Einstellungen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die Mahnwesen-Einstellungen.')
+                messages.error(request, _("Bitte prüfe die Mahnwesen-Einstellungen."))
             return redirect('admin_dashboard')
 
         if 'save_invoice_settings' in request.POST:
             form = InvoiceSettingsForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'Rechnungsversand-Einstellungen gespeichert.')
+                messages.success(request, _("Rechnungsversand-Einstellungen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die Rechnungsversand-Einstellungen.')
+                messages.error(request, _("Bitte prüfe die Rechnungsversand-Einstellungen."))
             return redirect('admin_dashboard')
 
         if 'save_scheduler_settings' in request.POST:
             form = SchedulerSettingsForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'Zeitplan-Einstellungen gespeichert.')
+                messages.success(request, _("Zeitplan-Einstellungen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die Zeitplan-Einstellungen.')
+                messages.error(request, _("Bitte prüfe die Zeitplan-Einstellungen."))
             return redirect('admin_dashboard')
 
         if 'save_email_log_settings' in request.POST:
             form = EmailLogSettingsForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'E-Mail-Log Einstellungen gespeichert.')
+                messages.success(request, _("E-Mail-Log Einstellungen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die E-Mail-Log Einstellungen.')
+                messages.error(request, _("Bitte prüfe die E-Mail-Log Einstellungen."))
             return redirect('admin_dashboard')
 
         if 'preview_email_templates' in request.POST:
@@ -535,14 +633,14 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 'dunning_subject': _safe_fmt(dun_subject_tpl),
                 'dunning_body': _safe_fmt(dun_body_tpl),
             }
-            messages.success(request, 'E-Mail Vorschau aktualisiert.')
+            messages.success(request, _("E-Mail Vorschau aktualisiert."))
             return redirect('admin_dashboard')
 
         if 'send_test_email' in request.POST:
             to_email = (request.POST.get('test_email_to') or '').strip()
             email_type = (request.POST.get('test_email_type') or 'invoice').strip()
             if not to_email:
-                messages.error(request, 'Bitte eine Ziel-E-Mail angeben.')
+                messages.error(request, _("Bitte eine Ziel-E-Mail angeben."))
                 return redirect('admin_dashboard')
 
             mapping = {
@@ -571,13 +669,13 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             body = _safe_fmt(body_tpl)
             from_email = settings_obj.company_email or settings_obj.smtp_username or None
             send_mail(subject, body, from_email, [to_email], fail_silently=True)
-            messages.success(request, f'Test-E-Mail gesendet an {to_email}.')
+            messages.success(request, _("Test-E-Mail gesendet an %(email)s.") % {"email": to_email})
             return redirect('admin_dashboard')
 
         if 'restore_email_log' in request.POST:
             log_id = request.POST.get('restore_email_log')
             EmailLog.objects.filter(id=log_id).update(archived=False)
-            messages.success(request, 'E-Mail wiederhergestellt.')
+            messages.success(request, _("E-Mail wiederhergestellt."))
             return redirect('admin_dashboard')
 
         if 'restore_archived_filtered' in request.POST:
@@ -598,98 +696,137 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
             if end_date:
                 qs = qs.filter(created_at__date__lte=end_date)
             qs.update(archived=False)
-            messages.success(request, 'Archivierte E-Mails wurden wiederhergestellt.')
+            messages.success(request, _("Archivierte E-Mails wurden wiederhergestellt."))
             return redirect('admin_dashboard')
         if 'restore_archived_all' in request.POST:
             EmailLog.objects.filter(archived=True).update(archived=False)
-            messages.success(request, 'Archiv komplett wiederhergestellt.')
+            messages.success(request, _("Archiv komplett wiederhergestellt."))
             return redirect('admin_dashboard')
 
         if 'save_marketing_roles' in request.POST:
             form = MarketingRolesForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'Marketing-Rollen gespeichert.')
+                messages.success(request, _("Marketing-Rollen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die Marketing-Rollen.')
+                messages.error(request, _("Bitte prüfe die Marketing-Rollen."))
             return redirect('admin_dashboard')
 
         if 'save_erp_roles' in request.POST:
             form = ErpRolesForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'ERP-Rollen gespeichert.')
+                messages.success(request, _("ERP-Rollen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die ERP-Rollen.')
+                messages.error(request, _("Bitte prüfe die ERP-Rollen."))
             return redirect('admin_dashboard')
 
         if 'save_erp_pricing' in request.POST:
             form = ErpPricingForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'ERP-Preislogik gespeichert.')
+                messages.success(request, _("ERP-Preislogik gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die ERP-Preislogik.')
+                messages.error(request, _("Bitte prüfe die ERP-Preislogik."))
             return redirect('admin_dashboard')
 
         if 'save_erp_competitor' in request.POST:
             form = ErpCompetitorForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'ERP Konkurrenz-Provider gespeichert.')
+                messages.success(request, _("ERP Konkurrenz-Provider gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die Konkurrenz-Provider Einstellungen.')
+                messages.error(request, _("Bitte prüfe die Konkurrenz-Provider Einstellungen."))
             return redirect('admin_dashboard')
 
         if 'save_bedrock' in request.POST:
             form = BedrockSettingsForm(request.POST, instance=settings_obj)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'Bedrock-Einstellungen gespeichert.')
+                messages.success(request, _("Bedrock-Einstellungen gespeichert."))
             else:
-                messages.error(request, 'Bitte prüfe die Bedrock-Einstellungen.')
+                messages.error(request, _("Bitte prüfe die Bedrock-Einstellungen."))
             return redirect('admin_dashboard')
+
 
         # Plugin upload
         zip_file = request.FILES.get('zip_file')
         if zip_file:
             try:
+
                 from apps.cloude.cloude_apps.plugins.loader import PluginLoader
+
                 from apps.cloude.cloude_apps.plugins.models import Plugin, PluginLog
 
+
+
                 loader = PluginLoader()
+
                 temp_path = Path('/tmp') / zip_file.name
+
                 with open(temp_path, 'wb+') as f:
+
                     for chunk in zip_file.chunks():
+
                         f.write(chunk)
 
+
+
                 manifest = loader.validate_zip(temp_path)
+
                 plugin = Plugin.objects.create(
+
                     name=manifest['name'],
+
                     slug=manifest['slug'],
+
                     version=manifest['version'],
+
                     author=manifest.get('author', 'Unknown'),
+
                     description=manifest.get('description', ''),
+
                     zip_file=zip_file,
+
                     manifest=manifest,
+
                     installed_by=request.user,
+
                     status='inactive'
+
                 )
+
+
 
                 extract_dir = loader.extract_plugin(str(plugin.id), temp_path)
+
                 plugin.extracted_path = str(extract_dir)
+
                 plugin.save()
 
+
+
                 PluginLog.objects.create(
+
                     plugin=plugin,
+
                     action='uploaded',
+
                     user=request.user,
+
                     message=f"Plugin uploaded by {request.user.username}"
+
                 )
 
-                messages.success(request, f'✅ Plugin "{plugin.name}" hochgeladen.')
+
+
+                messages.success(request, _("✅ Plugin \"%(name)s\" hochgeladen.") % {"name": plugin.name})
+
             except Exception as e:
-                messages.error(request, f'❌ Upload fehlgeschlagen: {str(e)}')
+
+                messages.error(request, _("❌ Upload fehlgeschlagen: %(error)s") % {"error": str(e)})
+
+
 
             return redirect('admin_dashboard')
 
@@ -707,53 +844,95 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 except Exception:
                     plugin.dashboard_row = 1
                 plugin.save(update_fields=['dashboard_position', 'dashboard_row'])
-                messages.success(request, 'Plugin-Position gespeichert.')
+                messages.success(request, _("Plugin-Position gespeichert."))
             except Exception:
-                messages.error(request, 'Plugin-Position konnte nicht gespeichert werden.')
+                messages.error(request, _("Plugin-Position konnte nicht gespeichert werden."))
             return redirect('admin_dashboard')
 
         return redirect('admin_dashboard')
 
 
+
+
 class SystemSettingsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+
     """Central system settings view."""
+
     template_name = 'system_settings.html'
 
+
+
     def test_func(self):
+
         return self.request.user.is_superuser or self.request.user.is_staff
 
+
+
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         settings_obj = SystemSettings.get_settings()
+
         context['theme_form'] = ThemeSettingsForm(instance=settings_obj)
+
         context['branding_form'] = BrandingSettingsForm(instance=settings_obj)
+
         context['app_toggles_form'] = AppTogglesForm(system_settings=settings_obj)
+
         return context
 
+
+
     def post(self, request, *args, **kwargs):
+
         if not self.test_func():
-            messages.error(request, 'Access denied')
+
+            messages.error(request, _("Zugriff verweigert."))
+
             return redirect('system_settings')
+
+
 
         settings_obj = SystemSettings.get_settings()
 
+
+
         if 'save_theme' in request.POST:
+
             form = ThemeSettingsForm(request.POST, instance=settings_obj)
+
             if form.is_valid():
+
                 form.save()
-                messages.success(request, 'Theme-Einstellungen gespeichert.')
+
+                messages.success(request, _("Theme-Einstellungen gespeichert."))
+
             else:
-                messages.error(request, 'Bitte prüfe die Theme-Felder.')
+
+                messages.error(request, _("Bitte prüfe die Theme-Felder."))
+
             return redirect('system_settings')
 
+
+
         if 'save_branding' in request.POST:
+
             form = BrandingSettingsForm(request.POST, request.FILES, instance=settings_obj)
+
             if form.is_valid():
+
                 form.save()
-                messages.success(request, 'Branding gespeichert.')
+
+                messages.success(request, _("Branding gespeichert."))
+
             else:
-                messages.error(request, 'Bitte prüfe die Branding-Felder.')
+
+                messages.error(request, _("Bitte prüfe die Branding-Felder."))
+
             return redirect('system_settings')
+
+
 
         if 'save_app_toggles' in request.POST:
             form = AppTogglesForm(request.POST, system_settings=settings_obj)
@@ -774,21 +953,35 @@ class SystemSettingsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 settings_obj.app_toggles = new_toggles
                 settings_obj.save()
 
+
                 if prev.get('approvals', False) and not new_toggles.get('approvals', False):
+
                     from apps.approvals.models import Approval
+
                     Approval.objects.update(archived=True)
 
-                messages.success(request, 'App-Toggles gespeichert.')
+
+
+                messages.success(request, _("App-Toggles gespeichert."))
+
             else:
-                messages.error(request, 'Bitte prüfe die App-Toggles.')
+
+                messages.error(request, _("Bitte prüfe die App-Toggles."))
+
             return redirect('system_settings')
 
+
+
         return redirect('system_settings')
+
+
+
 
 
 class ApiDocsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     """Unified API documentation landing page."""
     template_name = 'api_docs.html'
+
 
     def test_func(self):
         return self.request.user.is_staff or self.request.user.is_superuser
@@ -1076,6 +1269,10 @@ class HelpManualPdfView(LoginRequiredMixin, TemplateView):
         _footer(page_num)
         c.save()
         return resp
+
+
+
+
 
 
 
